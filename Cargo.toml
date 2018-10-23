@@ -1,0 +1,8 @@
+[package]
+name = "cgats"
+version = "0.1.0"
+authors = ["Ryan O'Beirne <robeirne@spoonflower.com>"]
+description = "Parse, transform, and write CGATS color files"
+
+[dependencies]
+clap = "2.32.0"
