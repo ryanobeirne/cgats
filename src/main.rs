@@ -30,14 +30,12 @@ fn main() {
             continue;
         }
 
-        let mut cgd: cgats::CgatsVec = Vec::new();
+        let mut cgd: cgats::RawVec = Vec::new();
         cgats::read_file_to_cgats_vec(&mut cgd, clap_file);
 
-        let mut set = cgats::CgatsObject::new(&cgd);
+        let mut _set = cgats::CgatsObject::new(&cgd);
 
-        for line in cgd {
-            println!("{:?}", line);
-        }
+        println!("{:?}", _set.raw_data)
     }
 
     std::process::exit(err_count);

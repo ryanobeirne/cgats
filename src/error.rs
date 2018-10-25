@@ -1,11 +1,13 @@
-use super::*;
+use std::error::Error;
+use std::fmt;
 
 #[derive(Debug)]
 pub enum CgatsError {
-    NoDataFound,
-    NoDataFormatFound,
+    NoData,
+    NoDataFormat,
     FormatDataMismatch,
     UnknownDataFormat,
+    FileError,
 }
 
 pub type CgatsResult<T> = Result<T, CgatsError>;
@@ -20,10 +22,11 @@ impl Error for CgatsError {
     fn description(&self) -> &str {
         use CgatsError::*;
         match &self {
-            NoDataFound        => "Cannot find BEGIN_DATA tag!",
-            NoDataFormatFound  => "Cannot find BEGIN_DATA_FORMAT tag!",
+            NoData             => "Cannot find BEGIN_DATA tag!",
+            NoDataFormat       => "Cannot find BEGIN_DATA_FORMAT tag!",
             FormatDataMismatch => "DATA_FORMAT length does not match DATA length!",
-            UnknownDataFormat  => "Unknown Data Format Type!"
+            UnknownDataFormat  => "Unknown Data Format Type!",
+            FileError          => "Problem reading file!",
         }
     }
 }
