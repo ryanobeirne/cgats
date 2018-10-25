@@ -47,7 +47,7 @@ fn data_format() -> CgatsResult<()> {
     println!("{:?}", cgv);
 
     let df = DataFormatType::from("CMYK_C")?;
-    assert_eq!(df.display(), "CmykC");
+    assert_eq!(df.display(), "CMYK_C");
 
     Ok(())
 }
@@ -71,7 +71,7 @@ fn test_extract_data() -> CgatsResult<()>{
 }
 
 #[test]
-fn extract_data_and_format() -> CgatsResult<()>{
+fn test_extract_data_and_format() -> CgatsResult<()>{
     let cgo = CgatsObject::from_file("test_files/cgats1.tsv")?;
     let format = extract_data_format(&cgo.raw_data)?;
     let data = extract_data(&cgo.raw_data)?;

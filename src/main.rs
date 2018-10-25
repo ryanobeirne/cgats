@@ -29,7 +29,8 @@ fn main() -> cgats::error::CgatsResult<()> {
 
         let set = cgats::CgatsObject::from_file(clap_file)?;
 
-        println!("{:?}", set.raw_data);
+        println!("{:?}", set.format);
+        println!("{:?}", set.data);
     }
 
     Ok(())

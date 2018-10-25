@@ -11,6 +11,7 @@ use error::*;
 mod tests;
 
 type RawVec = Vec<Vec<String>>;
+type DataFormat = Vec<DataFormatType>;
 
 #[derive(Debug, Clone)]
 pub struct DataColumn<'a, T> {
@@ -32,8 +33,10 @@ pub enum CgatsType {
 
 #[derive(Debug, Clone)]
 pub struct CgatsObject {
-    pub raw_data: RawVec,
+    raw_data: RawVec,
     pub cgats_type: Option<CgatsType>,
+    pub format: DataFormat,
+    pub data: RawVec,
 }
 
 impl<'a> CgatsObject {
@@ -41,6 +44,8 @@ impl<'a> CgatsObject {
         Self {
             raw_data: Vec::new(),
             cgats_type: None,
+            format: Vec::new(),
+            data: Vec::new(),
         }
     }
 
@@ -48,9 +53,14 @@ impl<'a> CgatsObject {
         let mut raw_data: RawVec = Vec::new();
         read_file_to_raw_vec(&mut raw_data, file)?;
 
+        let format = extract_data_format(&raw_data)?;
+        let data = extract_data(&raw_data)?;
+
         let cgo = Self {
             raw_data,
-            cgats_type: None
+            cgats_type: None,
+            format,
+            data,
         };
 
         Ok(cgo)
@@ -58,23 +68,24 @@ impl<'a> CgatsObject {
 
 }
 
+#[allow(non_camel_case_types)]
 #[derive(Debug, PartialEq, Clone)]
 pub enum DataFormatType {
-    SampleID, SampleName,
-    CmykC, CmykM, CmykY, CmykK,
-    RgbR, RgbG, RgbB,
-    LabL, LabA, LabB,
-    XyzX, XyzY, XyzZ,
-    DRed, DGreen, DBlue, DVisual,
-    Spectral380, Spectral390, Spectral400, Spectral410, Spectral420,
-    Spectral430, Spectral440, Spectral450, Spectral460, Spectral470,
-    Spectral480, Spectral490, Spectral500, Spectral510, Spectral520,
-    Spectral530, Spectral540, Spectral550, Spectral560, Spectral570,
-    Spectral580, Spectral590, Spectral600, Spectral610, Spectral620,
-    Spectral630, Spectral640, Spectral650, Spectral660, Spectral670,
-    Spectral680, Spectral690, Spectral700, Spectral710, Spectral720,
-    Spectral730, Spectral740, Spectral750, Spectral760, Spectral770,
-    Spectral780,
+    SAMPLE_ID, SAMPLE_NAME,
+    CMYK_C, CMYK_M, CMYK_Y, CMYK_K,
+    RGB_R, RGB_G, RGB_B,
+    LAB_L, LAB_A, LAB_B,
+    XYZ_X, XYZ_Y, XYZ_Z,
+    D_RED, D_GREEN, D_BLUE, D_VISUAL,
+    SPECTRAL_380, SPECTRAL_390, SPECTRAL_400, SPECTRAL_410, SPECTRAL_420,
+    SPECTRAL_430, SPECTRAL_440, SPECTRAL_450, SPECTRAL_460, SPECTRAL_470,
+    SPECTRAL_480, SPECTRAL_490, SPECTRAL_500, SPECTRAL_510, SPECTRAL_520,
+    SPECTRAL_530, SPECTRAL_540, SPECTRAL_550, SPECTRAL_560, SPECTRAL_570,
+    SPECTRAL_580, SPECTRAL_590, SPECTRAL_600, SPECTRAL_610, SPECTRAL_620,
+    SPECTRAL_630, SPECTRAL_640, SPECTRAL_650, SPECTRAL_660, SPECTRAL_670,
+    SPECTRAL_680, SPECTRAL_690, SPECTRAL_700, SPECTRAL_710, SPECTRAL_720,
+    SPECTRAL_730, SPECTRAL_740, SPECTRAL_750, SPECTRAL_760, SPECTRAL_770,
+    SPECTRAL_780,
 }
 
 impl DataFormatType {
@@ -84,68 +95,68 @@ impl DataFormatType {
 
     pub fn from(s: &str) -> CgatsResult<Self> {
         use DataFormatType::*;
-        match s.to_lowercase().as_ref() {
-            "sample_id" | "sampleid" | "sample" => Ok(SampleID),
-            "sample_name" | "samplename" => Ok(SampleName),
-            "cmyk_c"  => Ok(CmykC),
-            "cmyk_m"  => Ok(CmykM),
-            "cmyk_y"  => Ok(CmykY),
-            "cmyk_k"  => Ok(CmykK),
-            "rgb_r"   => Ok(RgbR),
-            "rgb_g"   => Ok(RgbG),
-            "rgb_b"   => Ok(RgbB),
-            "lab_l"   => Ok(LabL),
-            "lab_a"   => Ok(LabA),
-            "lab_b"   => Ok(LabB),
-            "xyz_x"   => Ok(XyzX),
-            "xyz_y"   => Ok(XyzY),
-            "xyz_z"   => Ok(XyzZ),
-            "d_red"   => Ok(DRed),
-            "d_green" => Ok(DGreen),
-            "d_blue"  => Ok(DBlue),
-            "d_visual" | "d_vis" => Ok(DVisual),
-            "spectral_380" => Ok(Spectral380),
-            "spectral_390" => Ok(Spectral390),
-            "spectral_400" => Ok(Spectral400),
-            "spectral_410" => Ok(Spectral410),
-            "spectral_420" => Ok(Spectral420),
-            "spectral_430" => Ok(Spectral430),
-            "spectral_440" => Ok(Spectral440),
-            "spectral_450" => Ok(Spectral450),
-            "spectral_460" => Ok(Spectral460),
-            "spectral_470" => Ok(Spectral470),
-            "spectral_480" => Ok(Spectral480),
-            "spectral_490" => Ok(Spectral490),
-            "spectral_500" => Ok(Spectral500),
-            "spectral_510" => Ok(Spectral510),
-            "spectral_520" => Ok(Spectral520),
-            "spectral_530" => Ok(Spectral530),
-            "spectral_540" => Ok(Spectral540),
-            "spectral_550" => Ok(Spectral550),
-            "spectral_560" => Ok(Spectral560),
-            "spectral_570" => Ok(Spectral570),
-            "spectral_580" => Ok(Spectral580),
-            "spectral_590" => Ok(Spectral590),
-            "spectral_600" => Ok(Spectral600),
-            "spectral_610" => Ok(Spectral610),
-            "spectral_620" => Ok(Spectral620),
-            "spectral_630" => Ok(Spectral630),
-            "spectral_640" => Ok(Spectral640),
-            "spectral_650" => Ok(Spectral650),
-            "spectral_660" => Ok(Spectral660),
-            "spectral_670" => Ok(Spectral670),
-            "spectral_680" => Ok(Spectral680),
-            "spectral_690" => Ok(Spectral690),
-            "spectral_700" => Ok(Spectral700),
-            "spectral_710" => Ok(Spectral710),
-            "spectral_720" => Ok(Spectral720),
-            "spectral_730" => Ok(Spectral730),
-            "spectral_740" => Ok(Spectral740),
-            "spectral_750" => Ok(Spectral750),
-            "spectral_760" => Ok(Spectral760),
-            "spectral_770" => Ok(Spectral770),
-            "spectral_780" => Ok(Spectral780),
-            _ => Err(CgatsError::UnknownDataFormat)
+        match s.to_uppercase().as_ref() {
+            "SAMPLE_ID" | "SAMPLEID" | "SAMPLE" => Ok(SAMPLE_ID),
+            "SAMPLE_NAME" | "SAMPLENAME" => Ok(SAMPLE_NAME),
+            "CMYK_C"  => Ok(CMYK_C),
+            "CMYK_M"  => Ok(CMYK_M),
+            "CMYK_Y"  => Ok(CMYK_Y),
+            "CMYK_K"  => Ok(CMYK_K),
+            "RGB_R"   => Ok(RGB_R),
+            "RGB_G"   => Ok(RGB_G),
+            "RGB_B"   => Ok(RGB_B),
+            "LAB_L"   => Ok(LAB_L),
+            "LAB_A"   => Ok(LAB_A),
+            "LAB_B"   => Ok(LAB_B),
+            "XYZ_X"   => Ok(XYZ_X),
+            "XYZ_Y"   => Ok(XYZ_Y),
+            "XYZ_Z"   => Ok(XYZ_Z),
+            "D_RED"   => Ok(D_RED),
+            "D_GREEN" => Ok(D_GREEN),
+            "D_BLUE"  => Ok(D_BLUE),
+            "D_VISUAL" | "D_VIS" => Ok(D_VISUAL),
+            "SPECTRAL_380" => Ok(SPECTRAL_380),
+            "SPECTRAL_390" => Ok(SPECTRAL_390),
+            "SPECTRAL_400" => Ok(SPECTRAL_400),
+            "SPECTRAL_410" => Ok(SPECTRAL_410),
+            "SPECTRAL_420" => Ok(SPECTRAL_420),
+            "SPECTRAL_430" => Ok(SPECTRAL_430),
+            "SPECTRAL_440" => Ok(SPECTRAL_440),
+            "SPECTRAL_450" => Ok(SPECTRAL_450),
+            "SPECTRAL_460" => Ok(SPECTRAL_460),
+            "SPECTRAL_470" => Ok(SPECTRAL_470),
+            "SPECTRAL_480" => Ok(SPECTRAL_480),
+            "SPECTRAL_490" => Ok(SPECTRAL_490),
+            "SPECTRAL_500" => Ok(SPECTRAL_500),
+            "SPECTRAL_510" => Ok(SPECTRAL_510),
+            "SPECTRAL_520" => Ok(SPECTRAL_520),
+            "SPECTRAL_530" => Ok(SPECTRAL_530),
+            "SPECTRAL_540" => Ok(SPECTRAL_540),
+            "SPECTRAL_550" => Ok(SPECTRAL_550),
+            "SPECTRAL_560" => Ok(SPECTRAL_560),
+            "SPECTRAL_570" => Ok(SPECTRAL_570),
+            "SPECTRAL_580" => Ok(SPECTRAL_580),
+            "SPECTRAL_590" => Ok(SPECTRAL_590),
+            "SPECTRAL_600" => Ok(SPECTRAL_600),
+            "SPECTRAL_610" => Ok(SPECTRAL_610),
+            "SPECTRAL_620" => Ok(SPECTRAL_620),
+            "SPECTRAL_630" => Ok(SPECTRAL_630),
+            "SPECTRAL_640" => Ok(SPECTRAL_640),
+            "SPECTRAL_650" => Ok(SPECTRAL_650),
+            "SPECTRAL_660" => Ok(SPECTRAL_660),
+            "SPECTRAL_670" => Ok(SPECTRAL_670),
+            "SPECTRAL_680" => Ok(SPECTRAL_680),
+            "SPECTRAL_690" => Ok(SPECTRAL_690),
+            "SPECTRAL_700" => Ok(SPECTRAL_700),
+            "SPECTRAL_710" => Ok(SPECTRAL_710),
+            "SPECTRAL_720" => Ok(SPECTRAL_720),
+            "SPECTRAL_730" => Ok(SPECTRAL_730),
+            "SPECTRAL_740" => Ok(SPECTRAL_740),
+            "SPECTRAL_750" => Ok(SPECTRAL_750),
+            "SPECTRAL_760" => Ok(SPECTRAL_760),
+            "SPECTRAL_770" => Ok(SPECTRAL_770),
+            "SPECTRAL_780" => Ok(SPECTRAL_780),
+            _ => Err(CgatsError::UnknownFormatType)
         }
     }
 }
@@ -190,15 +201,15 @@ fn read_file_to_raw_vec<'a>(raw_vec: &'a mut RawVec, file: &'a str) -> CgatsResu
     Ok(())
 }
 
-
-pub fn extract_data_format<'a>(raw_vec: &'a RawVec) -> CgatsResult<Vec<&'a str>> {
-    let mut cgv: Vec<&'a str> = Vec::new();
+pub fn extract_data_format<'a>(raw_vec: &'a RawVec) -> CgatsResult<DataFormat> {
+    let mut cgv: DataFormat = Vec::new();
 
     for (index, item) in raw_vec.iter().enumerate() {
         match item[0].as_str() {
             "BEGIN_DATA_FORMAT" => {
                 for format_type in raw_vec[index + 1].iter() {
-                    cgv.push(format_type);
+                    let format = DataFormatType::from(format_type)?;
+                    cgv.push(format);
                 }
                 break;
             },
