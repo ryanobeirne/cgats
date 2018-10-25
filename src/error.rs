@@ -1,5 +1,7 @@
 use std::error::Error;
 use std::fmt;
+use std::convert;
+use std::io;
 
 #[derive(Debug)]
 pub enum CgatsError {
@@ -30,3 +32,9 @@ impl Error for CgatsError {
         }
     }
 }
+
+impl convert::From<io::Error> for CgatsError {
+   fn from(_e: io::Error) -> Self {
+       CgatsError::FileError
+   } 
+} 

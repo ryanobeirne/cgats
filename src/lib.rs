@@ -10,7 +10,7 @@ use error::*;
 #[cfg(test)]
 mod tests;
 
-pub type RawVec = Vec<Vec<String>>;
+type RawVec = Vec<Vec<String>>;
 
 #[derive(Debug, Clone)]
 pub struct DataColumn<'a, T> {
@@ -36,17 +36,17 @@ pub struct CgatsObject {
     pub cgats_type: Option<CgatsType>,
 }
 
-impl CgatsObject {
-    pub fn new(data: &RawVec) -> Self {
+impl<'a> CgatsObject {
+    pub fn new() -> Self {
         Self {
-            raw_data: data.to_vec(),
+            raw_data: Vec::new(),
             cgats_type: None,
         }
     }
 
-    pub fn from_file(file: &str) -> error::CgatsResult<Self> {
+    pub fn from_file(file: &'a str) -> error::CgatsResult<Self> {
         let mut raw_data: RawVec = Vec::new();
-        read_file_to_cgats_vec(&mut raw_data, file)?;
+        read_file_to_raw_vec(&mut raw_data, file)?;
 
         let cgo = Self {
             raw_data,
@@ -56,54 +56,6 @@ impl CgatsObject {
         Ok(cgo)
     }
 
-    pub fn extract_data_format(&self) -> CgatsResult<Vec<&str>> {
-        let mut cgv: Vec<&str> = Vec::new();
-
-        for (index, item) in self.raw_data.iter().enumerate() {
-            match item[0].as_str() {
-                "BEGIN_DATA_FORMAT" => {
-                    for format_type in self.raw_data[index + 1].iter() {
-                        cgv.push(format_type);
-                    }
-                    break;
-                },
-                _ => continue
-            };
-        }
-
-        if cgv.len() < 1 {
-            Err(CgatsError::NoDataFormat)
-        } else {
-            Ok(cgv)
-        }
-
-    }
-
-    pub fn extract_data(&self) -> CgatsResult<RawVec> {
-        let mut cgv: RawVec = Vec::new();
-
-        for (index, item) in self.raw_data.iter().enumerate() {
-            match item[0].as_str() {
-                "BEGIN_DATA" => {
-                    for format_type in self.raw_data[index + 1..].iter() {
-                        cgv.push(format_type.to_vec());
-                    }
-                },
-                "END_DATA" => {
-                    cgv.pop();
-                    break;
-                },
-                _ => continue
-            };
-        }
-
-        if cgv.len() < 1 {
-            Err(CgatsError::NoData)
-        } else {
-            Ok(cgv)
-        }
-
-    }
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -204,27 +156,22 @@ impl fmt::Display for DataFormatType {
     }
 }
 
-pub fn read_file_to_cgats_vec(cgd: &mut Vec<Vec<String>>, file: &str) -> CgatsResult<()> {
-    let f = File::open(file);
+fn read_file_to_raw_vec<'a>(raw_vec: &'a mut RawVec, file: &'a str) -> CgatsResult<()> {
+    let f = File::open(file)?;
 
-    if let Err(e) = &f {
-        eprintln!("{}", e);
-        return Err(CgatsError::FileError);
-    }
-
-    for line in BufReader::new(f.unwrap()).lines() {
+    for line in BufReader::new(f).lines() {
         let text = match line {
-            Ok(text) => String::from(text.trim_right()),
-            Err(_) => String::from("")
+            Ok(txt) => txt.trim().to_string(),
+            Err(_)  => "".to_string()
         };
 
         let cr_split = text.split("\r");
 
-        let mut v_cr:Vec<String> = Vec::new();
+        let mut v_cr:Vec<&str> = Vec::new();
 
         for cr_line in cr_split {
             if ! cr_line.is_empty() {
-                v_cr.push(String::from(cr_line.trim_right()));
+                v_cr.push(cr_line.trim());
             }
         }
 
@@ -233,13 +180,62 @@ pub fn read_file_to_cgats_vec(cgd: &mut Vec<Vec<String>>, file: &str) -> CgatsRe
             let mut v: Vec<String> = Vec::new();
 
             for item in split {
-                v.push(String::from(item.trim()));
+                v.push(item.trim().to_string());
             }
 
-            cgd.push(v);
+            raw_vec.push(v);
         }
     } 
 
     Ok(())
 }
 
+
+pub fn extract_data_format<'a>(raw_vec: &'a RawVec) -> CgatsResult<Vec<&'a str>> {
+    let mut cgv: Vec<&'a str> = Vec::new();
+
+    for (index, item) in raw_vec.iter().enumerate() {
+        match item[0].as_str() {
+            "BEGIN_DATA_FORMAT" => {
+                for format_type in raw_vec[index + 1].iter() {
+                    cgv.push(format_type);
+                }
+                break;
+            },
+            _ => continue
+        };
+    }
+
+    if cgv.len() < 1 {
+        Err(CgatsError::NoDataFormat)
+    } else {
+        Ok(cgv)
+    }
+
+}
+
+pub fn extract_data<'a>(raw_vec: &'a RawVec) -> CgatsResult<RawVec> {
+    let mut cgv: RawVec = Vec::new();
+
+    for (index, item) in raw_vec.iter().enumerate() {
+        match item[0].as_str() {
+            "BEGIN_DATA" => {
+                for format_type in raw_vec[index + 1..].iter() {
+                    cgv.push(format_type.to_vec());
+                }
+            },
+            "END_DATA" => {
+                cgv.pop();
+                break;
+            },
+            _ => continue
+        };
+    }
+
+    if cgv.len() < 1 {
+        Err(CgatsError::NoData)
+    } else {
+        Ok(cgv)
+    }
+
+}

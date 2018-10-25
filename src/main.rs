@@ -10,7 +10,7 @@ use std::path::Path;
 // use std::collections::HashMap;
 // use std::io::stdin;
 
-fn main() {
+fn main() -> cgats::error::CgatsResult<()> {
     //Parse command line arguments with clap
     let matches = clap_app!(cgats =>
         (version: crate_version!())
@@ -21,22 +21,16 @@ fn main() {
 
     let clap_files: Vec<&str> = matches.values_of("FILE").unwrap().collect();
 
-    let mut err_count = 0;
-
     for clap_file in clap_files {
         if !Path::new(clap_file).is_file() {
             eprintln!("File does not exist: '{}'", clap_file);
-            err_count += 1;
             continue;
         }
 
-        let mut cgd: cgats::RawVec = Vec::new();
-        cgats::read_file_to_cgats_vec(&mut cgd, clap_file);
+        let set = cgats::CgatsObject::from_file(clap_file)?;
 
-        let mut _set = cgats::CgatsObject::new(&cgd);
-
-        println!("{:?}", _set.raw_data)
+        println!("{:?}", set.raw_data);
     }
 
-    std::process::exit(err_count);
+    Ok(())
 }

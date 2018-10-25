@@ -41,8 +41,8 @@ fn data_column() {
 
 #[test]
 fn data_format() -> CgatsResult<()> {
-    let mut cgv: RawVec = Vec::new();
-    read_file_to_cgats_vec(&mut cgv, "test_files/cgats0.txt")?;
+    let mut cgv: RawVec<> = Vec::new();
+    read_file_to_raw_vec(&mut cgv, "test_files/cgats0.txt")?;
 
     println!("{:?}", cgv);
 
@@ -53,18 +53,18 @@ fn data_format() -> CgatsResult<()> {
 }
 
 #[test]
-fn extract_data_format() -> CgatsResult<()> {
+fn test_extract_data_format() -> CgatsResult<()> {
     let cgo = CgatsObject::from_file("test_files/cgats1.tsv")?;
-    let data = cgo.extract_data_format()?;
+    let data = extract_data_format(&cgo.raw_data)?;
     println!("{:?}", data);
 
     Ok(())
 }
 
 #[test]
-fn extract_data() -> CgatsResult<()>{
+fn test_extract_data() -> CgatsResult<()>{
     let cgo = CgatsObject::from_file("test_files/cgats1.tsv")?;
-    let data = cgo.extract_data()?;
+    let data = extract_data(&cgo.raw_data)?;
     println!("{:?}", data);
 
     Ok(())
@@ -73,8 +73,8 @@ fn extract_data() -> CgatsResult<()>{
 #[test]
 fn extract_data_and_format() -> CgatsResult<()>{
     let cgo = CgatsObject::from_file("test_files/cgats1.tsv")?;
-    let format = cgo.extract_data_format()?;
-    let data = cgo.extract_data()?;
+    let format = extract_data_format(&cgo.raw_data)?;
+    let data = extract_data(&cgo.raw_data)?;
     println!("FORMAT [{}]:\n{:?}\n\nDATA [{}]:\n{:?}", format.len(), format, data.len(), data);
 
     for line in data {
