@@ -28,9 +28,14 @@ fn main() -> cgats::error::CgatsResult<()> {
         }
 
         let set = cgats::CgatsObject::from_file(clap_file)?;
+        let mut blank = cgats::CgatsObject::new();
 
-        println!("{:?}", set.format);
-        println!("{:?}", set.data);
+        for data_set in set.data.iter() {
+            blank.data.push(data_set.to_vec());
+        }
+
+        println!("{:?}", &set.format);
+        println!("{:?}", &blank.data);
     }
 
     Ok(())

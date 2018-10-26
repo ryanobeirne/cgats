@@ -72,7 +72,7 @@ fn test_extract_data() -> CgatsResult<()>{
 
 #[test]
 fn test_extract_data_and_format() -> CgatsResult<()>{
-    let cgo = CgatsObject::from_file("test_files/cgats1.tsv")?;
+    let cgo = CgatsObject::from_file("test_files/cgats0.txt")?;
     let format = extract_data_format(&cgo.raw_data)?;
     let data = extract_data(&cgo.raw_data)?;
     println!("FORMAT [{}]:\n{:?}\n\nDATA [{}]:\n{:?}", format.len(), format, data.len(), data);
@@ -89,4 +89,17 @@ fn text() {
     let text = "one two 3 \"4\" 5 six seven";
     let split: Vec<f64> = text.split_whitespace().filter_map(|i| i.parse().ok()).collect();
     println!("{:?}", split);
+}
+
+#[test]
+fn cgats_type() -> CgatsResult<()>{
+    for file in test_files() {
+        let cgo = CgatsObject::from_file(file);
+        match cgo {
+            Ok(object) => println!("{}: {:?}", file, object.cgats_type),
+            Err(e) => eprintln!("{}: {}", file, e),
+        }
+    }
+
+    Ok(())
 }

@@ -10,13 +10,14 @@ pub enum CgatsError {
     FormatDataMismatch,
     UnknownFormatType,
     FileError,
+    EmptyFile,
 }
 
 pub type CgatsResult<T> = Result<T, CgatsError>;
 
 impl fmt::Display for CgatsError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}: {}", &self, &self.description())
+        write!(f, "CgatsError::{:?}: {}", &self, &self.description())
     }
 }
 
@@ -26,9 +27,10 @@ impl Error for CgatsError {
         match &self {
             NoData             => "Cannot find BEGIN_DATA tag!",
             NoDataFormat       => "Cannot find BEGIN_DATA_FORMAT tag!",
-            FormatDataMismatch => "DATA_FORMAT length does not match DATA length!",
+            FormatDataMismatch => "DATA length does not match DATA_FORMAT length!",
             UnknownFormatType  => "Unknown Data Format Type!",
             FileError          => "Problem reading file!",
+            EmptyFile          => "File is empty!",
         }
     }
 }

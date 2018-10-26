@@ -33,6 +33,33 @@ pub enum CgatsType {
     Curve,
 }
 
+impl CgatsType {
+    pub fn display(&self) -> String {
+        format!("{}", &self)
+    }
+
+    pub fn from(s: &str) -> Option<Self> {
+        use CgatsType::*;
+        let types: Vec<Self> = vec![Cgats, ColorBurst, Curve];
+        for t in types {
+            let cgats_type = t.display().to_lowercase();
+            let finder = s.to_lowercase().find(cgats_type.as_str());
+            match finder {
+                Some(_) => return Some(t),
+                None => continue,
+            };
+        }
+
+       None
+    }
+}
+
+impl fmt::Display for CgatsType {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", &self)
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct CgatsObject {
     raw_data: RawVec,
@@ -51,16 +78,28 @@ impl<'a> CgatsObject {
         }
     }
 
-    pub fn from_file(file: &'a str) -> error::CgatsResult<Self> {
+    pub fn from_file(file: &'a str) -> CgatsResult<Self> {
         let mut raw_data: RawVec = Vec::new();
         read_file_to_raw_vec(&mut raw_data, file)?;
 
-        let format = extract_data_format(&raw_data)?;
+        let cgats_type = get_cgats_type(&raw_data);
+
+        let format = match cgats_type {
+            Some(CgatsType::ColorBurst) => format::ColorBurstFormat(),
+            _ => extract_data_format(&raw_data)?,
+        };
+
         let data = extract_data(&raw_data)?;
+
+        for line in &data {
+            if line.len() != format.len() {
+                return Err(CgatsError::FormatDataMismatch);
+            } 
+        }
 
         let cgo = Self {
             raw_data,
-            cgats_type: None,
+            cgats_type,
             format,
             data,
         };
@@ -70,6 +109,15 @@ impl<'a> CgatsObject {
 
 }
 
+fn get_cgats_type(raw_vec: &RawVec) -> Option<CgatsType> {
+    let mut s = String::new();
+
+    for item in raw_vec[0].iter() {
+        s.push_str(&item.to_lowercase());
+    }
+
+    CgatsType::from(&s)
+}
 
 fn read_file_to_raw_vec<'a>(raw_vec: &'a mut RawVec, file: &'a str) -> CgatsResult<()> {
     let f = File::open(file)?;
@@ -102,10 +150,14 @@ fn read_file_to_raw_vec<'a>(raw_vec: &'a mut RawVec, file: &'a str) -> CgatsResu
         }
     } 
 
-    Ok(())
+    if raw_vec.len() < 1 {
+        Err(CgatsError::EmptyFile)
+    } else {
+        Ok(())
+    }
 }
 
-pub fn extract_data_format<'a>(raw_vec: &'a RawVec) -> CgatsResult<DataFormat> {
+fn extract_data_format<'a>(raw_vec: &'a RawVec) -> CgatsResult<DataFormat> {
     let mut cgv: DataFormat = Vec::new();
 
     for (index, item) in raw_vec.iter().enumerate() {
@@ -129,7 +181,7 @@ pub fn extract_data_format<'a>(raw_vec: &'a RawVec) -> CgatsResult<DataFormat> {
 
 }
 
-pub fn extract_data<'a>(raw_vec: &'a RawVec) -> CgatsResult<RawVec> {
+fn extract_data<'a>(raw_vec: &'a RawVec) -> CgatsResult<RawVec> {
     let mut cgv: RawVec = Vec::new();
 
     for (index, item) in raw_vec.iter().enumerate() {
