@@ -27,15 +27,15 @@ fn main() -> cgats::error::CgatsResult<()> {
             continue;
         }
 
-        let set = cgats::CgatsObject::from_file(clap_file)?;
-        let mut blank = cgats::CgatsObject::new();
+        let set = cgats::CgatsObject::from_file(clap_file);
 
-        for data_set in set.data.iter() {
-            blank.data.push(data_set.to_vec());
+        match set {
+            Ok(object) => {
+                println!("{:?}", &object.format);
+                println!("{:?}", &object.data);
+            },
+            Err(e) => eprintln!("{}: {}", clap_file, e),
         }
-
-        println!("{:?}", &set.format);
-        println!("{:?}", &blank.data);
     }
 
     Ok(())

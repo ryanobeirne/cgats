@@ -1,7 +1,9 @@
 use super::*;
 
+// Container for what is between BEGIN_DATA_FORMAT and END_DATA_FORMAT
 pub type DataFormat = Vec<DataFormatType>;
 
+// Known data format types: This list is incomplete
 #[allow(non_camel_case_types)]
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum DataFormatType {
@@ -11,8 +13,10 @@ pub enum DataFormatType {
     // f64
     CMYK_C, CMYK_M, CMYK_Y, CMYK_K,
     RGB_R, RGB_G, RGB_B,
-    LAB_L, LAB_A, LAB_B,
+    LAB_L, LAB_A, LAB_B, LAB_C, LAB_H,
+    LAB_DE, LAB_DE_94, LAB_DE_94T, LAB_DE_CMC, LAB_DE2000,
     XYZ_X, XYZ_Y, XYZ_Z,
+    XYY_X, XYY_Y, XYY_CAPY,
     D_RED, D_GREEN, D_BLUE, D_VIS,
     SPECTRAL_380, SPECTRAL_390, SPECTRAL_400, SPECTRAL_410, SPECTRAL_420,
     SPECTRAL_430, SPECTRAL_440, SPECTRAL_450, SPECTRAL_460, SPECTRAL_470,
@@ -25,6 +29,7 @@ pub enum DataFormatType {
     SPECTRAL_780,
 }
 
+// Implicit DATA_FORMAT for ColorBurst LinFiles
 #[allow(non_snake_case)]
 pub fn ColorBurstFormat() -> DataFormat {
     vec![
@@ -43,6 +48,7 @@ impl DataFormatType {
         format!("{}", &self)
     }
 
+    // Convert a &str to a DataFormatType
     pub fn from(s: &str) -> CgatsResult<Self> {
         use DataFormatType::*;
         match s.to_uppercase().as_ref() {
@@ -59,6 +65,8 @@ impl DataFormatType {
             "LAB_L"   => Ok(LAB_L),
             "LAB_A"   => Ok(LAB_A),
             "LAB_B"   => Ok(LAB_B),
+            "LAB_C"   => Ok(LAB_C),
+            "LAB_H"   => Ok(LAB_H),
             "XYZ_X"   => Ok(XYZ_X),
             "XYZ_Y"   => Ok(XYZ_Y),
             "XYZ_Z"   => Ok(XYZ_Z),
@@ -66,6 +74,10 @@ impl DataFormatType {
             "D_GREEN" => Ok(D_GREEN),
             "D_BLUE"  => Ok(D_BLUE),
             "D_VISUAL" | "D_VIS" => Ok(D_VIS),
+            "LAB_DE"       => Ok(LAB_DE),
+            "LAB_DE_94"    => Ok(LAB_DE_94),
+            "LAB_DE_CMC"   => Ok(LAB_DE_CMC),
+            "LAB_DE_2000"  => Ok(LAB_DE2000),
             "SPECTRAL_380" => Ok(SPECTRAL_380),
             "SPECTRAL_390" => Ok(SPECTRAL_390),
             "SPECTRAL_400" => Ok(SPECTRAL_400),
@@ -107,10 +119,7 @@ impl DataFormatType {
             "SPECTRAL_760" => Ok(SPECTRAL_760),
             "SPECTRAL_770" => Ok(SPECTRAL_770),
             "SPECTRAL_780" => Ok(SPECTRAL_780),
-            _ => {
-		    eprintln!("{}", s);
-		    Err(CgatsError::UnknownFormatType)
-	    }
+            _ => Err(CgatsError::UnknownFormatType)
         }
     }
 }

@@ -1,6 +1,6 @@
 use super::*;
 
-#[allow(dead_code)]
+// List of all test files relative to crate root
 fn test_files<'a>() -> Vec<&'a str> {
     vec![
         "test_files/cgats_format.tsv",
@@ -14,17 +14,18 @@ fn test_files<'a>() -> Vec<&'a str> {
     ]
 }
 
+// Test that DataColumns can be Vectors of different types (Vec<&str>, Vec<i32>)
 #[test]
 fn data_column() {
     let dc0 = DataColumn {
-        header: "SAMPLE_NAME",
+        data_type: DataFormatType::SAMPLE_NAME,
         data: vec![
             "Cyan", "Magenta", "Yellow", "Black", "Blue", "Red", "Green", "3cBlack", "4cBlack", "3cGray", "1cGray",
         ]
  };
 
     let dc1 = DataColumn {
-        header: "CMYK_C",
+        data_type: DataFormatType::CMYK_C,
         data: vec![
             100, 0, 0, 0, 100, 0, 100, 100, 100, 50, 0,
         ]
@@ -39,6 +40,7 @@ fn data_column() {
     println!("--\n{:?}\n--", dcs);
 }
 
+// Test the conversion of DataFormatTypes
 #[test]
 fn data_format() -> CgatsResult<()> {
     let mut cgv: RawVec<> = Vec::new();
@@ -52,24 +54,48 @@ fn data_format() -> CgatsResult<()> {
     Ok(())
 }
 
+// Test the extraction of DATA_FORMAT
 #[test]
 fn test_extract_data_format() -> CgatsResult<()> {
+    use format::DataFormatType::*;
     let cgo = CgatsObject::from_file("test_files/cgats1.tsv")?;
-    let data = extract_data_format(&cgo.raw_data)?;
-    println!("{:?}", data);
+    let format = extract_data_format(&cgo.raw_data)?;
+    println!("{:?}", format);
+
+    let format_vec = vec![SAMPLE_ID, SAMPLE_NAME, CMYK_C, CMYK_M, CMYK_Y, CMYK_K];
+
+    assert_eq!(format_vec, format);
 
     Ok(())
 }
 
+// Test the extraction of DATA
 #[test]
 fn test_extract_data() -> CgatsResult<()>{
     let cgo = CgatsObject::from_file("test_files/cgats1.tsv")?;
     let data = extract_data(&cgo.raw_data)?;
     println!("{:?}", data);
 
+    let data_vec = vec![
+       vec!["1",  "Cyan",    "100", "0",   "0",   "0"  ],
+       vec!["2",  "Magenta", "0",   "100", "0",   "0"  ],
+       vec!["3",  "Yellow",  "0",   "0",   "100", "0"  ],
+       vec!["4",  "Black",   "0",   "0",   "0",   "100"],
+       vec!["5",  "Blue",    "100", "100", "0",   "0"  ],
+       vec!["6",  "Red",     "0",   "100", "100", "0"  ],
+       vec!["7",  "Green",   "100", "0",   "100", "0"  ],
+       vec!["6",  "3cBlack", "100", "100", "100", "0"  ],
+       vec!["8",  "4cBlack", "100", "100", "100", "100"],
+       vec!["9",  "3cGray",  "50",  "40",  "40",  "0"  ],
+       vec!["10", "1cGray",  "0",   "0",   "0",   "50" ],
+    ];
+
+    assert_eq!(data_vec, data);
+
     Ok(())
 }
 
+// Test the extraction of DATA and DATA_FORMAT
 #[test]
 fn test_extract_data_and_format() -> CgatsResult<()>{
     let cgo = CgatsObject::from_file("test_files/cgats0.txt")?;
@@ -84,6 +110,7 @@ fn test_extract_data_and_format() -> CgatsResult<()>{
     Ok(())
 }
 
+// This test is a reminder to parse a DataColumn
 #[test]
 fn text() {
     let text = "one two 3 \"4\" 5 six seven";
@@ -91,6 +118,8 @@ fn text() {
     println!("{:?}", split);
 }
 
+// Test the parsing of CgatsType from first line of file
+// cargo test --lib -- --nocapture cgats_type
 #[test]
 fn cgats_type() -> CgatsResult<()>{
     for file in test_files() {
