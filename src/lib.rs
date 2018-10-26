@@ -77,15 +77,17 @@ pub struct CgatsObject {
 }
 
 impl<'a> CgatsObject {
-    // New empty CgatsObject
-    pub fn new() -> Self {
+    // New empty CgatsObject of a given CgatsType
+    pub fn new(cgats_type: Option<CgatsType>) -> Self {
         Self {
             raw_data: Vec::new(),
-            cgats_type: None,
+            cgats_type,
             format: Vec::new(),
             data: Vec::new(),
         }
     }
+
+    // 
 
     // New CgatsObject from a file
     pub fn from_file(file: &'a str) -> CgatsResult<Self> {
@@ -114,14 +116,7 @@ impl<'a> CgatsObject {
             } 
         }
 
-        let cgo = Self {
-            raw_data,
-            cgats_type,
-            format,
-            data,
-        };
-
-        Ok(cgo)
+        Ok(Self{raw_data, cgats_type, format, data,})
     }
 
 }
