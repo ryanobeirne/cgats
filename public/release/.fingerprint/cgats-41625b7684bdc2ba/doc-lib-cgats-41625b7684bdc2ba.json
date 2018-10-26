@@ -1,0 +1,1 @@
+{"rustc":12039097912904431853,"features":"[]","target":6048190754579711761,"profile":14825619158432691368,"path":10872709659218687626,"deps":[["clap v2.32.0","clap",6240951539940416999]],"local":[{"Precalculated":"1540590844.804418198s (/Users/Spoonflower/repos/rust/cgats/src/lib.rs)"}],"rustflags":[],"edition":"Edition2015"}

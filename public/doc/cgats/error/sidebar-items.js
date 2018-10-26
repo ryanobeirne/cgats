@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["CgatsError",""]],"type":[["CgatsResult",""]]});

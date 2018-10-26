@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["CgatsType",""]],"mod":[["error",""],["format",""]],"struct":[["CgatsObject",""],["DataColumn",""],["DataSet",""]]});
