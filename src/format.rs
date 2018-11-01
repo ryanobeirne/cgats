@@ -48,6 +48,16 @@ impl DataFormatType {
         format!("{}", &self)
     }
 
+    pub fn is_f64(&self) -> bool {
+        use DataFormatType::*;
+        match &self {
+            SAMPLE_NAME => false,
+            SAMPLE_ID => false,
+            BLANK => false,
+            _ => true
+        }
+    }
+
     // Convert a &str to a DataFormatType
     pub fn from(s: &str) -> CgatsResult<Self> {
         use DataFormatType::*;

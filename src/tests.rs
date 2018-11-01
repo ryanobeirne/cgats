@@ -17,22 +17,24 @@ fn test_files<'a>() -> Vec<&'a str> {
 // Test that DataColumns can be Vectors of different types (Vec<&str>, Vec<i32>)
 #[test]
 fn data_column() {
-    let dc0 = DataColumn {
-        data_type: DataFormatType::SAMPLE_NAME,
-        data: vec![
+    let mut dc0 = DataColumn::new(DataFormatType::SAMPLE_NAME);
+    dc0.data.push(
+        vec![
             "Cyan", "Magenta", "Yellow", "Black", "Blue", "Red", "Green", "3cBlack", "4cBlack", "3cGray", "1cGray",
         ]
- };
+    );
+ 
 
-    let dc1 = DataColumn {
-        data_type: DataFormatType::CMYK_C,
-        data: vec![
-            100, 0, 0, 0, 100, 0, 100, 100, 100, 50, 0,
+    let mut dc1 = DataColumn::new(DataFormatType::CMYK_C);
+    dc1.data.push(
+        vec![
+            "100", "0", "0", "0", "100", "0", "100", "100", "100", "50", "0",
         ]
- };
+    );
 
     let dcs = DataSet {
-        columns: vec![&dc0, &dc0]
+        // I know, I know
+        columns: vec![dc0.to_owned(), dc1.to_owned()]
     };
 
     println!("{:?}", dc0);

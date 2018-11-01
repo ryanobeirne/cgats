@@ -1,5 +1,5 @@
 use std::fs::File;
-// use std::path::Path;
+use std::path::Path;
 use std::io::BufReader;
 use std::io::BufRead;
 use std::fmt;
@@ -15,18 +15,34 @@ mod tests;
 
 // Vector of Vector of strings to read CGATS files into line by line
 type RawVec = Vec<Vec<String>>;
+type DataVec<'a> = Vec<Vec<&'a str>>;
 
 // Column of CGATS Data
 #[derive(Debug, Clone)]
-pub struct DataColumn<T> {
+pub struct DataColumn<'a> {
     data_type: DataFormatType,
-    data: Vec<T>
+    data: DataVec<'a>,
+}
+
+impl<'a> DataColumn<'a> {
+    pub fn new(data_type: DataFormatType) -> Self {
+        Self {
+            data_type,
+            data: Vec::new(),
+        }
+    }
 }
 
 // Vector of DataColumns
-#[derive(Debug, Clone)]
-pub struct DataSet<'a, T: 'a> {
-    pub columns: Vec<&'a DataColumn<T>>
+#[derive(Debug)]
+pub struct DataSet<'a>{
+    pub columns: Vec<DataColumn<'a>>
+}
+
+impl<'a> DataSet<'a> {
+    pub fn new() {
+        unimplemented!();
+    }
 }
 
 // Possible CGATS types with special meanings
@@ -76,7 +92,7 @@ pub struct CgatsObject {
     pub data: RawVec,
 }
 
-impl<'a> CgatsObject {
+impl CgatsObject {
     // New empty CgatsObject of a given CgatsType
     pub fn new(cgats_type: Option<CgatsType>) -> Self {
         Self {
@@ -90,7 +106,10 @@ impl<'a> CgatsObject {
     // 
 
     // New CgatsObject from a file
-    pub fn from_file(file: &'a str) -> CgatsResult<Self> {
+    pub fn from_file<T>(file: T) -> CgatsResult<Self> 
+    where T:
+        AsRef<Path>
+    {
         // Read file into a RawVec
         let mut raw_data: RawVec = Vec::new();
         read_file_to_raw_vec(&mut raw_data, file)?;
@@ -135,7 +154,10 @@ fn get_cgats_type(raw_vec: &RawVec) -> Option<CgatsType> {
 }
 
 // Read a file into a Vector of a Vector of lines (RawVec)
-fn read_file_to_raw_vec<'a>(raw_vec: &'a mut RawVec, file: &'a str) -> CgatsResult<()> {
+fn read_file_to_raw_vec<T>(raw_vec: &mut RawVec, file: T) -> CgatsResult<()>
+where T:
+    AsRef<Path>
+{
     let f = File::open(file)?;
 
     // Loop through lines and trim trailing whitespace
@@ -179,7 +201,7 @@ fn read_file_to_raw_vec<'a>(raw_vec: &'a mut RawVec, file: &'a str) -> CgatsResu
 }
 
 // Extract the DATA_FORMAT into a Vector of DataFormatTypes (DataFormat)
-fn extract_data_format<'a>(raw_vec: &'a RawVec) -> CgatsResult<DataFormat> {
+fn extract_data_format(raw_vec: &RawVec) -> CgatsResult<DataFormat> {
     let mut cgv: DataFormat = Vec::new();
 
     // Loop through the RawVec and find the BEGIN_DATA_FORMAT tag
@@ -207,7 +229,7 @@ fn extract_data_format<'a>(raw_vec: &'a RawVec) -> CgatsResult<DataFormat> {
 }
 
 // Extract the data betweeen BEGIN_DATA and END_DATA into a RawVec
-fn extract_data<'a>(raw_vec: &'a RawVec) -> CgatsResult<RawVec> {
+fn extract_data(raw_vec: &RawVec) -> CgatsResult<RawVec> {
     let mut cgv: RawVec = Vec::new();
 
     // Loop through the first item of each line and look for the tags.

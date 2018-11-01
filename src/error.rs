@@ -3,6 +3,7 @@ use std::fmt;
 use std::convert;
 use std::io;
 
+// Custom error types for CGATS
 #[derive(Debug)]
 pub enum CgatsError {
     NoData,
@@ -13,6 +14,7 @@ pub enum CgatsError {
     EmptyFile,
 }
 
+// Custom Result type for CgatsError
 pub type CgatsResult<T> = Result<T, CgatsError>;
 
 impl fmt::Display for CgatsError {
@@ -21,6 +23,7 @@ impl fmt::Display for CgatsError {
     }
 }
 
+// Description of the Error type
 impl Error for CgatsError {
     fn description(&self) -> &str {
         use CgatsError::*;
