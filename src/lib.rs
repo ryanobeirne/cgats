@@ -3,6 +3,7 @@ use std::path::Path;
 use std::io::BufReader;
 use std::io::BufRead;
 use std::fmt;
+use std::collections::BTreeMap;
 
 pub mod error;
 use error::*;
@@ -13,35 +14,38 @@ use format::*;
 #[cfg(test)]
 mod tests;
 
-// Vector of Vector of strings to read CGATS files into line by line
 type RawVec = Vec<Vec<String>>;
-type DataVec<'a> = Vec<Vec<&'a str>>;
 
-// Column of CGATS Data
-#[derive(Debug, Clone)]
-pub struct DataColumn<'a> {
-    data_type: DataFormatType,
-    data: DataVec<'a>,
-}
+// BTreeMap of CGATS Data
+type DataMap = BTreeMap<(DataFormatType, usize), String>;
 
-impl<'a> DataColumn<'a> {
-    pub fn new(data_type: DataFormatType) -> Self {
-        Self {
-            data_type,
-            data: Vec::new(),
-        }
+#[derive(Debug, Eq, PartialEq, Clone)]
+pub struct CgatsMap(pub DataMap);
+
+impl CgatsMap {
+    pub fn new() -> Self {
+        let data_map: DataMap = BTreeMap::new();
+        CgatsMap(data_map)
     }
-}
 
-// Vector of DataColumns
-#[derive(Debug)]
-pub struct DataSet<'a>{
-    pub columns: Vec<DataColumn<'a>>
-}
+    pub fn from_file<T: AsRef<Path>>(file: T) -> CgatsResult<Self> {
+        let mut data_map: DataMap = BTreeMap::new();
+        let mut raw_vec: RawVec = Vec::new();
+        read_file_to_raw_vec(&mut raw_vec, file)?;
 
-impl<'a> DataSet<'a> {
-    pub fn new() {
-        unimplemented!();
+        let data_format = extract_data_format(&raw_vec)?;
+        let data = extract_data(&raw_vec)?;
+
+        for (line_index, line) in data.iter().enumerate() {
+            for (index, format) in data_format.iter().enumerate() {
+                data_map.insert(
+                    (*format, line_index),
+                    line[index].clone()
+                );
+            }
+        }
+
+        Ok(CgatsMap(data_map))
     }
 }
 
@@ -88,8 +92,9 @@ impl fmt::Display for CgatsType {
 pub struct CgatsObject {
     raw_data: RawVec,
     pub cgats_type: Option<CgatsType>,
-    pub format: DataFormat,
+    pub data_format: DataFormat,
     pub data: RawVec,
+    pub data_map: CgatsMap,
 }
 
 impl CgatsObject {
@@ -98,8 +103,9 @@ impl CgatsObject {
         Self {
             raw_data: Vec::new(),
             cgats_type,
-            format: Vec::new(),
+            data_format: Vec::new(),
             data: Vec::new(),
+            data_map: CgatsMap::new(),
         }
     }
 
@@ -112,17 +118,12 @@ impl CgatsObject {
     {
         // Read file into a RawVec
         let mut raw_data: RawVec = Vec::new();
-        read_file_to_raw_vec(&mut raw_data, file)?;
+        read_file_to_raw_vec(&mut raw_data, &file)?;
 
         // Determine the CgatsType from the first line of the file
         let cgats_type = get_cgats_type(&raw_data);
 
-        // If the file type is ColorBurst, the data format is implied,
-        // otherwise, check the file for BEGIN_DATA_FORMAT tags
-        let format = match cgats_type {
-            Some(CgatsType::ColorBurst) => format::ColorBurstFormat(),
-            _ => extract_data_format(&raw_data)?,
-        };
+        let data_format = extract_data_format(&raw_data)?;
 
         // Define the data as a vector of vectors of lines
         // between BEGIN_DATA and END_DATA tags
@@ -130,12 +131,14 @@ impl CgatsObject {
 
         // Validate that the data format and the data have the same item count
         for line in &data {
-            if line.len() != format.len() {
+            if line.len() != data_format.len() {
                 return Err(CgatsError::FormatDataMismatch);
             } 
         }
 
-        Ok(Self{raw_data, cgats_type, format, data,})
+        let data_map = CgatsMap::from_file(&file)?;
+
+        Ok(Self{raw_data, cgats_type, data_format, data, data_map})
     }
 
 }
@@ -202,7 +205,14 @@ where T:
 
 // Extract the DATA_FORMAT into a Vector of DataFormatTypes (DataFormat)
 fn extract_data_format(raw_vec: &RawVec) -> CgatsResult<DataFormat> {
-    let mut cgv: DataFormat = Vec::new();
+
+    // Use implicit format type for ColorBurst LinFiles
+    let cgats_type = get_cgats_type(&raw_vec);
+    if let Some(CgatsType::ColorBurst) = cgats_type {
+        return Ok(format::ColorBurstFormat());
+    }
+
+    let mut data_format: DataFormat = Vec::new();
 
     // Loop through the RawVec and find the BEGIN_DATA_FORMAT tag
     // then take the next line as a tab-delimited Vector
@@ -211,7 +221,7 @@ fn extract_data_format(raw_vec: &RawVec) -> CgatsResult<DataFormat> {
             "BEGIN_DATA_FORMAT" => {
                 for format_type in raw_vec[index + 1].iter() {
                     let format = DataFormatType::from(format_type)?;
-                    cgv.push(format);
+                    data_format.push(format);
                 }
                 break;
             },
@@ -220,17 +230,17 @@ fn extract_data_format(raw_vec: &RawVec) -> CgatsResult<DataFormat> {
     }
 
     // Check that the DATA_FORMAT is not empty
-    if cgv.len() < 1 {
+    if data_format.len() < 1 {
         Err(CgatsError::NoDataFormat)
     } else {
-        Ok(cgv)
+        Ok(data_format)
     }
 
 }
 
 // Extract the data betweeen BEGIN_DATA and END_DATA into a RawVec
 fn extract_data(raw_vec: &RawVec) -> CgatsResult<RawVec> {
-    let mut cgv: RawVec = Vec::new();
+    let mut data_vec: RawVec = Vec::new();
 
     // Loop through the first item of each line and look for the tags.
     for (index, item) in raw_vec.iter().enumerate() {
@@ -238,12 +248,12 @@ fn extract_data(raw_vec: &RawVec) -> CgatsResult<RawVec> {
             "BEGIN_DATA" => {
                 // Loop through each line after BEGIN_DATA and push the next
                 for format_type in raw_vec[index + 1..].iter() {
-                    cgv.push(format_type.to_vec());
+                    data_vec.push(format_type.to_vec());
                 }
             },
             "END_DATA" => {
                 // Pop the last line off the Vector and stop looking
-                cgv.pop();
+                data_vec.pop();
                 break;
             },
             _ => continue
@@ -251,10 +261,10 @@ fn extract_data(raw_vec: &RawVec) -> CgatsResult<RawVec> {
     }
 
     // Check that we actually found some data
-    if cgv.len() < 1 {
+    if data_vec.len() < 1 {
         Err(CgatsError::NoData)
     } else {
-        Ok(cgv)
+        Ok(data_vec)
     }
 
 }

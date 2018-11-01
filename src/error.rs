@@ -12,6 +12,7 @@ pub enum CgatsError {
     UnknownFormatType,
     FileError,
     EmptyFile,
+    InvalidID,
 }
 
 // Custom Result type for CgatsError
@@ -34,6 +35,7 @@ impl Error for CgatsError {
             UnknownFormatType  => "Unknown Data Format Type!",
             FileError          => "Problem reading file!",
             EmptyFile          => "File is empty!",
+            InvalidID          => "SAMPLE_ID is not an integer!",
         }
     }
 }

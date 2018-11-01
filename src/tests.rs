@@ -14,33 +14,6 @@ fn test_files<'a>() -> Vec<&'a str> {
     ]
 }
 
-// Test that DataColumns can be Vectors of different types (Vec<&str>, Vec<i32>)
-#[test]
-fn data_column() {
-    let mut dc0 = DataColumn::new(DataFormatType::SAMPLE_NAME);
-    dc0.data.push(
-        vec![
-            "Cyan", "Magenta", "Yellow", "Black", "Blue", "Red", "Green", "3cBlack", "4cBlack", "3cGray", "1cGray",
-        ]
-    );
- 
-
-    let mut dc1 = DataColumn::new(DataFormatType::CMYK_C);
-    dc1.data.push(
-        vec![
-            "100", "0", "0", "0", "100", "0", "100", "100", "100", "50", "0",
-        ]
-    );
-
-    let dcs = DataSet {
-        // I know, I know
-        columns: vec![dc0.to_owned(), dc1.to_owned()]
-    };
-
-    println!("{:?}", dc0);
-    println!("{:?}", dc1);
-    println!("--\n{:?}\n--", dcs);
-}
 
 // Test the conversion of DataFormatTypes
 #[test]
@@ -86,10 +59,10 @@ fn test_extract_data() -> CgatsResult<()>{
        vec!["5",  "Blue",    "100", "100", "0",   "0"  ],
        vec!["6",  "Red",     "0",   "100", "100", "0"  ],
        vec!["7",  "Green",   "100", "0",   "100", "0"  ],
-       vec!["6",  "3cBlack", "100", "100", "100", "0"  ],
-       vec!["8",  "4cBlack", "100", "100", "100", "100"],
-       vec!["9",  "3cGray",  "50",  "40",  "40",  "0"  ],
-       vec!["10", "1cGray",  "0",   "0",   "0",   "50" ],
+       vec!["8",  "3cBlack", "100", "100", "100", "0"  ],
+       vec!["9",  "4cBlack", "100", "100", "100", "100"],
+       vec!["10",  "3cGray",  "50",  "40",  "40",  "0"  ],
+       vec!["11", "1cGray",  "0",   "0",   "0",   "50" ],
     ];
 
     assert_eq!(data_vec, data);
@@ -133,4 +106,23 @@ fn cgats_type() -> CgatsResult<()>{
     }
 
     Ok(())
+}
+
+#[test]
+fn cgats_map() {
+    for file in test_files() {
+        let cgo = CgatsObject::from_file(file);
+        let mut s = String::new();
+
+        match cgo {
+            Ok(cgo) => {
+                for ((format, id), value) in cgo.data_map.0 {
+                    println!("{}, {}:\t{}", format, id, value);
+                }
+            },
+            Err(e) => s.push_str( &format!("'{}': {}", file, e) )
+        }
+
+        eprintln!("{}", s);
+    }
 }

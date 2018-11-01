@@ -5,7 +5,7 @@ pub type DataFormat = Vec<DataFormatType>;
 
 // Known data format types: This list is incomplete
 #[allow(non_camel_case_types)]
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
 pub enum DataFormatType {
     // String
     SAMPLE_ID, SAMPLE_NAME, BLANK,
