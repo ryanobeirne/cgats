@@ -17,7 +17,7 @@ mod tests;
 type RawVec = Vec<Vec<String>>;
 
 // BTreeMap of CGATS Data
-type DataMap = BTreeMap<(DataFormatType, usize), String>;
+type DataMap = BTreeMap<(usize, DataFormatType), String>;
 
 #[derive(Debug, Eq, PartialEq, Clone)]
 pub struct CgatsMap(pub DataMap);
@@ -39,7 +39,7 @@ impl CgatsMap {
         for (line_index, line) in data.iter().enumerate() {
             for (index, format) in data_format.iter().enumerate() {
                 data_map.insert(
-                    (*format, line_index),
+                    (line_index, *format),
                     line[index].clone()
                 );
             }
@@ -141,6 +141,53 @@ impl CgatsObject {
         Ok(Self{raw_data, cgats_type, data_format, data, data_map})
     }
 
+    pub fn print_data_format(&self) -> String {
+        let mut s = String::new();
+
+        // Print DATA_FORMAT
+        s.push_str("BEGIN_DATA_FORMAT\n");
+        for (index, format) in self.data_format.iter().enumerate() {
+            s.push_str(&format.display());
+            if index == self.data_format.len() - 1 {
+                s.push('\n');
+            } else {
+                s.push('\t');
+            }
+        }
+        s.push_str("END_DATA_FORMAT\n");
+
+        s
+    }
+
+    pub fn print_data(&self) -> String {
+        let mut s = String::new();
+
+        // Print DATA
+        s.push_str("BEGIN_DATA\n");
+        for line in &self.data {
+            for (index, item) in line.iter().enumerate() {
+                s.push_str(item);
+                if index == line.len() - 1 {
+                    s.push('\n');
+                } else {
+                    s.push('\t');
+                }
+            }
+        }
+        s.push_str("END_DATA\n");
+
+        s
+    }
+
+    pub fn print(&self) -> String {
+        let mut s = String::new();
+
+        s.push_str(&self.print_data_format());
+        s.push_str(&self.print_data());
+
+        s
+    }
+
 }
 
 // Get the CgatsType from the first line in the RawVec (first line in file)
@@ -200,6 +247,20 @@ where T:
         Err(CgatsError::EmptyFile)
     } else {
         Ok(())
+    }
+}
+
+impl fmt::Display for CgatsObject {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let cgats_type = &self.cgats_type;
+        let cgt = match cgats_type {
+            Some(cgt) => cgt.display(),
+            None => "None".to_string()
+        };
+        
+        let format = format!("{}[{}]{:?}", cgt, &self.data.len(), &self.data_format);
+
+        write!(f, "{:?}", format)
     }
 }
 
