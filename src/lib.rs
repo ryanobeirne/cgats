@@ -20,9 +20,6 @@ use rawvec::*;
 pub struct CgatsObject {
     pub raw_vec: RawVec,
     pub cgats_type: Option<CgatsType>,
-    pub metadata: RawVec,
-    pub data_format: DataFormat,
-    pub data: RawVec,
     pub data_map: CgatsMap,
 }
 
@@ -30,10 +27,7 @@ impl CgatsObject {
     pub fn new() -> Self {
         Self {
             raw_vec: RawVec::new(),
-            metadata: RawVec::new(),
             cgats_type: None,
-            data_format: DataFormat::new(),
-            data: RawVec::new(),
             data_map: CgatsMap::new(),
         }
     }
@@ -45,11 +39,15 @@ impl CgatsObject {
         cgo
     }
 
+    pub fn len(&self) -> CgatsResult<usize> {
+        Ok(self.data()?.len())
+    }
+
     // New CgatsObject from a file
     pub fn from_file<T: AsRef<Path>>(file: T) -> CgatsResult<Self> {
         // Read file into a RawVec
         let mut raw_vec = RawVec::new();
-        read_file_to_raw_vec(&mut raw_vec, &file)?;
+        read_file_to_raw_vec(&mut raw_vec, file)?;
 
         CgatsObject::from_raw_vec(raw_vec)
     }
@@ -57,15 +55,10 @@ impl CgatsObject {
     fn from_raw_vec(raw_vec: RawVec) -> CgatsResult<Self> {
         // Determine the CgatsType from the first line of the file
         let cgats_type = get_cgats_type(&raw_vec);
-        let metadata = extract_meta_data(&raw_vec)?;
         let data_format = extract_data_format(&raw_vec)?;
 
-        // Define the data as a vector of vectors of lines
-        // between BEGIN_DATA and END_DATA tags
-        let data = extract_data(&raw_vec)?;
-
         // Validate that the data format and the data have the same item count
-        for line in &data {
+        for line in extract_data(&raw_vec)? {
             if line.len() != data_format.len() {
                 return Err(CgatsError::FormatDataMismatch);
             } 
@@ -73,17 +66,30 @@ impl CgatsObject {
 
         let data_map = CgatsMap::from_raw_vec(&raw_vec)?;
 
-        Ok(Self{raw_vec, cgats_type, metadata, data_format, data, data_map})
+        Ok(Self{raw_vec, cgats_type, data_map})
     }
 
-    pub fn print_data_format(&self) -> String {
+    pub fn metadata(&self) -> CgatsResult<RawVec> {
+        extract_meta_data(&self.raw_vec)
+    }
+
+    pub fn data(&self) -> CgatsResult<RawVec> {
+        extract_data(&self.raw_vec)
+    }
+
+    pub fn data_format(&self) -> CgatsResult<DataFormat> {
+        extract_data_format(&self.raw_vec)
+    }
+
+    pub fn print_data_format(&self) -> CgatsResult<String> {
         let mut s = String::new();
 
         // Print DATA_FORMAT
         s.push_str("BEGIN_DATA_FORMAT\n");
-        for (index, format) in self.data_format.iter().enumerate() {
+        let data_format = &self.data_format()?;
+        for (index, format) in data_format.iter().enumerate() {
             s.push_str(&format.display());
-            if index == self.data_format.len() - 1 {
+            if index == data_format.len() - 1 {
                 s.push('\n');
             } else {
                 s.push('\t');
@@ -91,15 +97,16 @@ impl CgatsObject {
         }
         s.push_str("END_DATA_FORMAT\n");
 
-        s
+        Ok(s)
     }
 
-    pub fn print_data(&self) -> String {
+    pub fn print_data(&self) -> CgatsResult<String> {
         let mut s = String::new();
 
         // Print DATA
         s.push_str("BEGIN_DATA\n");
-        for line in &self.data {
+        let data = &self.data()?;
+        for line in data {
             for (index, item) in line.iter().enumerate() {
                 s.push_str(item);
                 if index == line.len() - 1 {
@@ -111,14 +118,15 @@ impl CgatsObject {
         }
         s.push_str("END_DATA\n");
 
-        s
+        Ok(s)
     }
 
-    pub fn print_meta_data(&self) -> String {
+    pub fn print_meta_data(&self) -> CgatsResult<String> {
         let mut s = String::new();
 
         // Print metadata
-        for line in &self.metadata {
+        let metadata = &self.metadata()?;
+        for line in metadata {
             for (index, item) in line.iter().enumerate() {
                 s.push_str(item);
                 if index == line.len() - 1 {
@@ -129,17 +137,17 @@ impl CgatsObject {
             }
         }
 
-        s
+        Ok(s)
     }
 
-    pub fn print(&self) -> String {
+    pub fn print(&self) -> CgatsResult<String> {
         let mut s = String::new();
 
-        s.push_str(&self.print_meta_data());
-        s.push_str(&self.print_data_format());
-        s.push_str(&self.print_data());
+        s.push_str(&self.print_meta_data()?);
+        s.push_str(&self.print_data_format()?);
+        s.push_str(&self.print_data()?);
 
-        s
+        Ok(s)
     }
 
 }
@@ -152,9 +160,9 @@ impl fmt::Display for CgatsObject {
             None => "None".to_string()
         };
         
-        let format = format!("{}[{}]{:?}", cgt, &self.data.len(), &self.data_format);
+        let format = format!("{}({}){:?}", cgt, &self.len()?, &self.data_format()?);
 
-        write!(f, "{:?}", format)
+        write!(f, "{}", format)
     }
 }
 

@@ -31,8 +31,8 @@ fn main() -> cgats::error::CgatsResult<()> {
 
         match set {
             Ok(object) => {
-                // println!("{}", &object);
-                println!("{}", &object.print());
+                println!("{}", &object);
+                // println!("{}", &object.print()?);
                 // println!("{:?}", &object.format);
                 // println!("{:?}", &object.data);
                 // println!("{:?}", object.data_map);

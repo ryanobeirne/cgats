@@ -46,3 +46,10 @@ impl convert::From<io::Error> for CgatsError {
        CgatsError::FileError
    } 
 } 
+
+impl convert::From<CgatsError> for fmt::Error {
+    fn from(cge: CgatsError) -> Self {
+        eprintln!("{}", cge);
+        fmt::Error
+    }
+}

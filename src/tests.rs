@@ -130,7 +130,7 @@ fn cgats_map() {
 #[test]
 fn cgo_print() -> CgatsResult<()> {
     let cgo = CgatsObject::from_file("test_files/cgats1.tsv")?;
-    println!("{}", cgo.print());
+    println!("{}", cgo.print()?);
 
     Ok(())
 }
