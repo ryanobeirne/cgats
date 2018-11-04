@@ -28,11 +28,9 @@ impl CgatsMap {
         CgatsMap(data_map)
     }
 
-    pub fn from_file<T: AsRef<Path>>(file: T) -> CgatsResult<Self> {
+    fn from_raw_vec(raw_vec: &RawVec) -> CgatsResult<Self> {
         let mut data_map: DataMap = BTreeMap::new();
-        let mut raw_vec: RawVec = Vec::new();
-        read_file_to_raw_vec(&mut raw_vec, file)?;
-
+        
         let data_format = extract_data_format(&raw_vec)?;
         let data = extract_data(&raw_vec)?;
 
@@ -46,6 +44,13 @@ impl CgatsMap {
         }
 
         Ok(CgatsMap(data_map))
+    }
+
+    pub fn from_file<T: AsRef<Path>>(file: T) -> CgatsResult<Self> {
+        let mut raw_vec: RawVec = Vec::new();
+        read_file_to_raw_vec(&mut raw_vec, file)?;
+
+        Self::from_raw_vec(&raw_vec)
     }
 }
 
@@ -90,7 +95,7 @@ impl fmt::Display for CgatsType {
 // The meat and potatoes of this crate
 #[derive(Debug, Clone)]
 pub struct CgatsObject {
-    raw_data: RawVec,
+    raw_vec: RawVec,
     pub cgats_type: Option<CgatsType>,
     pub data_format: DataFormat,
     pub data: RawVec,
@@ -98,36 +103,41 @@ pub struct CgatsObject {
 }
 
 impl CgatsObject {
-    // New empty CgatsObject of a given CgatsType
-    pub fn new(cgats_type: Option<CgatsType>) -> Self {
+    pub fn new() -> Self {
         Self {
-            raw_data: Vec::new(),
-            cgats_type,
+            raw_vec: Vec::new(),
+            cgats_type: None,
             data_format: Vec::new(),
             data: Vec::new(),
             data_map: CgatsMap::new(),
         }
     }
 
-    // 
+    // New empty CgatsObject of a given CgatsType
+    pub fn new_with_type(cgats_type: CgatsType) -> Self {
+        let mut cgo = Self::new();
+        cgo.cgats_type = Some(cgats_type);
+        cgo
+    }
 
     // New CgatsObject from a file
-    pub fn from_file<T>(file: T) -> CgatsResult<Self> 
-    where T:
-        AsRef<Path>
-    {
+    pub fn from_file<T: AsRef<Path>>(file: T) -> CgatsResult<Self> {
         // Read file into a RawVec
-        let mut raw_data: RawVec = Vec::new();
-        read_file_to_raw_vec(&mut raw_data, &file)?;
+        let mut raw_vec: RawVec = Vec::new();
+        read_file_to_raw_vec(&mut raw_vec, &file)?;
 
+        CgatsObject::from_raw_vec(raw_vec)
+    }
+
+    fn from_raw_vec(raw_vec: RawVec) -> CgatsResult<Self> {
         // Determine the CgatsType from the first line of the file
-        let cgats_type = get_cgats_type(&raw_data);
+        let cgats_type = get_cgats_type(&raw_vec);
 
-        let data_format = extract_data_format(&raw_data)?;
+        let data_format = extract_data_format(&raw_vec)?;
 
         // Define the data as a vector of vectors of lines
         // between BEGIN_DATA and END_DATA tags
-        let data = extract_data(&raw_data)?;
+        let data = extract_data(&raw_vec)?;
 
         // Validate that the data format and the data have the same item count
         for line in &data {
@@ -136,9 +146,9 @@ impl CgatsObject {
             } 
         }
 
-        let data_map = CgatsMap::from_file(&file)?;
+        let data_map = CgatsMap::from_raw_vec(&raw_vec)?;
 
-        Ok(Self{raw_data, cgats_type, data_format, data, data_map})
+        Ok(Self{raw_vec, cgats_type, data_format, data, data_map})
     }
 
     pub fn print_data_format(&self) -> String {

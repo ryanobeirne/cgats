@@ -18,7 +18,7 @@ fn test_files<'a>() -> Vec<&'a str> {
 // Test the conversion of DataFormatTypes
 #[test]
 fn data_format() -> CgatsResult<()> {
-    let mut cgv: RawVec<> = Vec::new();
+    let mut cgv: RawVec = Vec::new();
     read_file_to_raw_vec(&mut cgv, "test_files/cgats0.txt")?;
 
     println!("{:?}", cgv);
@@ -34,7 +34,7 @@ fn data_format() -> CgatsResult<()> {
 fn test_extract_data_format() -> CgatsResult<()> {
     use format::DataFormatType::*;
     let cgo = CgatsObject::from_file("test_files/cgats1.tsv")?;
-    let format = extract_data_format(&cgo.raw_data)?;
+    let format = extract_data_format(&cgo.raw_vec)?;
     println!("{:?}", format);
 
     let format_vec = vec![SAMPLE_ID, SAMPLE_NAME, CMYK_C, CMYK_M, CMYK_Y, CMYK_K];
@@ -48,7 +48,7 @@ fn test_extract_data_format() -> CgatsResult<()> {
 #[test]
 fn test_extract_data() -> CgatsResult<()>{
     let cgo = CgatsObject::from_file("test_files/cgats1.tsv")?;
-    let data = extract_data(&cgo.raw_data)?;
+    let data = extract_data(&cgo.raw_vec)?;
     println!("{:?}", data);
 
     let data_vec = vec![
@@ -74,8 +74,8 @@ fn test_extract_data() -> CgatsResult<()>{
 #[test]
 fn test_extract_data_and_format() -> CgatsResult<()>{
     let cgo = CgatsObject::from_file("test_files/cgats0.txt")?;
-    let format = extract_data_format(&cgo.raw_data)?;
-    let data = extract_data(&cgo.raw_data)?;
+    let format = extract_data_format(&cgo.raw_vec)?;
+    let data = extract_data(&cgo.raw_vec)?;
     println!("FORMAT [{}]:\n{:?}\n\nDATA [{}]:\n{:?}", format.len(), format, data.len(), data);
 
     for line in data {
