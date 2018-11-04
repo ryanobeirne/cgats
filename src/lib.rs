@@ -113,6 +113,7 @@ impl CgatsObject {
 
         s
     }
+
     pub fn print_meta_data(&self) -> String {
         let mut s = String::new();
 
@@ -130,7 +131,6 @@ impl CgatsObject {
 
         s
     }
-
 
     pub fn print(&self) -> String {
         let mut s = String::new();
