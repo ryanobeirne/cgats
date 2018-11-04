@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["CgatsType",""]],"mod":[["error",""],["format",""]],"struct":[["CgatsMap",""],["CgatsObject",""]],"type":[["DataMap",""],["RawVec",""]]});
+initSidebarItems({"enum":[["CgatsType",""]],"mod":[["error",""],["format",""],["rawvec",""]],"struct":[["CgatsMap",""],["CgatsObject",""]],"type":[["DataMap",""]]});
