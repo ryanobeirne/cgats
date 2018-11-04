@@ -14,10 +14,10 @@ use format::*;
 #[cfg(test)]
 mod tests;
 
-type RawVec = Vec<Vec<String>>;
+pub type RawVec = Vec<Vec<String>>;
 
 // BTreeMap of CGATS Data
-type DataMap = BTreeMap<(usize, DataFormatType), String>;
+pub type DataMap = BTreeMap<(usize, DataFormatType), String>;
 
 #[derive(Debug, Eq, PartialEq, Clone)]
 pub struct CgatsMap(pub DataMap);
@@ -47,7 +47,7 @@ impl CgatsMap {
     }
 
     pub fn from_file<T: AsRef<Path>>(file: T) -> CgatsResult<Self> {
-        let mut raw_vec: RawVec = Vec::new();
+        let mut raw_vec = RawVec::new();
         read_file_to_raw_vec(&mut raw_vec, file)?;
 
         Self::from_raw_vec(&raw_vec)
@@ -95,8 +95,9 @@ impl fmt::Display for CgatsType {
 // The meat and potatoes of this crate
 #[derive(Debug, Clone)]
 pub struct CgatsObject {
-    raw_vec: RawVec,
+    pub raw_vec: RawVec,
     pub cgats_type: Option<CgatsType>,
+    pub metadata: RawVec,
     pub data_format: DataFormat,
     pub data: RawVec,
     pub data_map: CgatsMap,
@@ -105,10 +106,11 @@ pub struct CgatsObject {
 impl CgatsObject {
     pub fn new() -> Self {
         Self {
-            raw_vec: Vec::new(),
+            raw_vec: RawVec::new(),
+            metadata: RawVec::new(),
             cgats_type: None,
-            data_format: Vec::new(),
-            data: Vec::new(),
+            data_format: DataFormat::new(),
+            data: RawVec::new(),
             data_map: CgatsMap::new(),
         }
     }
@@ -123,7 +125,7 @@ impl CgatsObject {
     // New CgatsObject from a file
     pub fn from_file<T: AsRef<Path>>(file: T) -> CgatsResult<Self> {
         // Read file into a RawVec
-        let mut raw_vec: RawVec = Vec::new();
+        let mut raw_vec = RawVec::new();
         read_file_to_raw_vec(&mut raw_vec, &file)?;
 
         CgatsObject::from_raw_vec(raw_vec)
@@ -132,7 +134,7 @@ impl CgatsObject {
     fn from_raw_vec(raw_vec: RawVec) -> CgatsResult<Self> {
         // Determine the CgatsType from the first line of the file
         let cgats_type = get_cgats_type(&raw_vec);
-
+        let metadata = extract_meta_data(&raw_vec)?;
         let data_format = extract_data_format(&raw_vec)?;
 
         // Define the data as a vector of vectors of lines
@@ -148,7 +150,7 @@ impl CgatsObject {
 
         let data_map = CgatsMap::from_raw_vec(&raw_vec)?;
 
-        Ok(Self{raw_vec, cgats_type, data_format, data, data_map})
+        Ok(Self{raw_vec, cgats_type, metadata, data_format, data, data_map})
     }
 
     pub fn print_data_format(&self) -> String {
@@ -188,10 +190,29 @@ impl CgatsObject {
 
         s
     }
+    pub fn print_meta_data(&self) -> String {
+        let mut s = String::new();
+
+        // Print metadata
+        for line in &self.metadata {
+            for (index, item) in line.iter().enumerate() {
+                s.push_str(item);
+                if index == line.len() - 1 {
+                    s.push('\n');
+                } else {
+                    s.push('\t');
+                }
+            }
+        }
+
+        s
+    }
+
 
     pub fn print(&self) -> String {
         let mut s = String::new();
 
+        s.push_str(&self.print_meta_data());
         s.push_str(&self.print_data_format());
         s.push_str(&self.print_data());
 
@@ -214,10 +235,7 @@ fn get_cgats_type(raw_vec: &RawVec) -> Option<CgatsType> {
 }
 
 // Read a file into a Vector of a Vector of lines (RawVec)
-fn read_file_to_raw_vec<T>(raw_vec: &mut RawVec, file: T) -> CgatsResult<()>
-where T:
-    AsRef<Path>
-{
+fn read_file_to_raw_vec<T: AsRef<Path>>(raw_vec: &mut RawVec, file: T) -> CgatsResult<()> {
     let f = File::open(file)?;
 
     // Loop through lines and trim trailing whitespace
@@ -274,6 +292,34 @@ impl fmt::Display for CgatsObject {
     }
 }
 
+// Extract metadata from CGATS file: anything that is not between bookends:
+// e.g. BEGIN_DATA_FORMAT...END_DATA_FORMAT // BEGIN_DATA...END_DATA
+fn extract_meta_data(raw_vec: &RawVec) -> CgatsResult<RawVec> {
+    let mut meta_vec = RawVec::new();
+
+    let bookends = &[
+        "BEGIN_DATA_FORMAT", "END_DATA_FORMAT",
+        "BEGIN_DATA", "END_DATA"
+    ];
+
+    let mut index = 0;
+    let mut tag_switch = true;
+    while index < raw_vec.len() {
+        let item = &raw_vec[index];
+        if bookends.contains(&item[0].as_str()) {
+            if tag_switch { tag_switch = false } else { tag_switch = true };
+            index += 1;
+            continue;
+        }
+        if tag_switch {
+            meta_vec.push(item.clone());
+        }
+        index += 1;
+    }
+
+    Ok(meta_vec)
+}
+
 // Extract the DATA_FORMAT into a Vector of DataFormatTypes (DataFormat)
 fn extract_data_format(raw_vec: &RawVec) -> CgatsResult<DataFormat> {
 
@@ -311,7 +357,7 @@ fn extract_data_format(raw_vec: &RawVec) -> CgatsResult<DataFormat> {
 
 // Extract the data betweeen BEGIN_DATA and END_DATA into a RawVec
 fn extract_data(raw_vec: &RawVec) -> CgatsResult<RawVec> {
-    let mut data_vec: RawVec = Vec::new();
+    let mut data_vec = RawVec::new();
 
     // Loop through the first item of each line and look for the tags.
     for (index, item) in raw_vec.iter().enumerate() {

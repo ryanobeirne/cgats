@@ -339,6 +339,52 @@
 <span id="339">339</span>
 <span id="340">340</span>
 <span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
+<span id="347">347</span>
+<span id="348">348</span>
+<span id="349">349</span>
+<span id="350">350</span>
+<span id="351">351</span>
+<span id="352">352</span>
+<span id="353">353</span>
+<span id="354">354</span>
+<span id="355">355</span>
+<span id="356">356</span>
+<span id="357">357</span>
+<span id="358">358</span>
+<span id="359">359</span>
+<span id="360">360</span>
+<span id="361">361</span>
+<span id="362">362</span>
+<span id="363">363</span>
+<span id="364">364</span>
+<span id="365">365</span>
+<span id="366">366</span>
+<span id="367">367</span>
+<span id="368">368</span>
+<span id="369">369</span>
+<span id="370">370</span>
+<span id="371">371</span>
+<span id="372">372</span>
+<span id="373">373</span>
+<span id="374">374</span>
+<span id="375">375</span>
+<span id="376">376</span>
+<span id="377">377</span>
+<span id="378">378</span>
+<span id="379">379</span>
+<span id="380">380</span>
+<span id="381">381</span>
+<span id="382">382</span>
+<span id="383">383</span>
+<span id="384">384</span>
+<span id="385">385</span>
+<span id="386">386</span>
+<span id="387">387</span>
 </pre><pre class="rust ">
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">fs</span>::<span class="ident">File</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">path</span>::<span class="ident">Path</span>;
@@ -356,10 +402,10 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span>;
 
-<span class="kw">type</span> <span class="ident">RawVec</span> <span class="op">=</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;&gt;</span>;
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">RawVec</span> <span class="op">=</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;&gt;</span>;
 
 <span class="comment">// BTreeMap of CGATS Data</span>
-<span class="kw">type</span> <span class="ident">DataMap</span> <span class="op">=</span> <span class="ident">BTreeMap</span><span class="op">&lt;</span>(<span class="ident">usize</span>, <span class="ident">DataFormatType</span>), <span class="ident">String</span><span class="op">&gt;</span>;
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">DataMap</span> <span class="op">=</span> <span class="ident">BTreeMap</span><span class="op">&lt;</span>(<span class="ident">usize</span>, <span class="ident">DataFormatType</span>), <span class="ident">String</span><span class="op">&gt;</span>;
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>, <span class="ident">Clone</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CgatsMap</span>(<span class="kw">pub</span> <span class="ident">DataMap</span>);
@@ -389,7 +435,7 @@
     }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_file</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;&gt;</span>(<span class="ident">file</span>: <span class="ident">T</span>) <span class="op">-&gt;</span> <span class="ident">CgatsResult</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">raw_vec</span>: <span class="ident">RawVec</span> <span class="op">=</span> <span class="ident">Vec</span>::<span class="ident">new</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">raw_vec</span> <span class="op">=</span> <span class="ident">RawVec</span>::<span class="ident">new</span>();
         <span class="ident">read_file_to_raw_vec</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">raw_vec</span>, <span class="ident">file</span>)<span class="question-mark">?</span>;
 
         <span class="self">Self</span>::<span class="ident">from_raw_vec</span>(<span class="kw-2">&amp;</span><span class="ident">raw_vec</span>)
@@ -437,8 +483,9 @@
 <span class="comment">// The meat and potatoes of this crate</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CgatsObject</span> {
-    <span class="ident">raw_vec</span>: <span class="ident">RawVec</span>,
+    <span class="kw">pub</span> <span class="ident">raw_vec</span>: <span class="ident">RawVec</span>,
     <span class="kw">pub</span> <span class="ident">cgats_type</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">CgatsType</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">metadata</span>: <span class="ident">RawVec</span>,
     <span class="kw">pub</span> <span class="ident">data_format</span>: <span class="ident">DataFormat</span>,
     <span class="kw">pub</span> <span class="ident">data</span>: <span class="ident">RawVec</span>,
     <span class="kw">pub</span> <span class="ident">data_map</span>: <span class="ident">CgatsMap</span>,
@@ -447,10 +494,11 @@
 <span class="kw">impl</span> <span class="ident">CgatsObject</span> {
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-&gt;</span> <span class="self">Self</span> {
         <span class="self">Self</span> {
-            <span class="ident">raw_vec</span>: <span class="ident">Vec</span>::<span class="ident">new</span>(),
+            <span class="ident">raw_vec</span>: <span class="ident">RawVec</span>::<span class="ident">new</span>(),
+            <span class="ident">metadata</span>: <span class="ident">RawVec</span>::<span class="ident">new</span>(),
             <span class="ident">cgats_type</span>: <span class="prelude-val">None</span>,
-            <span class="ident">data_format</span>: <span class="ident">Vec</span>::<span class="ident">new</span>(),
-            <span class="ident">data</span>: <span class="ident">Vec</span>::<span class="ident">new</span>(),
+            <span class="ident">data_format</span>: <span class="ident">DataFormat</span>::<span class="ident">new</span>(),
+            <span class="ident">data</span>: <span class="ident">RawVec</span>::<span class="ident">new</span>(),
             <span class="ident">data_map</span>: <span class="ident">CgatsMap</span>::<span class="ident">new</span>(),
         }
     }
@@ -465,7 +513,7 @@
     <span class="comment">// New CgatsObject from a file</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_file</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;&gt;</span>(<span class="ident">file</span>: <span class="ident">T</span>) <span class="op">-&gt;</span> <span class="ident">CgatsResult</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="comment">// Read file into a RawVec</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">raw_vec</span>: <span class="ident">RawVec</span> <span class="op">=</span> <span class="ident">Vec</span>::<span class="ident">new</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">raw_vec</span> <span class="op">=</span> <span class="ident">RawVec</span>::<span class="ident">new</span>();
         <span class="ident">read_file_to_raw_vec</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">raw_vec</span>, <span class="kw-2">&amp;</span><span class="ident">file</span>)<span class="question-mark">?</span>;
 
         <span class="ident">CgatsObject</span>::<span class="ident">from_raw_vec</span>(<span class="ident">raw_vec</span>)
@@ -474,7 +522,7 @@
     <span class="kw">fn</span> <span class="ident">from_raw_vec</span>(<span class="ident">raw_vec</span>: <span class="ident">RawVec</span>) <span class="op">-&gt;</span> <span class="ident">CgatsResult</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="comment">// Determine the CgatsType from the first line of the file</span>
         <span class="kw">let</span> <span class="ident">cgats_type</span> <span class="op">=</span> <span class="ident">get_cgats_type</span>(<span class="kw-2">&amp;</span><span class="ident">raw_vec</span>);
-
+        <span class="kw">let</span> <span class="ident">metadata</span> <span class="op">=</span> <span class="ident">extract_meta_data</span>(<span class="kw-2">&amp;</span><span class="ident">raw_vec</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">data_format</span> <span class="op">=</span> <span class="ident">extract_data_format</span>(<span class="kw-2">&amp;</span><span class="ident">raw_vec</span>)<span class="question-mark">?</span>;
 
         <span class="comment">// Define the data as a vector of vectors of lines</span>
@@ -490,7 +538,7 @@
 
         <span class="kw">let</span> <span class="ident">data_map</span> <span class="op">=</span> <span class="ident">CgatsMap</span>::<span class="ident">from_raw_vec</span>(<span class="kw-2">&amp;</span><span class="ident">raw_vec</span>)<span class="question-mark">?</span>;
 
-        <span class="prelude-val">Ok</span>(<span class="self">Self</span>{<span class="ident">raw_vec</span>, <span class="ident">cgats_type</span>, <span class="ident">data_format</span>, <span class="ident">data</span>, <span class="ident">data_map</span>})
+        <span class="prelude-val">Ok</span>(<span class="self">Self</span>{<span class="ident">raw_vec</span>, <span class="ident">cgats_type</span>, <span class="ident">metadata</span>, <span class="ident">data_format</span>, <span class="ident">data</span>, <span class="ident">data_map</span>})
     }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">print_data_format</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">String</span> {
@@ -530,10 +578,29 @@
 
         <span class="ident">s</span>
     }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">print_meta_data</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">String</span> {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">String</span>::<span class="ident">new</span>();
+
+        <span class="comment">// Print metadata</span>
+        <span class="kw">for</span> <span class="ident">line</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">metadata</span> {
+            <span class="kw">for</span> (<span class="ident">index</span>, <span class="ident">item</span>) <span class="kw">in</span> <span class="ident">line</span>.<span class="ident">iter</span>().<span class="ident">enumerate</span>() {
+                <span class="ident">s</span>.<span class="ident">push_str</span>(<span class="ident">item</span>);
+                <span class="kw">if</span> <span class="ident">index</span> <span class="op">==</span> <span class="ident">line</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">1</span> {
+                    <span class="ident">s</span>.<span class="ident">push</span>(<span class="string">&#39;\n&#39;</span>);
+                } <span class="kw">else</span> {
+                    <span class="ident">s</span>.<span class="ident">push</span>(<span class="string">&#39;\t&#39;</span>);
+                }
+            }
+        }
+
+        <span class="ident">s</span>
+    }
+
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">print</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">String</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">String</span>::<span class="ident">new</span>();
 
+        <span class="ident">s</span>.<span class="ident">push_str</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">print_meta_data</span>());
         <span class="ident">s</span>.<span class="ident">push_str</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">print_data_format</span>());
         <span class="ident">s</span>.<span class="ident">push_str</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">print_data</span>());
 
@@ -556,10 +623,7 @@
 }
 
 <span class="comment">// Read a file into a Vector of a Vector of lines (RawVec)</span>
-<span class="kw">fn</span> <span class="ident">read_file_to_raw_vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">raw_vec</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">RawVec</span>, <span class="ident">file</span>: <span class="ident">T</span>) <span class="op">-&gt;</span> <span class="ident">CgatsResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>
-<span class="kw">where</span> <span class="ident">T</span>:
-    <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;</span>
-{
+<span class="kw">fn</span> <span class="ident">read_file_to_raw_vec</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;&gt;</span>(<span class="ident">raw_vec</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">RawVec</span>, <span class="ident">file</span>: <span class="ident">T</span>) <span class="op">-&gt;</span> <span class="ident">CgatsResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">f</span> <span class="op">=</span> <span class="ident">File</span>::<span class="ident">open</span>(<span class="ident">file</span>)<span class="question-mark">?</span>;
 
     <span class="comment">// Loop through lines and trim trailing whitespace</span>
@@ -616,6 +680,34 @@
     }
 }
 
+<span class="comment">// Extract metadata from CGATS file: anything that is not between bookends:</span>
+<span class="comment">// e.g. BEGIN_DATA_FORMAT...END_DATA_FORMAT // BEGIN_DATA...END_DATA</span>
+<span class="kw">fn</span> <span class="ident">extract_meta_data</span>(<span class="ident">raw_vec</span>: <span class="kw-2">&amp;</span><span class="ident">RawVec</span>) <span class="op">-&gt;</span> <span class="ident">CgatsResult</span><span class="op">&lt;</span><span class="ident">RawVec</span><span class="op">&gt;</span> {
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">meta_vec</span> <span class="op">=</span> <span class="ident">RawVec</span>::<span class="ident">new</span>();
+
+    <span class="kw">let</span> <span class="ident">bookends</span> <span class="op">=</span> <span class="kw-2">&amp;</span>[
+        <span class="string">&quot;BEGIN_DATA_FORMAT&quot;</span>, <span class="string">&quot;END_DATA_FORMAT&quot;</span>,
+        <span class="string">&quot;BEGIN_DATA&quot;</span>, <span class="string">&quot;END_DATA&quot;</span>
+    ];
+
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">index</span> <span class="op">=</span> <span class="number">0</span>;
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tag_switch</span> <span class="op">=</span> <span class="bool-val">true</span>;
+    <span class="kw">while</span> <span class="ident">index</span> <span class="op">&lt;</span> <span class="ident">raw_vec</span>.<span class="ident">len</span>() {
+        <span class="kw">let</span> <span class="ident">item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">raw_vec</span>[<span class="ident">index</span>];
+        <span class="kw">if</span> <span class="ident">bookends</span>.<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="ident">item</span>[<span class="number">0</span>].<span class="ident">as_str</span>()) {
+            <span class="kw">if</span> <span class="ident">tag_switch</span> { <span class="ident">tag_switch</span> <span class="op">=</span> <span class="bool-val">false</span> } <span class="kw">else</span> { <span class="ident">tag_switch</span> <span class="op">=</span> <span class="bool-val">true</span> };
+            <span class="ident">index</span> <span class="op">+=</span> <span class="number">1</span>;
+            <span class="kw">continue</span>;
+        }
+        <span class="kw">if</span> <span class="ident">tag_switch</span> {
+            <span class="ident">meta_vec</span>.<span class="ident">push</span>(<span class="ident">item</span>.<span class="ident">clone</span>());
+        }
+        <span class="ident">index</span> <span class="op">+=</span> <span class="number">1</span>;
+    }
+
+    <span class="prelude-val">Ok</span>(<span class="ident">meta_vec</span>)
+}
+
 <span class="comment">// Extract the DATA_FORMAT into a Vector of DataFormatTypes (DataFormat)</span>
 <span class="kw">fn</span> <span class="ident">extract_data_format</span>(<span class="ident">raw_vec</span>: <span class="kw-2">&amp;</span><span class="ident">RawVec</span>) <span class="op">-&gt;</span> <span class="ident">CgatsResult</span><span class="op">&lt;</span><span class="ident">DataFormat</span><span class="op">&gt;</span> {
 
@@ -653,7 +745,7 @@
 
 <span class="comment">// Extract the data betweeen BEGIN_DATA and END_DATA into a RawVec</span>
 <span class="kw">fn</span> <span class="ident">extract_data</span>(<span class="ident">raw_vec</span>: <span class="kw-2">&amp;</span><span class="ident">RawVec</span>) <span class="op">-&gt;</span> <span class="ident">CgatsResult</span><span class="op">&lt;</span><span class="ident">RawVec</span><span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">data_vec</span>: <span class="ident">RawVec</span> <span class="op">=</span> <span class="ident">Vec</span>::<span class="ident">new</span>();
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">data_vec</span> <span class="op">=</span> <span class="ident">RawVec</span>::<span class="ident">new</span>();
 
     <span class="comment">// Loop through the first item of each line and look for the tags.</span>
     <span class="kw">for</span> (<span class="ident">index</span>, <span class="ident">item</span>) <span class="kw">in</span> <span class="ident">raw_vec</span>.<span class="ident">iter</span>().<span class="ident">enumerate</span>() {

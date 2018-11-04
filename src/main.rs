@@ -31,14 +31,14 @@ fn main() -> cgats::error::CgatsResult<()> {
 
         match set {
             Ok(object) => {
-                println!("{}", &object);
+                // println!("{}", &object);
                 println!("{}", &object.print());
                 // println!("{:?}", &object.format);
                 // println!("{:?}", &object.data);
                 // println!("{:?}", object.data_map);
-                for ( (index, format), value) in object.data_map.0 {
-                    println!("{}, {}:\t{}", index, format, value);
-                }
+                // for ( (index, format), value) in object.data_map.0 {
+                //     println!("{}, {}:\t{}", index, format, value);
+                // }
             },
             Err(e) => eprintln!("{}: {}", clap_file, e),
         }

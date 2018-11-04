@@ -134,3 +134,12 @@ fn cgo_print() -> CgatsResult<()> {
 
     Ok(())
 }
+
+#[test]
+fn meta() -> CgatsResult<()> {
+    let cgo = CgatsObject::from_file("test_files/curve0.txt")?;
+    let meta = extract_meta_data(&cgo.raw_vec)?;
+    println!("{:?}", meta);
+
+    Ok(())
+}
