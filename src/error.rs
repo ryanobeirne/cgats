@@ -13,6 +13,7 @@ pub enum CgatsError {
     FileError,
     EmptyFile,
     InvalidID,
+    CannotCompare,
 }
 
 // Custom Result type for CgatsError
@@ -36,6 +37,7 @@ impl Error for CgatsError {
             FileError          => "Problem reading file!",
             EmptyFile          => "File is empty!",
             InvalidID          => "SAMPLE_ID is not an integer!",
+            CannotCompare      => "Cannot compare data sets!",
         }
     }
 }

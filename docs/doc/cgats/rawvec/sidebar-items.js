@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["extract_data",""],["extract_data_format",""],["get_cgats_type",""],["read_file_to_raw_vec",""]],"type":[["RawVec",""]]});
+initSidebarItems({"fn":[["extract_data",""],["extract_data_format",""],["extract_meta_data",""],["get_cgats_type",""],["read_file_to_raw_vec",""]],"type":[["RawVec",""]]});

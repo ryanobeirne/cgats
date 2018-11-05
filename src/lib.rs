@@ -3,6 +3,12 @@ use std::path::Path;
 use std::fmt;
 use std::collections::BTreeMap;
 
+pub mod rawvec;
+use rawvec::*;
+
+pub mod compare;
+pub use compare::*;
+
 pub mod error;
 pub use error::*;
 
@@ -11,9 +17,6 @@ pub use format::*;
 
 #[cfg(test)]
 mod tests;
-
-pub mod rawvec;
-use rawvec::*;
 
 // The meat and potatoes of this crate
 #[derive(Debug, Clone)]
@@ -39,8 +42,11 @@ impl CgatsObject {
         cgo
     }
 
-    pub fn len(&self) -> CgatsResult<usize> {
-        Ok(self.data()?.len())
+    pub fn len(&self) -> usize {
+        match self.data() {
+            Ok(data) => data.len(),
+            Err(_) => 0
+        }
     }
 
     // New CgatsObject from a file
@@ -160,38 +166,10 @@ impl fmt::Display for CgatsObject {
             None => "None".to_string()
         };
         
-        let format = format!("{}({}){:?}", cgt, &self.len()?, &self.data_format()?);
+        let format = format!("{}({}){:?}", cgt, &self.len(), &self.data_format()?);
 
         write!(f, "{}", format)
     }
-}
-
-// Extract metadata from CGATS file: anything that is not between bookends:
-// e.g. BEGIN_DATA_FORMAT...END_DATA_FORMAT // BEGIN_DATA...END_DATA
-fn extract_meta_data(raw_vec: &RawVec) -> CgatsResult<RawVec> {
-    let mut meta_vec = RawVec::new();
-
-    let bookends = &[
-        "BEGIN_DATA_FORMAT", "END_DATA_FORMAT",
-        "BEGIN_DATA", "END_DATA"
-    ];
-
-    let mut index = 0;
-    let mut tag_switch = true;
-    while index < raw_vec.len() {
-        let item = &raw_vec[index];
-        if bookends.contains(&item[0].as_str()) {
-            if tag_switch { tag_switch = false } else { tag_switch = true };
-            index += 1;
-            continue;
-        }
-        if tag_switch {
-            meta_vec.push(item.clone());
-        }
-        index += 1;
-    }
-
-    Ok(meta_vec)
 }
 
 // BTreeMap of CGATS Data
@@ -202,8 +180,7 @@ pub struct CgatsMap(pub DataMap);
 
 impl CgatsMap {
     pub fn new() -> Self {
-        let data_map: DataMap = BTreeMap::new();
-        CgatsMap(data_map)
+        CgatsMap(BTreeMap::new())
     }
 
     fn from_raw_vec(raw_vec: &RawVec) -> CgatsResult<Self> {

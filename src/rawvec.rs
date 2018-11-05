@@ -60,6 +60,34 @@ pub fn read_file_to_raw_vec<T: AsRef<Path>>(raw_vec: &mut RawVec, file: T) -> Cg
     }
 }
 
+// Extract metadata from CGATS file: anything that is not between bookends:
+// e.g. BEGIN_DATA_FORMAT...END_DATA_FORMAT // BEGIN_DATA...END_DATA
+pub fn extract_meta_data(raw_vec: &RawVec) -> CgatsResult<RawVec> {
+    let mut meta_vec = RawVec::new();
+
+    let bookends = &[
+        "BEGIN_DATA_FORMAT", "END_DATA_FORMAT",
+        "BEGIN_DATA", "END_DATA"
+    ];
+
+    let mut index = 0;
+    let mut tag_switch = true;
+    while index < raw_vec.len() {
+        let item = &raw_vec[index];
+        if bookends.contains(&item[0].as_str()) {
+            if tag_switch { tag_switch = false } else { tag_switch = true };
+            index += 1;
+            continue;
+        }
+        if tag_switch {
+            meta_vec.push(item.clone());
+        }
+        index += 1;
+    }
+
+    Ok(meta_vec)
+}
+
 // Extract the DATA_FORMAT into a Vector of DataFormatTypes (DataFormat)
 pub fn extract_data_format(raw_vec: &RawVec) -> CgatsResult<DataFormat> {
 
