@@ -23,6 +23,7 @@ mod tests;
 pub struct CgatsObject {
     pub raw_vec: RawVec,
     pub cgats_type: Option<CgatsType>,
+    pub data_format: DataFormat,
     pub data_map: CgatsMap,
 }
 
@@ -31,6 +32,7 @@ impl CgatsObject {
         Self {
             raw_vec: RawVec::new(),
             cgats_type: None,
+            data_format: DataFormat::new(),
             data_map: CgatsMap::new(),
         }
     }
@@ -39,6 +41,12 @@ impl CgatsObject {
     pub fn new_with_type(cgats_type: CgatsType) -> Self {
         let mut cgo = Self::new();
         cgo.cgats_type = Some(cgats_type);
+        cgo
+    }
+
+    pub fn new_with_format(data_format: DataFormat) -> Self {
+        let mut cgo = Self::new();
+        cgo.data_format = data_format;
         cgo
     }
 
@@ -72,10 +80,10 @@ impl CgatsObject {
 
         let data_map = CgatsMap::from_raw_vec(&raw_vec)?;
 
-        Ok(Self{raw_vec, cgats_type, data_map})
+        Ok(Self{raw_vec, cgats_type, data_format, data_map})
     }
 
-    pub fn metadata(&self) -> CgatsResult<RawVec> {
+    pub fn metadata(&self) -> Option<RawVec> {
         extract_meta_data(&self.raw_vec)
     }
 
@@ -83,19 +91,21 @@ impl CgatsObject {
         extract_data(&self.raw_vec)
     }
 
-    pub fn data_format(&self) -> CgatsResult<DataFormat> {
-        extract_data_format(&self.raw_vec)
-    }
+    // pub fn data_format(&self) -> CgatsResult<DataFormat> {
+    //     extract_data_format(&self.raw_vec)
+    // }
 
     pub fn print_data_format(&self) -> CgatsResult<String> {
         let mut s = String::new();
 
         // Print DATA_FORMAT
         s.push_str("BEGIN_DATA_FORMAT\n");
-        let data_format = &self.data_format()?;
-        for (index, format) in data_format.iter().enumerate() {
+        if self.data_format.len() == 0 {
+            return Err(CgatsError::NoDataFormat);
+        }
+        for (index, format) in self.data_format.iter().enumerate() {
             s.push_str(&format.display());
-            if index == data_format.len() - 1 {
+            if index == self.data_format.len() - 1 {
                 s.push('\n');
             } else {
                 s.push('\t');
@@ -112,6 +122,9 @@ impl CgatsObject {
         // Print DATA
         s.push_str("BEGIN_DATA\n");
         let data = &self.data()?;
+        if data.len() == 0 {
+            return Err(CgatsError::NoData);
+        }
         for line in data {
             for (index, item) in line.iter().enumerate() {
                 s.push_str(item);
@@ -127,11 +140,14 @@ impl CgatsObject {
         Ok(s)
     }
 
-    pub fn print_meta_data(&self) -> CgatsResult<String> {
+    pub fn print_meta_data(&self) -> Option<String> {
         let mut s = String::new();
 
         // Print metadata
         let metadata = &self.metadata()?;
+        if metadata.len() == 0 {
+            return Some(s);
+        }
         for line in metadata {
             for (index, item) in line.iter().enumerate() {
                 s.push_str(item);
@@ -143,13 +159,18 @@ impl CgatsObject {
             }
         }
 
-        Ok(s)
+        Some(s)
     }
 
     pub fn print(&self) -> CgatsResult<String> {
         let mut s = String::new();
 
-        s.push_str(&self.print_meta_data()?);
+        let metadata = &self.print_meta_data();
+        match metadata {
+            Some(meta) => s.push_str(meta),
+            None => ()
+        }
+
         s.push_str(&self.print_data_format()?);
         s.push_str(&self.print_data()?);
 
@@ -166,7 +187,7 @@ impl fmt::Display for CgatsObject {
             None => "None".to_string()
         };
         
-        let format = format!("{}({}){:?}", cgt, &self.len(), &self.data_format()?);
+        let format = format!("{}({}){:?}", cgt, &self.len(), &self.data_format);
 
         write!(f, "{}", format)
     }
@@ -176,29 +197,31 @@ impl fmt::Display for CgatsObject {
 pub type DataMap = BTreeMap<(usize, DataFormatType), String>;
 
 #[derive(Debug, Eq, PartialEq, Clone)]
-pub struct CgatsMap(pub DataMap);
+pub struct CgatsMap {
+    pub inner: DataMap
+}
 
 impl CgatsMap {
     pub fn new() -> Self {
-        CgatsMap(BTreeMap::new())
+        Self { inner: BTreeMap::new() }
     }
 
-    fn from_raw_vec(raw_vec: &RawVec) -> CgatsResult<Self> {
-        let mut data_map: DataMap = BTreeMap::new();
+    pub fn from_raw_vec(raw_vec: &RawVec) -> CgatsResult<Self> {
+        let mut inner: DataMap = BTreeMap::new();
         
         let data_format = extract_data_format(&raw_vec)?;
         let data = extract_data(&raw_vec)?;
 
         for (line_index, line) in data.iter().enumerate() {
             for (index, format) in data_format.iter().enumerate() {
-                data_map.insert(
+                inner.insert(
                     (line_index, *format),
                     line[index].clone()
                 );
             }
         }
 
-        Ok(CgatsMap(data_map))
+        Ok(Self {inner})
     }
 
     pub fn from_file<T: AsRef<Path>>(file: T) -> CgatsResult<Self> {
@@ -206,6 +229,37 @@ impl CgatsMap {
         read_file_to_raw_vec(&mut raw_vec, file)?;
 
         Self::from_raw_vec(&raw_vec)
+    }
+
+    pub fn map_average(map_vec: Vec<Self>) -> CgatsResult<Self> {
+        let mut cgm = CgatsMap::new();
+
+        let map_count = map_vec.len();
+
+        for map in map_vec {
+            for ((index, format), value) in map.inner {
+                let key = (index, format);
+                if format.is_float() {
+                    let float = value.parse::<f64>();
+                    match float {
+                        Ok(f) => {
+                            let contents = match cgm.inner.get(&key) {
+                                Some(v) => v.parse::<f64>().unwrap_or(0_f64),
+                                None => 0_f64
+                            };
+                            cgm.inner.insert( key, ( contents + (f / map_count as f64)).to_string() );
+                        },
+                        Err(_) => return Err(CgatsError::FormatDataMismatch)
+                    }
+                } else {
+                    if !cgm.inner.contains_key(&key) {
+                        cgm.inner.insert(key, value);
+                    }
+                }
+            }
+        }
+
+        Ok(cgm)
     }
 }
 

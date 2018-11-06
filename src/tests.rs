@@ -116,14 +116,14 @@ fn cgats_map() {
 
         match cgo {
             Ok(cgo) => {
-                for ((format, id), value) in cgo.data_map.0 {
-                    println!("{}, {}:\t{}", format, id, value);
+                for ((id, format), value) in cgo.data_map.inner {
+                    println!("{}, {}:\t{}", id, format, value);
                 }
             },
             Err(e) => s.push_str( &format!("'{}': {}", file, e) )
         }
 
-        eprintln!("{}", s);
+        if !s.is_empty() { eprintln!("{}", s); }
     }
 }
 
@@ -136,26 +136,37 @@ fn cgo_print() -> CgatsResult<()> {
 }
 
 #[test]
-fn meta() -> CgatsResult<()> {
-    let cgo = CgatsObject::from_file("test_files/curve0.txt")?;
-    let meta = extract_meta_data(&cgo.raw_vec)?;
-    println!("{:?}", meta);
+fn meta() {
+    let cgo = CgatsObject::from_file("test_files/curve0.txt").unwrap();
+    let meta = extract_meta_data(&cgo.raw_vec).unwrap();
 
-    Ok(())
+    println!("{:?}", meta);
 }
 
 #[test]
 fn compare_average() -> CgatsResult<()> {
     let cgo0 = CgatsObject::from_file("test_files/cgats1.tsv")?;
-    let cgo1 = CgatsObject::from_file("test_files/cgats1.tsv")?;
+    let cgo1 = CgatsObject::from_file("test_files/cgats2.tsv")?;
     let mut cgo_vec = CgatsVec::new();
+
+    println!("{}\n{}\n", &cgo0, &cgo1);
     
     cgo_vec.push(cgo0);
     cgo_vec.push(cgo1);
 
-    let cgo_avg = compare::average(&cgo_vec)?;
+    let cgo_avg = compare::cgats_average(&cgo_vec)?.data_map;
 
-    println!("{}", cgo_avg.print()?);
+    println!("{:?}", &cgo_avg);
+
+    Ok(())
+}
+
+#[test]
+fn btreemap() -> CgatsResult<()> {
+    let cgo = CgatsObject::from_file("test_files/cgats1.tsv")?;
+    let cgm = cgo.data_map;
+    let val = cgm.inner.get(&(0,DataFormatType::SAMPLE_NAME)).unwrap();
+    println!("{}", val);
 
     Ok(())
 }

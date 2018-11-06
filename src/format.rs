@@ -48,7 +48,7 @@ impl DataFormatType {
         format!("{}", &self)
     }
 
-    pub fn is_f64(&self) -> bool {
+    pub fn is_float(&self) -> bool {
         use DataFormatType::*;
         match &self {
             SAMPLE_NAME => false,

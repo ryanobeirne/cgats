@@ -62,14 +62,23 @@ pub fn read_file_to_raw_vec<T: AsRef<Path>>(raw_vec: &mut RawVec, file: T) -> Cg
 
 // Extract metadata from CGATS file: anything that is not between bookends:
 // e.g. BEGIN_DATA_FORMAT...END_DATA_FORMAT // BEGIN_DATA...END_DATA
-pub fn extract_meta_data(raw_vec: &RawVec) -> CgatsResult<RawVec> {
+pub fn extract_meta_data(raw_vec: &RawVec) -> Option<RawVec> {
+    // No sense in doing anything if there's nothing here
+    if raw_vec.len() < 1 {
+        return None;
+    }
+
+    // Push metadata here
     let mut meta_vec = RawVec::new();
 
+    // Don't push anything between these tags (or the the tags themselves)
     let bookends = &[
         "BEGIN_DATA_FORMAT", "END_DATA_FORMAT",
         "BEGIN_DATA", "END_DATA"
     ];
 
+    // Loop through the raw_vec and toggle pushing to meta_vec
+    // based on the presence of bookend tags
     let mut index = 0;
     let mut tag_switch = true;
     while index < raw_vec.len() {
@@ -85,11 +94,16 @@ pub fn extract_meta_data(raw_vec: &RawVec) -> CgatsResult<RawVec> {
         index += 1;
     }
 
-    Ok(meta_vec)
+    Some(meta_vec)
 }
 
 // Extract the DATA_FORMAT into a Vector of DataFormatTypes (DataFormat)
 pub fn extract_data_format(raw_vec: &RawVec) -> CgatsResult<DataFormat> {
+    // We need at least 2 lines to extract DATA_FORMAT
+    // OK, really 3 lines, but we only need to see 2
+    if raw_vec.len() < 2 {
+        return Err(CgatsError::NoDataFormat);
+    }
 
     // Use implicit format type for ColorBurst LinFiles
     let cgats_type = get_cgats_type(&raw_vec);
@@ -125,6 +139,12 @@ pub fn extract_data_format(raw_vec: &RawVec) -> CgatsResult<DataFormat> {
 
 // Extract the data betweeen BEGIN_DATA and END_DATA into a RawVec
 pub fn extract_data(raw_vec: &RawVec) -> CgatsResult<RawVec> {
+    // We need at least 3 lines to define DATA
+    if raw_vec.len() < 3 {
+        return Err(CgatsError::NoData);
+    }
+
+    // Push DATA here
     let mut data_vec = RawVec::new();
 
     // Loop through the first item of each line and look for the tags.
