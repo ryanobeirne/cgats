@@ -6,14 +6,16 @@ use std::collections::BTreeMap;
 pub mod rawvec;
 use rawvec::*;
 
+pub mod cgatsmap;
+use cgatsmap::*;
+
 pub mod compare;
-pub use compare::*;
 
 pub mod error;
-pub use error::*;
+use error::*;
 
 pub mod format;
-pub use format::*;
+use format::*;
 
 #[cfg(test)]
 mod tests;
@@ -165,10 +167,8 @@ impl CgatsObject {
     pub fn print(&self) -> CgatsResult<String> {
         let mut s = String::new();
 
-        let metadata = &self.print_meta_data();
-        match metadata {
-            Some(meta) => s.push_str(meta),
-            None => ()
+        if let Some(meta) = &self.print_meta_data() {
+            s.push_str(meta);
         }
 
         s.push_str(&self.print_data_format()?);
@@ -193,73 +193,31 @@ impl fmt::Display for CgatsObject {
     }
 }
 
-// BTreeMap of CGATS Data
-pub type DataMap = BTreeMap<(usize, DataFormatType), String>;
-
-#[derive(Debug, Eq, PartialEq, Clone)]
-pub struct CgatsMap {
-    pub inner: DataMap
+#[derive(Debug, PartialEq, PartialOrd, Clone)]
+pub struct CgatsValue {
+    pub value: String,
+    pub float: f64,
+    pub is_float: bool,
 }
 
-impl CgatsMap {
-    pub fn new() -> Self {
-        Self { inner: BTreeMap::new() }
+impl CgatsValue {
+    fn from_string(value: &str) -> Self {
+        let (float, is_float) = match value.parse::<f64>() {
+            Ok(f) => (f, true),
+            Err(_) => (0_f64, false)
+        };
+        Self {value: value.to_string(), float, is_float}
     }
 
-    pub fn from_raw_vec(raw_vec: &RawVec) -> CgatsResult<Self> {
-        let mut inner: DataMap = BTreeMap::new();
-        
-        let data_format = extract_data_format(&raw_vec)?;
-        let data = extract_data(&raw_vec)?;
-
-        for (line_index, line) in data.iter().enumerate() {
-            for (index, format) in data_format.iter().enumerate() {
-                inner.insert(
-                    (line_index, *format),
-                    line[index].clone()
-                );
-            }
-        }
-
-        Ok(Self {inner})
+    fn from_float(float: f64) -> Self {
+        let value = float.to_string();
+        Self { value, float, is_float: true}
     }
+}
 
-    pub fn from_file<T: AsRef<Path>>(file: T) -> CgatsResult<Self> {
-        let mut raw_vec = RawVec::new();
-        read_file_to_raw_vec(&mut raw_vec, file)?;
-
-        Self::from_raw_vec(&raw_vec)
-    }
-
-    pub fn map_average(map_vec: Vec<Self>) -> CgatsResult<Self> {
-        let mut cgm = CgatsMap::new();
-
-        let map_count = map_vec.len();
-
-        for map in map_vec {
-            for ((index, format), value) in map.inner {
-                let key = (index, format);
-                if format.is_float() {
-                    let float = value.parse::<f64>();
-                    match float {
-                        Ok(f) => {
-                            let contents = match cgm.inner.get(&key) {
-                                Some(v) => v.parse::<f64>().unwrap_or(0_f64),
-                                None => 0_f64
-                            };
-                            cgm.inner.insert( key, ( contents + (f / map_count as f64)).to_string() );
-                        },
-                        Err(_) => return Err(CgatsError::FormatDataMismatch)
-                    }
-                } else {
-                    if !cgm.inner.contains_key(&key) {
-                        cgm.inner.insert(key, value);
-                    }
-                }
-            }
-        }
-
-        Ok(cgm)
+impl fmt::Display for CgatsValue {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", &self.value)
     }
 }
 

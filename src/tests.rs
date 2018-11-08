@@ -147,16 +147,14 @@ fn meta() {
 fn compare_average() -> CgatsResult<()> {
     let cgo0 = CgatsObject::from_file("test_files/cgats1.tsv")?;
     let cgo1 = CgatsObject::from_file("test_files/cgats2.tsv")?;
-    let mut cgo_vec = CgatsVec::new();
+    let mut cgo_vec = compare::CgatsVec::new();
 
-    println!("{}\n{}\n", &cgo0, &cgo1);
-    
     cgo_vec.push(cgo0);
     cgo_vec.push(cgo1);
 
-    let cgo_avg = compare::cgats_average(&cgo_vec)?.data_map;
+    let cgo_avg = cgo_vec.average()?;
 
-    println!("{:?}", &cgo_avg);
+    println!("{}", &cgo_avg.print()?);
 
     Ok(())
 }

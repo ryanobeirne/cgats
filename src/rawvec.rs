@@ -2,6 +2,7 @@ use super::*;
 use std::io::{BufReader, BufRead};
 
 pub type RawVec = Vec<Vec<String>>;
+pub type DataVec =  RawVec;
 
 // Get the CgatsType from the first line in the RawVec (first line in file)
 pub fn get_cgats_type(raw_vec: &RawVec) -> Option<CgatsType> {

@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["CgatsMap",""],["MapVec",""]],"type":[["DataMap",""],["MapKey",""]]});
