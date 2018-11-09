@@ -116,7 +116,6 @@
 <span id="116">116</span>
 <span id="117">117</span>
 <span id="118">118</span>
-<span id="119">119</span>
 </pre><pre class="rust ">
 <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
 
@@ -210,11 +209,10 @@
 
         <span class="comment">// Collect metadata from first object</span>
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">metadata</span>) <span class="op">=</span> <span class="ident">cgo_prime</span>.<span class="ident">metadata</span>() {
-            <span class="kw">for</span> <span class="ident">line</span> <span class="kw">in</span> <span class="ident">metadata</span> {
+            <span class="kw">for</span> <span class="ident">line</span> <span class="kw">in</span> <span class="ident">metadata</span>.<span class="ident">inner</span> {
                 <span class="ident">raw_vec</span>.<span class="ident">push</span>(<span class="ident">line</span>);
             }
         }
-
 
         <span class="comment">// Push on the DATA_FORMAT</span>
         <span class="ident">raw_vec</span>.<span class="ident">push</span>(<span class="macro">vec</span><span class="macro">!</span>(<span class="string">&quot;BEGIN_DATA_FORMAT&quot;</span>.<span class="ident">to_string</span>()));

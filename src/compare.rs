@@ -90,11 +90,10 @@ impl CgatsVec {
 
         // Collect metadata from first object
         if let Some(metadata) = cgo_prime.metadata() {
-            for line in metadata {
+            for line in metadata.inner {
                 raw_vec.push(line);
             }
         }
-
 
         // Push on the DATA_FORMAT
         raw_vec.push(vec!("BEGIN_DATA_FORMAT".to_string()));

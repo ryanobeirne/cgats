@@ -19,10 +19,10 @@ impl CgatsMap {
     pub fn from_raw_vec(raw_vec: &RawVec) -> CgatsResult<Self> {
         let mut inner: DataMap = BTreeMap::new();
         
-        let data_format = extract_data_format(&raw_vec)?;
-        let data = extract_data(&raw_vec)?;
+        let data_format = raw_vec.extract_data_format()?;
+        let data = raw_vec.extract_data()?;
 
-        for (line_index, line) in data.iter().enumerate() {
+        for (line_index, line) in data.inner.iter().enumerate() {
             for (index, format) in data_format.iter().enumerate() {
                 inner.insert(
                     (line_index, *format),
@@ -72,7 +72,7 @@ impl CgatsMap {
 
     pub fn from_file<T: AsRef<Path>>(file: T) -> CgatsResult<Self> {
         let mut raw_vec = RawVec::new();
-        read_file_to_raw_vec(&mut raw_vec, file)?;
+        raw_vec.read_file_to_raw_vec(file)?;
 
         Self::from_raw_vec(&raw_vec)
     }

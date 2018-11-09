@@ -10,6 +10,7 @@ use std::path::Path;
 // use std::collections::HashMap;
 // use std::io::stdin;
 
+#[derive(Debug)]
 enum Command {
     Average,
     Convert,
@@ -25,6 +26,7 @@ impl Command {
     }
 }
 
+#[derive(Debug)]
 struct Config {
     command: Option<Command>,
     files: Vec<String>,
@@ -44,7 +46,7 @@ fn main() -> cgats::error::CgatsResult<()> {
         (version: crate_version!())
         (author: crate_authors!())
         (about: crate_description!())
-        (@arg FILE: +multiple +required "CGATS File to process.")
+        (@arg FILE: +multiple "CGATS File to process.")
         (@subcommand average =>
             (about: "Average values from multiple CGATS files.")
             (@arg FILE: +multiple +required "CGATS File to average.")

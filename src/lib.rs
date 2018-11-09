@@ -63,18 +63,18 @@ impl CgatsObject {
     pub fn from_file<T: AsRef<Path>>(file: T) -> CgatsResult<Self> {
         // Read file into a RawVec
         let mut raw_vec = RawVec::new();
-        read_file_to_raw_vec(&mut raw_vec, file)?;
+        raw_vec.read_file_to_raw_vec(file)?;
 
         CgatsObject::from_raw_vec(raw_vec)
     }
 
     fn from_raw_vec(raw_vec: RawVec) -> CgatsResult<Self> {
         // Determine the CgatsType from the first line of the file
-        let cgats_type = get_cgats_type(&raw_vec);
-        let data_format = extract_data_format(&raw_vec)?;
+        let cgats_type = raw_vec.get_cgats_type();
+        let data_format = raw_vec.extract_data_format()?;
 
         // Validate that the data format and the data have the same item count
-        for line in extract_data(&raw_vec)? {
+        for line in raw_vec.extract_data()?.inner {
             if line.len() != data_format.len() {
                 return Err(CgatsError::FormatDataMismatch);
             } 
@@ -86,11 +86,11 @@ impl CgatsObject {
     }
 
     pub fn metadata(&self) -> Option<RawVec> {
-        extract_meta_data(&self.raw_vec)
+        self.raw_vec.extract_meta_data()
     }
 
     pub fn data(&self) -> CgatsResult<RawVec> {
-        extract_data(&self.raw_vec)
+        self.raw_vec.extract_data()
     }
 
     // pub fn data_format(&self) -> CgatsResult<DataFormat> {
@@ -127,7 +127,7 @@ impl CgatsObject {
         if data.len() == 0 {
             return Err(CgatsError::NoData);
         }
-        for line in data {
+        for line in &data.inner {
             for (index, item) in line.iter().enumerate() {
                 s.push_str(item);
                 if index == line.len() - 1 {
@@ -150,7 +150,7 @@ impl CgatsObject {
         if metadata.len() == 0 {
             return Some(s);
         }
-        for line in metadata {
+        for line in &metadata.inner {
             for (index, item) in line.iter().enumerate() {
                 s.push_str(item);
                 if index == line.len() - 1 {

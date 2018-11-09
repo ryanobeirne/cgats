@@ -18,8 +18,8 @@ fn test_files<'a>() -> Vec<&'a str> {
 // Test the conversion of DataFormatTypes
 #[test]
 fn data_format() -> CgatsResult<()> {
-    let mut cgv: RawVec = Vec::new();
-    read_file_to_raw_vec(&mut cgv, "test_files/cgats0.txt")?;
+    let mut cgv = RawVec::new();
+    cgv.read_file_to_raw_vec("test_files/cgats0.txt")?;
 
     println!("{:?}", cgv);
 
@@ -34,7 +34,7 @@ fn data_format() -> CgatsResult<()> {
 fn test_extract_data_format() -> CgatsResult<()> {
     use format::DataFormatType::*;
     let cgo = CgatsObject::from_file("test_files/cgats1.tsv")?;
-    let format = extract_data_format(&cgo.raw_vec)?;
+    let format = cgo.raw_vec.extract_data_format()?;
     println!("{:?}", format);
 
     let format_vec = vec![SAMPLE_ID, SAMPLE_NAME, CMYK_C, CMYK_M, CMYK_Y, CMYK_K];
@@ -48,7 +48,7 @@ fn test_extract_data_format() -> CgatsResult<()> {
 #[test]
 fn test_extract_data() -> CgatsResult<()>{
     let cgo = CgatsObject::from_file("test_files/cgats1.tsv")?;
-    let data = extract_data(&cgo.raw_vec)?;
+    let data = cgo.raw_vec.extract_data()?;
     println!("{:?}", data);
 
     let data_vec = vec![
@@ -65,7 +65,7 @@ fn test_extract_data() -> CgatsResult<()>{
        vec!["11", "1cGray",  "0",   "0",   "0",   "50" ],
     ];
 
-    assert_eq!(data_vec, data);
+    assert_eq!(data_vec, data.inner);
 
     Ok(())
 }
@@ -74,11 +74,11 @@ fn test_extract_data() -> CgatsResult<()>{
 #[test]
 fn test_extract_data_and_format() -> CgatsResult<()>{
     let cgo = CgatsObject::from_file("test_files/cgats0.txt")?;
-    let format = extract_data_format(&cgo.raw_vec)?;
-    let data = extract_data(&cgo.raw_vec)?;
+    let format = cgo.raw_vec.extract_data_format()?;
+    let data = cgo.raw_vec.extract_data()?;
     println!("FORMAT [{}]:\n{:?}\n\nDATA [{}]:\n{:?}", format.len(), format, data.len(), data);
 
-    for line in data {
+    for line in data.inner {
         assert_eq!(line.len(), format.len())
     }
 
@@ -136,11 +136,14 @@ fn cgo_print() -> CgatsResult<()> {
 }
 
 #[test]
-fn meta() {
-    let cgo = CgatsObject::from_file("test_files/curve0.txt").unwrap();
-    let meta = extract_meta_data(&cgo.raw_vec).unwrap();
+fn meta() -> CgatsResult<()> {
+    let cgo = CgatsObject::from_file("test_files/curve0.txt")?;
+    let meta = cgo.raw_vec.extract_meta_data();
 
-    println!("{:?}", meta);
+    match meta {
+        Some(m) => Ok(println!("{:?}", m)),
+        None => Err(CgatsError::NoData)
+    }
 }
 
 #[test]
