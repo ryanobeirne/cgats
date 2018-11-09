@@ -1,4 +1,5 @@
 use super::*;
+use std::iter::FromIterator;
 
 pub struct CgatsVec {
     pub inner: Vec<CgatsObject>,
@@ -125,5 +126,60 @@ impl CgatsVec {
         cgo.raw_vec = self.raw_from_prime(&cgo.data_map)?;
 
         Ok(cgo)
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct MapVec {
+    inner:  Vec<CgatsMap>,
+}
+
+impl MapVec {
+    pub fn new() -> Self {
+        Self { inner: Vec::new() }
+    }
+
+    pub fn len(&self) -> usize {
+        self.inner.len()
+    }
+
+    pub fn push(&mut self, value: CgatsMap) {
+        self.inner.push(value)
+    }
+
+    pub fn average(&self) -> CgatsResult<CgatsMap> {
+        let mut cgm = CgatsMap::new();
+
+        for map in &self.inner {
+            for ((index, format), value) in &map.inner {
+                let key = (*index, *format);
+                if format.is_float() {
+                    let current = match cgm.inner.get(&key) {
+                        Some(c) => c.float,
+                        None => 0_f64
+                    };
+                    let float = current + &value.float / *&self.len() as f64;
+                    cgm.inner.insert( key, CgatsValue::from_float(float) );
+                } else {
+                    if !cgm.inner.contains_key(&key) {
+                        cgm.inner.insert(key, value.clone());
+                    }
+                }
+            }
+        }
+
+        Ok(cgm)
+    }
+}
+
+impl FromIterator<CgatsMap> for MapVec {
+    fn from_iter<I: IntoIterator<Item=CgatsMap>>(iter: I) -> Self {
+        let mut c = Self::new();
+
+        for i in iter {
+            c.push(i);
+        }
+
+        c
     }
 }

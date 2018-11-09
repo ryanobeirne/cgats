@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["CgatsVec",""]]});
+initSidebarItems({"struct":[["CgatsVec",""],["MapVec",""]]});
