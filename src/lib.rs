@@ -215,9 +215,15 @@ impl CgatsValue {
     }
 
     fn from_float(float: f64) -> Self {
-        let value = float.to_string();
+        let value = Self::round_to(float, 4).to_string();
         Self { value, float, is_float: true}
     }
+
+    fn round_to(float: f64, places: i32) -> f64 {
+        let mult = 10_f64.powi(places);
+        (float * mult).round() / mult
+    }
+
 }
 
 impl fmt::Display for CgatsValue {

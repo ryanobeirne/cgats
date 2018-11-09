@@ -85,6 +85,7 @@ impl CgatsVec {
 
         // Push on the DATA
         raw_vec.push(vec!["BEGIN_DATA".to_string()]);
+        // This is very important
         let data_vec = cgats_map.to_data_vec()?;
         for v in data_vec {
             raw_vec.push(v);
