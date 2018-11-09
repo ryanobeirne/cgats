@@ -124,7 +124,11 @@ impl MapVec {
             for ((index, format), value) in &map.inner {
                 let key = (*index, *format);
                 if format.is_float() {
-                    let float = &value.float / *&self.len() as f64;
+                    let current = match cgm.inner.get(&key) {
+                        Some(c) => c.float,
+                        None => 0_f64
+                    };
+                    let float = current + &value.float / *&self.len() as f64;
                     cgm.inner.insert( key, CgatsValue::from_float(float) );
                 } else {
                     if !cgm.inner.contains_key(&key) {
