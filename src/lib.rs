@@ -63,7 +63,7 @@ impl CgatsObject {
     pub fn from_file<T: AsRef<Path>>(file: T) -> CgatsResult<Self> {
         // Read file into a RawVec
         let mut raw_vec = RawVec::new();
-        raw_vec.read_file_to_raw_vec(file)?;
+        raw_vec.read_file(file)?;
 
         CgatsObject::from_raw_vec(raw_vec)
     }
@@ -92,10 +92,6 @@ impl CgatsObject {
     pub fn data(&self) -> CgatsResult<RawVec> {
         self.raw_vec.extract_data()
     }
-
-    // pub fn data_format(&self) -> CgatsResult<DataFormat> {
-    //     extract_data_format(&self.raw_vec)
-    // }
 
     pub fn print_data_format(&self) -> CgatsResult<String> {
         let mut s = String::new();

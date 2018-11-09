@@ -199,6 +199,11 @@
 <span id="199">199</span>
 <span id="200">200</span>
 <span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
 </pre><pre class="rust ">
 <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">io</span>::{<span class="ident">BufReader</span>, <span class="ident">BufRead</span>};
@@ -229,176 +234,181 @@
         <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">len</span>()
     }
 
-<span class="comment">// Get the CgatsType from the first line in the RawVec (first line in file)</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_cgats_type</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">CgatsType</span><span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">String</span>::<span class="ident">new</span>();
+    <span class="comment">// Get the CgatsType from the first line in the RawVec (first line in file)</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_cgats_type</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">CgatsType</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">String</span>::<span class="ident">new</span>();
 
-    <span class="comment">// Push the first line into a single string</span>
-    <span class="kw">for</span> <span class="ident">item</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">inner</span>[<span class="number">0</span>].<span class="ident">iter</span>() {
-        <span class="ident">s</span>.<span class="ident">push_str</span>(<span class="kw-2">&amp;</span><span class="ident">item</span>.<span class="ident">to_lowercase</span>());
-    }
-
-    <span class="comment">// Search the string for a CgatsType</span>
-    <span class="ident">CgatsType</span>::<span class="ident">from</span>(<span class="kw-2">&amp;</span><span class="ident">s</span>)
-}
-
-<span class="comment">// Read a file into a Vector of a Vector of lines (RawVec)</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read_file_to_raw_vec</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">file</span>: <span class="ident">T</span>) <span class="op">-&gt;</span> <span class="ident">CgatsResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="ident">f</span> <span class="op">=</span> <span class="ident">File</span>::<span class="ident">open</span>(<span class="ident">file</span>)<span class="question-mark">?</span>;
-
-    <span class="comment">// Loop through lines and trim trailing whitespace</span>
-    <span class="kw">for</span> <span class="ident">line</span> <span class="kw">in</span> <span class="ident">BufReader</span>::<span class="ident">new</span>(<span class="ident">f</span>).<span class="ident">lines</span>() {
-        <span class="kw">let</span> <span class="ident">text</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">line</span> {
-            <span class="prelude-val">Ok</span>(<span class="ident">txt</span>) <span class="op">=&gt;</span> <span class="ident">txt</span>.<span class="ident">trim</span>().<span class="ident">to_string</span>(),
-            <span class="prelude-val">Err</span>(<span class="kw">_</span>)  <span class="op">=&gt;</span> <span class="string">&quot;&quot;</span>.<span class="ident">to_string</span>()
-        };
-
-        <span class="comment">// If the file uses carriage returns, split those up as well</span>
-        <span class="kw">let</span> <span class="ident">cr_split</span> <span class="op">=</span> <span class="ident">text</span>.<span class="ident">split</span>(<span class="string">&quot;\r&quot;</span>);
-
-        <span class="comment">// Push each line into a Vector of &amp;str&#39;s unless it&#39;s a blank line</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">v_cr</span>:<span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec</span>::<span class="ident">new</span>();
-        <span class="kw">for</span> <span class="ident">cr_line</span> <span class="kw">in</span> <span class="ident">cr_split</span> {
-            <span class="kw">if</span> <span class="op">!</span> <span class="ident">cr_line</span>.<span class="ident">is_empty</span>() {
-                <span class="ident">v_cr</span>.<span class="ident">push</span>(<span class="ident">cr_line</span>.<span class="ident">trim</span>());
-            }
+        <span class="comment">// Push the first line into a single string</span>
+        <span class="kw">for</span> <span class="ident">item</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">inner</span>[<span class="number">0</span>].<span class="ident">iter</span>() {
+            <span class="ident">s</span>.<span class="ident">push_str</span>(<span class="kw-2">&amp;</span><span class="ident">item</span>.<span class="ident">to_lowercase</span>());
         }
 
-        <span class="comment">// Push each item in a line into a Vector</span>
-        <span class="kw">for</span> <span class="ident">split_line</span> <span class="kw">in</span> <span class="ident">v_cr</span> {
-            <span class="kw">let</span> <span class="ident">split</span> <span class="op">=</span> <span class="ident">split_line</span>.<span class="ident">split</span>(<span class="string">&quot;\t&quot;</span>);
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">v</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec</span>::<span class="ident">new</span>();
+        <span class="comment">// Search the string for a CgatsType</span>
+        <span class="ident">CgatsType</span>::<span class="ident">from</span>(<span class="kw-2">&amp;</span><span class="ident">s</span>)
+    }
 
-            <span class="kw">for</span> <span class="ident">item</span> <span class="kw">in</span> <span class="ident">split</span> {
-                <span class="ident">v</span>.<span class="ident">push</span>(<span class="ident">item</span>.<span class="ident">trim</span>().<span class="ident">to_string</span>());
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_file</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;&gt;</span>(<span class="ident">file</span>: <span class="ident">T</span>) <span class="op">-&gt;</span> <span class="ident">CgatsResult</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">raw_vec</span> <span class="op">=</span> <span class="self">Self</span>::<span class="ident">new</span>();
+        <span class="ident">raw_vec</span>.<span class="ident">read_file</span>(<span class="ident">file</span>)<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(<span class="ident">raw_vec</span>)
+    }
+
+    <span class="comment">// Read a file into a Vector of a Vector of lines (RawVec)</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read_file</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">file</span>: <span class="ident">T</span>) <span class="op">-&gt;</span> <span class="ident">CgatsResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">f</span> <span class="op">=</span> <span class="ident">File</span>::<span class="ident">open</span>(<span class="ident">file</span>)<span class="question-mark">?</span>;
+
+        <span class="comment">// Loop through lines and trim trailing whitespace</span>
+        <span class="kw">for</span> <span class="ident">line</span> <span class="kw">in</span> <span class="ident">BufReader</span>::<span class="ident">new</span>(<span class="ident">f</span>).<span class="ident">lines</span>() {
+            <span class="kw">let</span> <span class="ident">text</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">line</span> {
+                <span class="prelude-val">Ok</span>(<span class="ident">txt</span>) <span class="op">=&gt;</span> <span class="ident">txt</span>.<span class="ident">trim</span>().<span class="ident">to_string</span>(),
+                <span class="prelude-val">Err</span>(<span class="kw">_</span>)  <span class="op">=&gt;</span> <span class="string">&quot;&quot;</span>.<span class="ident">to_string</span>()
+            };
+
+            <span class="comment">// If the file uses carriage returns, split those up as well</span>
+            <span class="kw">let</span> <span class="ident">cr_split</span> <span class="op">=</span> <span class="ident">text</span>.<span class="ident">split</span>(<span class="string">&quot;\r&quot;</span>);
+
+            <span class="comment">// Push each line into a Vector of &amp;str&#39;s unless it&#39;s a blank line</span>
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">v_cr</span>:<span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec</span>::<span class="ident">new</span>();
+            <span class="kw">for</span> <span class="ident">cr_line</span> <span class="kw">in</span> <span class="ident">cr_split</span> {
+                <span class="kw">if</span> <span class="op">!</span> <span class="ident">cr_line</span>.<span class="ident">is_empty</span>() {
+                    <span class="ident">v_cr</span>.<span class="ident">push</span>(<span class="ident">cr_line</span>.<span class="ident">trim</span>());
+                }
             }
 
-            <span class="comment">// Push the Vectors into the RawVec</span>
-            <span class="self">self</span>.<span class="ident">push</span>(<span class="ident">v</span>);
+            <span class="comment">// Push each item in a line into a Vector</span>
+            <span class="kw">for</span> <span class="ident">split_line</span> <span class="kw">in</span> <span class="ident">v_cr</span> {
+                <span class="kw">let</span> <span class="ident">split</span> <span class="op">=</span> <span class="ident">split_line</span>.<span class="ident">split</span>(<span class="string">&quot;\t&quot;</span>);
+                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">v</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec</span>::<span class="ident">new</span>();
+
+                <span class="kw">for</span> <span class="ident">item</span> <span class="kw">in</span> <span class="ident">split</span> {
+                    <span class="ident">v</span>.<span class="ident">push</span>(<span class="ident">item</span>.<span class="ident">trim</span>().<span class="ident">to_string</span>());
+                }
+
+                <span class="comment">// Push the Vectors into the RawVec</span>
+                <span class="self">self</span>.<span class="ident">push</span>(<span class="ident">v</span>);
+            }
+        } 
+
+        <span class="comment">// Make sure the file is not empty</span>
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">len</span>() <span class="op">&lt;</span> <span class="number">1</span> {
+            <span class="prelude-val">Err</span>(<span class="ident">CgatsError</span>::<span class="ident">EmptyFile</span>)
+        } <span class="kw">else</span> {
+            <span class="prelude-val">Ok</span>(())
         }
-    } 
-
-    <span class="comment">// Make sure the file is not empty</span>
-    <span class="kw">if</span> <span class="self">self</span>.<span class="ident">len</span>() <span class="op">&lt;</span> <span class="number">1</span> {
-        <span class="prelude-val">Err</span>(<span class="ident">CgatsError</span>::<span class="ident">EmptyFile</span>)
-    } <span class="kw">else</span> {
-        <span class="prelude-val">Ok</span>(())
-    }
-}
-
-<span class="comment">// Extract metadata from CGATS file: anything that is not between bookends:</span>
-<span class="comment">// e.g. BEGIN_DATA_FORMAT...END_DATA_FORMAT // BEGIN_DATA...END_DATA</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">extract_meta_data</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RawVec</span><span class="op">&gt;</span> {
-    <span class="comment">// No sense in doing anything if there&#39;s nothing here</span>
-    <span class="kw">if</span> <span class="self">self</span>.<span class="ident">len</span>() <span class="op">&lt;</span> <span class="number">1</span> {
-        <span class="kw">return</span> <span class="prelude-val">None</span>;
     }
 
-    <span class="comment">// Push metadata here</span>
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">meta_vec</span> <span class="op">=</span> <span class="ident">RawVec</span>::<span class="ident">new</span>();
+    <span class="comment">// Extract metadata from CGATS file: anything that is not between bookends:</span>
+    <span class="comment">// e.g. BEGIN_DATA_FORMAT...END_DATA_FORMAT // BEGIN_DATA...END_DATA</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">extract_meta_data</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+        <span class="comment">// No sense in doing anything if there&#39;s nothing here</span>
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">len</span>() <span class="op">&lt;</span> <span class="number">1</span> {
+            <span class="kw">return</span> <span class="prelude-val">None</span>;
+        }
 
-    <span class="comment">// Don&#39;t push anything between these tags (or the the tags themselves)</span>
-    <span class="kw">let</span> <span class="ident">bookends</span> <span class="op">=</span> <span class="kw-2">&amp;</span>[
-        <span class="string">&quot;BEGIN_DATA_FORMAT&quot;</span>, <span class="string">&quot;END_DATA_FORMAT&quot;</span>,
-        <span class="string">&quot;BEGIN_DATA&quot;</span>, <span class="string">&quot;END_DATA&quot;</span>
-    ];
+        <span class="comment">// Push metadata here</span>
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">meta_vec</span> <span class="op">=</span> <span class="ident">RawVec</span>::<span class="ident">new</span>();
 
-    <span class="comment">// Loop through the raw_vec and toggle pushing to meta_vec</span>
-    <span class="comment">// based on the presence of bookend tags</span>
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">index</span> <span class="op">=</span> <span class="number">0</span>;
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tag_switch</span> <span class="op">=</span> <span class="bool-val">true</span>;
-    <span class="kw">while</span> <span class="ident">index</span> <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">len</span>() {
-        <span class="kw">let</span> <span class="ident">item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">inner</span>[<span class="ident">index</span>];
-        <span class="kw">if</span> <span class="ident">bookends</span>.<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="ident">item</span>[<span class="number">0</span>].<span class="ident">as_str</span>()) {
-            <span class="kw">if</span> <span class="ident">tag_switch</span> { <span class="ident">tag_switch</span> <span class="op">=</span> <span class="bool-val">false</span> } <span class="kw">else</span> { <span class="ident">tag_switch</span> <span class="op">=</span> <span class="bool-val">true</span> };
+        <span class="comment">// Don&#39;t push anything between these tags (or the the tags themselves)</span>
+        <span class="kw">let</span> <span class="ident">bookends</span> <span class="op">=</span> <span class="kw-2">&amp;</span>[
+            <span class="string">&quot;BEGIN_DATA_FORMAT&quot;</span>, <span class="string">&quot;END_DATA_FORMAT&quot;</span>,
+            <span class="string">&quot;BEGIN_DATA&quot;</span>, <span class="string">&quot;END_DATA&quot;</span>
+        ];
+
+        <span class="comment">// Loop through the raw_vec and toggle pushing to meta_vec</span>
+        <span class="comment">// based on the presence of bookend tags</span>
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">index</span> <span class="op">=</span> <span class="number">0</span>;
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tag_switch</span> <span class="op">=</span> <span class="bool-val">true</span>;
+        <span class="kw">while</span> <span class="ident">index</span> <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">len</span>() {
+            <span class="kw">let</span> <span class="ident">item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">inner</span>[<span class="ident">index</span>];
+            <span class="kw">if</span> <span class="ident">bookends</span>.<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="ident">item</span>[<span class="number">0</span>].<span class="ident">as_str</span>()) {
+                <span class="kw">if</span> <span class="ident">tag_switch</span> { <span class="ident">tag_switch</span> <span class="op">=</span> <span class="bool-val">false</span> } <span class="kw">else</span> { <span class="ident">tag_switch</span> <span class="op">=</span> <span class="bool-val">true</span> };
+                <span class="ident">index</span> <span class="op">+=</span> <span class="number">1</span>;
+                <span class="kw">continue</span>;
+            }
+            <span class="kw">if</span> <span class="ident">tag_switch</span> {
+                <span class="ident">meta_vec</span>.<span class="ident">push</span>(<span class="ident">item</span>.<span class="ident">clone</span>());
+            }
             <span class="ident">index</span> <span class="op">+=</span> <span class="number">1</span>;
-            <span class="kw">continue</span>;
         }
-        <span class="kw">if</span> <span class="ident">tag_switch</span> {
-            <span class="ident">meta_vec</span>.<span class="ident">push</span>(<span class="ident">item</span>.<span class="ident">clone</span>());
+
+        <span class="prelude-val">Some</span>(<span class="ident">meta_vec</span>)
+    }
+
+    <span class="comment">// Extract the DATA_FORMAT into a Vector of DataFormatTypes (DataFormat)</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">extract_data_format</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">CgatsResult</span><span class="op">&lt;</span><span class="ident">DataFormat</span><span class="op">&gt;</span> {
+        <span class="comment">// We need at least 2 lines to extract DATA_FORMAT</span>
+        <span class="comment">// OK, really 3 lines, but we only need to see 2</span>
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">len</span>() <span class="op">&lt;</span> <span class="number">2</span> {
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">CgatsError</span>::<span class="ident">NoDataFormat</span>);
         }
-        <span class="ident">index</span> <span class="op">+=</span> <span class="number">1</span>;
+
+        <span class="comment">// Use implicit format type for ColorBurst LinFiles</span>
+        <span class="kw">let</span> <span class="ident">cgats_type</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">get_cgats_type</span>();
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">CgatsType</span>::<span class="ident">ColorBurst</span>) <span class="op">=</span> <span class="ident">cgats_type</span> {
+            <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">format</span>::<span class="ident">ColorBurstFormat</span>());
+        }
+
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">data_format</span> <span class="op">=</span> <span class="ident">DataFormat</span>::<span class="ident">new</span>();
+
+        <span class="comment">// Loop through the RawVec and find the BEGIN_DATA_FORMAT tag</span>
+        <span class="comment">// then take the next line as a tab-delimited Vector</span>
+        <span class="kw">for</span> (<span class="ident">index</span>, <span class="ident">item</span>) <span class="kw">in</span> <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">iter</span>().<span class="ident">enumerate</span>() {
+            <span class="kw">match</span> <span class="ident">item</span>[<span class="number">0</span>].<span class="ident">as_str</span>() {
+                <span class="string">&quot;BEGIN_DATA_FORMAT&quot;</span> <span class="op">=&gt;</span> {
+                    <span class="kw">for</span> <span class="ident">format_type</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">inner</span>[<span class="ident">index</span> <span class="op">+</span> <span class="number">1</span>].<span class="ident">iter</span>() {
+                        <span class="kw">let</span> <span class="ident">format</span> <span class="op">=</span> <span class="ident">DataFormatType</span>::<span class="ident">from</span>(<span class="ident">format_type</span>)<span class="question-mark">?</span>;
+                        <span class="ident">data_format</span>.<span class="ident">push</span>(<span class="ident">format</span>);
+                    }
+                    <span class="kw">break</span>;
+                },
+                <span class="kw">_</span> <span class="op">=&gt;</span> <span class="kw">continue</span>
+            };
+        }
+
+        <span class="comment">// Check that the DATA_FORMAT is not empty</span>
+        <span class="kw">if</span> <span class="ident">data_format</span>.<span class="ident">len</span>() <span class="op">&lt;</span> <span class="number">1</span> {
+            <span class="prelude-val">Err</span>(<span class="ident">CgatsError</span>::<span class="ident">NoDataFormat</span>)
+        } <span class="kw">else</span> {
+            <span class="prelude-val">Ok</span>(<span class="ident">data_format</span>)
+        }
+
     }
 
-    <span class="prelude-val">Some</span>(<span class="ident">meta_vec</span>)
-}
+    <span class="comment">// Extract the data betweeen BEGIN_DATA and END_DATA into a RawVec</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">extract_data</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">CgatsResult</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+        <span class="comment">// We need at least 3 lines to define DATA</span>
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">len</span>() <span class="op">&lt;</span> <span class="number">3</span> {
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">CgatsError</span>::<span class="ident">NoData</span>);
+        }
 
-<span class="comment">// Extract the DATA_FORMAT into a Vector of DataFormatTypes (DataFormat)</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">extract_data_format</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">CgatsResult</span><span class="op">&lt;</span><span class="ident">DataFormat</span><span class="op">&gt;</span> {
-    <span class="comment">// We need at least 2 lines to extract DATA_FORMAT</span>
-    <span class="comment">// OK, really 3 lines, but we only need to see 2</span>
-    <span class="kw">if</span> <span class="self">self</span>.<span class="ident">len</span>() <span class="op">&lt;</span> <span class="number">2</span> {
-        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">CgatsError</span>::<span class="ident">NoDataFormat</span>);
+        <span class="comment">// Push DATA here</span>
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">data_vec</span> <span class="op">=</span> <span class="ident">RawVec</span>::<span class="ident">new</span>();
+
+        <span class="comment">// Loop through the first item of each line and look for the tags.</span>
+        <span class="kw">for</span> (<span class="ident">index</span>, <span class="ident">item</span>) <span class="kw">in</span> <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">iter</span>().<span class="ident">enumerate</span>() {
+            <span class="kw">match</span> <span class="ident">item</span>[<span class="number">0</span>].<span class="ident">as_str</span>() {
+                <span class="string">&quot;BEGIN_DATA&quot;</span> <span class="op">=&gt;</span> {
+                    <span class="comment">// Loop through each line after BEGIN_DATA and push the next</span>
+                    <span class="kw">for</span> <span class="ident">format_type</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">inner</span>[<span class="ident">index</span> <span class="op">+</span> <span class="number">1</span>..].<span class="ident">iter</span>() {
+                        <span class="ident">data_vec</span>.<span class="ident">push</span>(<span class="ident">format_type</span>.<span class="ident">to_vec</span>());
+                    }
+                },
+                <span class="string">&quot;END_DATA&quot;</span> <span class="op">=&gt;</span> {
+                    <span class="comment">// Pop the last line off the Vector and stop looking</span>
+                    <span class="ident">data_vec</span>.<span class="ident">pop</span>();
+                    <span class="kw">break</span>;
+                },
+                <span class="kw">_</span> <span class="op">=&gt;</span> <span class="kw">continue</span>
+            };
+        }
+
+        <span class="comment">// Check that we actually found some data</span>
+        <span class="kw">if</span> <span class="ident">data_vec</span>.<span class="ident">len</span>() <span class="op">&lt;</span> <span class="number">1</span> {
+            <span class="prelude-val">Err</span>(<span class="ident">CgatsError</span>::<span class="ident">NoData</span>)
+        } <span class="kw">else</span> {
+            <span class="prelude-val">Ok</span>(<span class="ident">data_vec</span>)
+        }
+
     }
-
-    <span class="comment">// Use implicit format type for ColorBurst LinFiles</span>
-    <span class="kw">let</span> <span class="ident">cgats_type</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">get_cgats_type</span>();
-    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">CgatsType</span>::<span class="ident">ColorBurst</span>) <span class="op">=</span> <span class="ident">cgats_type</span> {
-        <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">format</span>::<span class="ident">ColorBurstFormat</span>());
-    }
-
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">data_format</span>: <span class="ident">DataFormat</span> <span class="op">=</span> <span class="ident">Vec</span>::<span class="ident">new</span>();
-
-    <span class="comment">// Loop through the RawVec and find the BEGIN_DATA_FORMAT tag</span>
-    <span class="comment">// then take the next line as a tab-delimited Vector</span>
-    <span class="kw">for</span> (<span class="ident">index</span>, <span class="ident">item</span>) <span class="kw">in</span> <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">iter</span>().<span class="ident">enumerate</span>() {
-        <span class="kw">match</span> <span class="ident">item</span>[<span class="number">0</span>].<span class="ident">as_str</span>() {
-            <span class="string">&quot;BEGIN_DATA_FORMAT&quot;</span> <span class="op">=&gt;</span> {
-                <span class="kw">for</span> <span class="ident">format_type</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">inner</span>[<span class="ident">index</span> <span class="op">+</span> <span class="number">1</span>].<span class="ident">iter</span>() {
-                    <span class="kw">let</span> <span class="ident">format</span> <span class="op">=</span> <span class="ident">DataFormatType</span>::<span class="ident">from</span>(<span class="ident">format_type</span>)<span class="question-mark">?</span>;
-                    <span class="ident">data_format</span>.<span class="ident">push</span>(<span class="ident">format</span>);
-                }
-                <span class="kw">break</span>;
-            },
-            <span class="kw">_</span> <span class="op">=&gt;</span> <span class="kw">continue</span>
-        };
-    }
-
-    <span class="comment">// Check that the DATA_FORMAT is not empty</span>
-    <span class="kw">if</span> <span class="ident">data_format</span>.<span class="ident">len</span>() <span class="op">&lt;</span> <span class="number">1</span> {
-        <span class="prelude-val">Err</span>(<span class="ident">CgatsError</span>::<span class="ident">NoDataFormat</span>)
-    } <span class="kw">else</span> {
-        <span class="prelude-val">Ok</span>(<span class="ident">data_format</span>)
-    }
-
-}
-
-<span class="comment">// Extract the data betweeen BEGIN_DATA and END_DATA into a RawVec</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">extract_data</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">CgatsResult</span><span class="op">&lt;</span><span class="ident">RawVec</span><span class="op">&gt;</span> {
-    <span class="comment">// We need at least 3 lines to define DATA</span>
-    <span class="kw">if</span> <span class="self">self</span>.<span class="ident">len</span>() <span class="op">&lt;</span> <span class="number">3</span> {
-        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">CgatsError</span>::<span class="ident">NoData</span>);
-    }
-
-    <span class="comment">// Push DATA here</span>
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">data_vec</span> <span class="op">=</span> <span class="ident">RawVec</span>::<span class="ident">new</span>();
-
-    <span class="comment">// Loop through the first item of each line and look for the tags.</span>
-    <span class="kw">for</span> (<span class="ident">index</span>, <span class="ident">item</span>) <span class="kw">in</span> <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">iter</span>().<span class="ident">enumerate</span>() {
-        <span class="kw">match</span> <span class="ident">item</span>[<span class="number">0</span>].<span class="ident">as_str</span>() {
-            <span class="string">&quot;BEGIN_DATA&quot;</span> <span class="op">=&gt;</span> {
-                <span class="comment">// Loop through each line after BEGIN_DATA and push the next</span>
-                <span class="kw">for</span> <span class="ident">format_type</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">inner</span>[<span class="ident">index</span> <span class="op">+</span> <span class="number">1</span>..].<span class="ident">iter</span>() {
-                    <span class="ident">data_vec</span>.<span class="ident">push</span>(<span class="ident">format_type</span>.<span class="ident">to_vec</span>());
-                }
-            },
-            <span class="string">&quot;END_DATA&quot;</span> <span class="op">=&gt;</span> {
-                <span class="comment">// Pop the last line off the Vector and stop looking</span>
-                <span class="ident">data_vec</span>.<span class="ident">pop</span>();
-                <span class="kw">break</span>;
-            },
-            <span class="kw">_</span> <span class="op">=&gt;</span> <span class="kw">continue</span>
-        };
-    }
-
-    <span class="comment">// Check that we actually found some data</span>
-    <span class="kw">if</span> <span class="ident">data_vec</span>.<span class="ident">len</span>() <span class="op">&lt;</span> <span class="number">1</span> {
-        <span class="prelude-val">Err</span>(<span class="ident">CgatsError</span>::<span class="ident">NoData</span>)
-    } <span class="kw">else</span> {
-        <span class="prelude-val">Ok</span>(<span class="ident">data_vec</span>)
-    }
-
-}
-
 }</pre>
 </section><section id="search" class="content hidden"></section><section class="footer"></section><aside id="help" class="hidden"><div><h1 class="hidden">Help</h1><div class="shortcuts"><h2>Keyboard Shortcuts</h2><dl><dt><kbd>?</kbd></dt><dd>Show this help dialog</dd><dt><kbd>S</kbd></dt><dd>Focus the search field</dd><dt><kbd>↑</kbd></dt><dd>Move up in search results</dd><dt><kbd>↓</kbd></dt><dd>Move down in search results</dd><dt><kbd>↹</kbd></dt><dd>Switch tab</dd><dt><kbd>&#9166;</kbd></dt><dd>Go to active search result</dd><dt><kbd>+</kbd></dt><dd>Expand all sections</dd><dt><kbd>-</kbd></dt><dd>Collapse all sections</dd></dl></div><div class="infos"><h2>Search Tricks</h2><p>Prefix searches with a type followed by a colon (e.g. <code>fn:</code>) to restrict the search to a given type.</p><p>Accepted types are: <code>fn</code>, <code>mod</code>, <code>struct</code>, <code>enum</code>, <code>trait</code>, <code>type</code>, <code>macro</code>, and <code>const</code>.</p><p>Search functions by type signature (e.g. <code>vec -> usize</code> or <code>* -> vec</code>)</p><p>Search multiple things at once by splitting your query with comma (e.g. <code>str,u8</code> or <code>String,struct:Vec,test</code>)</p></div></div></aside><script>window.rootPath = "../../";window.currentCrate = "cgats";</script><script src="../../aliases.js"></script><script src="../../main.js"></script><script defer src="../../search-index.js"></script></body></html>

@@ -72,7 +72,7 @@ impl CgatsMap {
 
     pub fn from_file<T: AsRef<Path>>(file: T) -> CgatsResult<Self> {
         let mut raw_vec = RawVec::new();
-        raw_vec.read_file_to_raw_vec(file)?;
+        raw_vec.read_file(file)?;
 
         Self::from_raw_vec(&raw_vec)
     }

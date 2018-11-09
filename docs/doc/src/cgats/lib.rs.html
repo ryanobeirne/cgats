@@ -254,10 +254,6 @@
 <span id="254">254</span>
 <span id="255">255</span>
 <span id="256">256</span>
-<span id="257">257</span>
-<span id="258">258</span>
-<span id="259">259</span>
-<span id="260">260</span>
 </pre><pre class="rust ">
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">fs</span>::<span class="ident">File</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">path</span>::<span class="ident">Path</span>;
@@ -324,7 +320,7 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_file</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;&gt;</span>(<span class="ident">file</span>: <span class="ident">T</span>) <span class="op">-&gt;</span> <span class="ident">CgatsResult</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="comment">// Read file into a RawVec</span>
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">raw_vec</span> <span class="op">=</span> <span class="ident">RawVec</span>::<span class="ident">new</span>();
-        <span class="ident">raw_vec</span>.<span class="ident">read_file_to_raw_vec</span>(<span class="ident">file</span>)<span class="question-mark">?</span>;
+        <span class="ident">raw_vec</span>.<span class="ident">read_file</span>(<span class="ident">file</span>)<span class="question-mark">?</span>;
 
         <span class="ident">CgatsObject</span>::<span class="ident">from_raw_vec</span>(<span class="ident">raw_vec</span>)
     }
@@ -353,10 +349,6 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">data</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">CgatsResult</span><span class="op">&lt;</span><span class="ident">RawVec</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">raw_vec</span>.<span class="ident">extract_data</span>()
     }
-
-    <span class="comment">// pub fn data_format(&amp;self) -&gt; CgatsResult&lt;DataFormat&gt; {</span>
-    <span class="comment">//     extract_data_format(&amp;self.raw_vec)</span>
-    <span class="comment">// }</span>
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">print_data_format</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">CgatsResult</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">String</span>::<span class="ident">new</span>();

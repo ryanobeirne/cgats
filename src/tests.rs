@@ -18,8 +18,7 @@ fn test_files<'a>() -> Vec<&'a str> {
 // Test the conversion of DataFormatTypes
 #[test]
 fn data_format() -> CgatsResult<()> {
-    let mut cgv = RawVec::new();
-    cgv.read_file_to_raw_vec("test_files/cgats0.txt")?;
+    let cgv = RawVec::from_file("test_files/cgats0.txt")?;
 
     println!("{:?}", cgv);
 

@@ -40,8 +40,14 @@ impl RawVec {
         CgatsType::from(&s)
     }
 
+    pub fn from_file<T: AsRef<Path>>(file: T) -> CgatsResult<Self> {
+        let mut raw_vec = Self::new();
+        raw_vec.read_file(file)?;
+        Ok(raw_vec)
+    }
+
     // Read a file into a Vector of a Vector of lines (RawVec)
-    pub fn read_file_to_raw_vec<T: AsRef<Path>>(&mut self, file: T) -> CgatsResult<()> {
+    pub fn read_file<T: AsRef<Path>>(&mut self, file: T) -> CgatsResult<()> {
         let f = File::open(file)?;
 
         // Loop through lines and trim trailing whitespace
@@ -86,7 +92,7 @@ impl RawVec {
 
     // Extract metadata from CGATS file: anything that is not between bookends:
     // e.g. BEGIN_DATA_FORMAT...END_DATA_FORMAT // BEGIN_DATA...END_DATA
-    pub fn extract_meta_data(&self) -> Option<RawVec> {
+    pub fn extract_meta_data(&self) -> Option<Self> {
         // No sense in doing anything if there's nothing here
         if self.len() < 1 {
             return None;
@@ -135,7 +141,7 @@ impl RawVec {
             return Ok(format::ColorBurstFormat());
         }
 
-        let mut data_format: DataFormat = Vec::new();
+        let mut data_format = DataFormat::new();
 
         // Loop through the RawVec and find the BEGIN_DATA_FORMAT tag
         // then take the next line as a tab-delimited Vector
@@ -162,7 +168,7 @@ impl RawVec {
     }
 
     // Extract the data betweeen BEGIN_DATA and END_DATA into a RawVec
-    pub fn extract_data(&self) -> CgatsResult<RawVec> {
+    pub fn extract_data(&self) -> CgatsResult<Self> {
         // We need at least 3 lines to define DATA
         if self.len() < 3 {
             return Err(CgatsError::NoData);
