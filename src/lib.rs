@@ -46,6 +46,15 @@ impl CgatsObject {
         cgo
     }
 
+    pub fn derive_from(other: &Self) -> Self {
+        Self {
+            raw_vec: RawVec::new(),
+            cgats_type: other.cgats_type.clone(),
+            data_format: other.data_format.clone(),
+            data_map: CgatsMap::new(),
+        }
+    }
+
     pub fn new_with_format(data_format: DataFormat) -> Self {
         let mut cgo = Self::new();
         cgo.data_format = data_format;

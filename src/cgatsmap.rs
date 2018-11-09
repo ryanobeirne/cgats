@@ -61,15 +61,6 @@ impl CgatsMap {
         Ok(data_vec)
     }
 
-    pub fn to_raw_vec(&self) -> CgatsResult<RawVec> {
-        let mut raw_vec = RawVec::new();
-        let data_vec = &self.to_data_vec()?;
-        
-        // Fix this
-
-        Ok(raw_vec)
-    }
-
     pub fn from_file<T: AsRef<Path>>(file: T) -> CgatsResult<Self> {
         let mut raw_vec = RawVec::new();
         raw_vec.read_file(file)?;

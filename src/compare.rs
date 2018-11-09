@@ -55,6 +55,34 @@ impl CgatsVec {
     //     }
     //     sum / nums.len() as f64
     // }
+    pub fn raw_from_prime(&self, cgats_map: &CgatsMap) -> CgatsResult<RawVec> {
+        let mut raw_vec = RawVec::new();
+
+        // The first object in the list
+        let cgo_prime = &self.inner[0];
+
+        // Collect metadata from first object
+        if let Some(metadata) = cgo_prime.metadata() {
+            for line in metadata.inner {
+                raw_vec.push(line);
+            }
+        }
+
+        // Push on the DATA_FORMAT
+        raw_vec.push(vec!("BEGIN_DATA_FORMAT".to_string()));
+        raw_vec.push(cgo_prime.data_format.iter().map(|f| f.display()).collect());
+        raw_vec.push(vec!("END_DATA_FORMAT".to_string()));
+
+        // Push on the DATA
+        raw_vec.push(vec!["BEGIN_DATA".to_string()]);
+        let data_vec = cgats_map.to_data_vec()?;
+        for v in data_vec {
+            raw_vec.push(v);
+        }
+        raw_vec.push(vec!["END_DATA".to_string()]);
+
+        Ok(raw_vec)
+    }
 
     pub fn average(&self) -> CgatsResult<CgatsObject> {
         // The first object in the list
@@ -73,45 +101,17 @@ impl CgatsVec {
             return Err(CgatsError::CannotCompare);
         } 
 
-        // Use format from first object
-        let mut cgo = CgatsObject::new_with_format(
-            cgo_prime.data_format.clone()
-        );
-
         // Collect all the DataMaps into a MapVec
         let map_vec: MapVec = self.inner.iter().map(|cgvo|
             cgvo.data_map.clone()
         ).collect();
 
+        // Use filler from first object
+        let mut cgo = CgatsObject::derive_from(&cgo_prime);
         // Average the DataMaps
         cgo.data_map = map_vec.average()?;
-
-        let mut raw_vec = RawVec::new();
-
-        // Collect metadata from first object
-        if let Some(metadata) = cgo_prime.metadata() {
-            for line in metadata.inner {
-                raw_vec.push(line);
-            }
-        }
-
-        // Push on the DATA_FORMAT
-        raw_vec.push(vec!("BEGIN_DATA_FORMAT".to_string()));
-        raw_vec.push(cgo_prime.data_format.iter().map(|f| f.display()).collect());
-        raw_vec.push(vec!("END_DATA_FORMAT".to_string()));
-
-        // Push on the DATA
-        raw_vec.push(vec!["BEGIN_DATA".to_string()]);
-        let data_vec = cgo.data_map.to_data_vec()?;
-        for v in data_vec {
-            raw_vec.push(v);
-        }
-        raw_vec.push(vec!["END_DATA".to_string()]);
-
-        // DELETE THIS
-        println!("RAW_VEC:\n{:?}", raw_vec);
-
-        cgo.raw_vec = raw_vec;
+        // Use the first object to fill in the blanks
+        cgo.raw_vec = self.raw_from_prime(&cgo.data_map)?;
 
         Ok(cgo)
     }
