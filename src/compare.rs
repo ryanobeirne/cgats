@@ -1,17 +1,24 @@
 use super::*;
 use std::iter::FromIterator;
 
+pub type CgatsSet = Vec<CgatsObject>;
+
+#[derive(Debug, Clone)]
 pub struct CgatsVec {
-    pub inner: Vec<CgatsObject>,
+    pub inner: CgatsSet,
 }
 
 impl CgatsVec {
     pub fn new() -> Self {
-        Self { inner: Vec::new() }
+        Self { inner: CgatsSet::new() }
     }
 
     pub fn push(&mut self, value: CgatsObject) {
         self.inner.push(value)
+    }
+
+    pub fn pop(&mut self) -> Option<CgatsObject> {
+        self.inner.pop()
     }
 
     pub fn len(&self) -> usize {
@@ -129,6 +136,18 @@ impl CgatsVec {
     }
 }
 
+impl FromIterator<CgatsObject> for CgatsVec {
+    fn from_iter<I: IntoIterator<Item=CgatsObject>>(iter: I) -> Self {
+        let mut c = Self::new();
+
+        for i in iter {
+            c.push(i);
+        }
+
+        c
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct MapVec {
     inner:  Vec<CgatsMap>,
@@ -145,6 +164,10 @@ impl MapVec {
 
     pub fn push(&mut self, value: CgatsMap) {
         self.inner.push(value)
+    }
+
+    pub fn pop(&mut self) -> Option<CgatsMap> {
+        self.inner.pop()
     }
 
     pub fn average(&self) -> CgatsResult<CgatsMap> {
@@ -182,4 +205,9 @@ impl FromIterator<CgatsMap> for MapVec {
 
         c
     }
+}
+
+pub fn round_to(float: f64, places: i32) -> f64 {
+    let mult = 10_f64.powi(places);
+    (float * mult).round() / mult
 }

@@ -77,7 +77,7 @@ impl CgatsObject {
         CgatsObject::from_raw_vec(raw_vec)
     }
 
-    fn from_raw_vec(raw_vec: RawVec) -> CgatsResult<Self> {
+    pub fn from_raw_vec(raw_vec: RawVec) -> CgatsResult<Self> {
         // Determine the CgatsType from the first line of the file
         let cgats_type = raw_vec.get_cgats_type();
         let data_format = raw_vec.extract_data_format()?;
@@ -206,24 +206,18 @@ pub struct CgatsValue {
 }
 
 impl CgatsValue {
-    fn from_string(value: &str) -> Self {
-        let (float, is_float) = match value.parse::<f64>() {
-            Ok(f) => (f, true),
-            Err(_) => (0_f64, false)
+    fn from_string(val: &str) -> Self {
+        let (value, float, is_float) = match val.parse::<f64>() {
+            Ok(f) => ( compare::round_to(f, 4).to_string(), f, true ),
+            Err(_) => ( val.to_string(), 0_f64, false )
         };
-        Self {value: value.to_string(), float, is_float}
+        Self {value, float, is_float}
     }
 
     fn from_float(float: f64) -> Self {
-        let value = Self::round_to(float, 4).to_string();
-        Self { value, float, is_float: true}
+        let value = compare::round_to(float, 4).to_string();
+        Self { value, float, is_float: true }
     }
-
-    fn round_to(float: f64, places: i32) -> f64 {
-        let mult = 10_f64.powi(places);
-        (float * mult).round() / mult
-    }
-
 }
 
 impl fmt::Display for CgatsValue {
