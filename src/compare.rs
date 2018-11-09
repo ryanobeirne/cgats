@@ -17,6 +17,16 @@ impl CgatsVec {
         self.inner.len()
     }
 
+    pub fn from_files<T: AsRef<Path>>(file_vec: &Vec<T>) -> CgatsResult<Self> {
+        let mut cgats_vec = Self::new();
+
+        for file in file_vec {
+            cgats_vec.push(CgatsObject::from_file(file)?);
+        }
+
+        Ok(cgats_vec)
+    }
+
     // Check that all CgatsObjects have the same data type and sample count
     pub fn is_comparable(&self) -> bool {
         // If there are less than 2, we can skip out early

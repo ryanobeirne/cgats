@@ -55,6 +55,15 @@ fn main() -> cgats::error::CgatsResult<()> {
 
     let clap_files: Vec<&str> = matches.values_of("FILE").unwrap().collect();
 
+    let cgv = cgats::compare::CgatsVec::from_files(&clap_files)?;
+    let avg = cgv.average();
+    match avg {
+        Ok(cgo) => println!("{}", cgo.print()?),
+        Err(e) => eprintln!("{}", e)
+    }
+
+    std::process::exit(69);
+
     for clap_file in clap_files {
         if !Path::new(clap_file).is_file() {
             eprintln!("File does not exist: '{}'", clap_file);
