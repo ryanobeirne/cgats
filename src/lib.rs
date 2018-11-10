@@ -3,19 +3,20 @@ use std::path::Path;
 use std::fmt;
 use std::collections::BTreeMap;
 
-pub mod rawvec;
-use rawvec::*;
+mod rawvec;
+pub use rawvec::*;
 
-pub mod cgatsmap;
-use cgatsmap::*;
+mod cgatsmap;
+pub use cgatsmap::*;
 
-pub mod compare;
+mod compare;
+pub use compare::*;
 
-pub mod error;
-use error::*;
+mod error;
+pub use error::*;
 
-pub mod format;
-use format::*;
+mod format;
+pub use format::*;
 
 #[cfg(test)]
 mod tests;
