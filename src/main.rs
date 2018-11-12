@@ -15,15 +15,21 @@ use clap::{ArgMatches, Arg, App, SubCommand};
 #[derive(Debug)]
 enum Command {
     Average,
-    Convert,
+    // Convert,
 }
 
 impl Command {
     fn from_string(s: &str) -> Option<Self> {
         match s.to_lowercase().as_str() {
             "average" | "avg" => Some(Command::Average),
-            "convert"         => Some(Command::Convert),
+            // "convert"         => Some(Command::Convert),
             _ => None
+        }
+    }
+
+    fn execute(&self, cgv: CgatsVec) -> CgatsResult<CgatsObject> {
+        match &self {
+            Command::Average => cgv.average()
         }
     }
 }
@@ -57,6 +63,17 @@ impl<'a> Config {
 
         Self { command, files }
     }
+
+    fn execute(&self) -> CgatsResult<CgatsObject> {
+        match &self.command {
+            Some(cmd) => cmd.execute(self.cgats_vec()?),
+            None => Err(CgatsError::CannotCompare)
+        }
+    }
+
+    fn cgats_vec(&self) -> CgatsResult<CgatsVec> {
+        CgatsVec::from_files(&self.files)
+    }
 }
 
 fn main() -> CgatsResult<()> {
@@ -80,7 +97,25 @@ fn main() -> CgatsResult<()> {
 
     let config = Config::build(&matches);
 
-    println!("{:?}", config);
+    if config.files.len() < 1 {
+        eprintln!("{}", matches.usage());
+        std::process::exit(1);
+    }
+
+    match &config.command {
+        Some(_) => {
+            let cgo = config.execute()?;
+            println!("{}", cgo.print()?);
+        },
+        None => {
+            for file in &config.files {
+                match CgatsObject::from_file(&file) {
+                    Ok(cgo) => println!("'{}':\n\t{}", file, cgo),
+                    Err(e) => eprintln!("'{}':\n\t{}", file, e)
+                }
+            }
+        }
+    }
 
     Ok(())
 }
