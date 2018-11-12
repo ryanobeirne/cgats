@@ -44,9 +44,9 @@ impl CgatsMap {
         }
 
         for index in index_map.keys() {
-            let mut mini_vec: Vec<String> = Vec::new();
+            let mut data_line = DataLine::new();
             for format in format_map.keys() {
-                mini_vec.push(
+                data_line.push(
                     self.inner.get(
                         &(*index, *format)
                     ).unwrap()
@@ -54,7 +54,7 @@ impl CgatsMap {
                     .value
                 );
             }
-            data_vec.insert(*index, mini_vec);
+            data_vec.insert(*index, data_line);
         }
         
         Ok(data_vec)

@@ -15,7 +15,7 @@ impl RawVec {
         Self { inner: DataSet::new() }
     }
 
-    pub fn pop(&mut self) -> Option<Vec<String>> {
+    pub fn pop(&mut self) -> Option<DataLine> {
         self.inner.pop()
     }
 
@@ -71,7 +71,7 @@ impl RawVec {
             // Push each item in a line into a Vector
             for split_line in v_cr {
                 let split = split_line.split("\t");
-                let mut v: Vec<String> = Vec::new();
+                let mut v: DataLine = Vec::new();
 
                 for item in split {
                     v.push(item.trim().to_string());
