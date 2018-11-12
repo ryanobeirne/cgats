@@ -55,6 +55,10 @@
 <span id="55">55</span>
 <span id="56">56</span>
 <span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
 </pre><pre class="rust ">
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">error</span>::<span class="ident">Error</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">fmt</span>;
@@ -72,6 +76,8 @@
     <span class="ident">EmptyFile</span>,
     <span class="ident">InvalidID</span>,
     <span class="ident">CannotCompare</span>,
+    <span class="ident">InvalidCommand</span>,
+    <span class="ident">WriteError</span>
 }
 
 <span class="comment">// Custom Result type for CgatsError</span>
@@ -96,6 +102,8 @@
             <span class="ident">EmptyFile</span>          <span class="op">=&gt;</span> <span class="string">&quot;File is empty!&quot;</span>,
             <span class="ident">InvalidID</span>          <span class="op">=&gt;</span> <span class="string">&quot;SAMPLE_ID is not an integer!&quot;</span>,
             <span class="ident">CannotCompare</span>      <span class="op">=&gt;</span> <span class="string">&quot;Cannot compare data sets!&quot;</span>,
+            <span class="ident">InvalidCommand</span>     <span class="op">=&gt;</span> <span class="string">&quot;Invalid Compare command!&quot;</span>,
+            <span class="ident">WriteError</span>         <span class="op">=&gt;</span> <span class="string">&quot;Problem writing to file!&quot;</span>,
         }
     }
 }

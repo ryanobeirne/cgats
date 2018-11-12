@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["CgatsType",""]],"mod":[["cgatsmap",""],["compare",""],["error",""],["format",""],["rawvec",""]],"struct":[["CgatsObject",""],["CgatsValue",""]]});
+initSidebarItems({"enum":[["CgatsError",""],["CgatsType",""],["DataFormatType",""]],"fn":[["ColorBurstFormat",""],["round_to",""]],"struct":[["CgatsMap",""],["CgatsObject",""],["CgatsValue",""],["CgatsVec",""],["MapVec",""],["RawVec",""]],"type":[["CgatsResult",""],["CgatsSet",""],["DataFormat",""],["DataLine",""],["DataMap",""],["DataSet",""],["DataVec",""],["MapKey",""]]});
