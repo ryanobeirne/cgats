@@ -2,6 +2,7 @@ use std::fs::File;
 use std::path::Path;
 use std::fmt;
 use std::collections::BTreeMap;
+use std::io::{Write, BufWriter};
 
 mod rawvec;
 pub use rawvec::*;
@@ -38,6 +39,24 @@ impl CgatsObject {
             data_format: DataFormat::new(),
             data_map: CgatsMap::new(),
         }
+    }
+
+    pub fn write_cgats<T: AsRef<Path>>(&self, file: T) -> CgatsResult<()> {
+        match File::create(file) {
+            Ok(f) => {
+                let mut buf = BufWriter::new(f);
+
+                if let Err(e) = buf.write(self.print()?.as_bytes()) {
+                    eprintln!("{}", e);
+                    return Err(CgatsError::WriteError);
+                }
+            },
+            Err(e) => {
+                eprintln!("{}", e);
+                return Err(CgatsError::WriteError);
+            }
+        }
+        Ok(())
     }
 
     // New empty CgatsObject of a given CgatsType

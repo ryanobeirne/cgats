@@ -5,12 +5,7 @@ use cgats::*;
 extern crate clap;
 use clap::{ArgMatches, Arg, App, SubCommand};
 
-// use std::fs::File;
-// use std::path::Path;
-// use std::io::BufReader;
-// use std::io::BufRead;
-// use std::collections::HashMap;
-// use std::io::stdin;
+use std::fmt;
 
 #[derive(Debug)]
 enum Command {
@@ -31,6 +26,17 @@ impl Command {
         match &self {
             Command::Average => cgv.average()
         }
+    }
+
+    fn display(&self) -> String {
+        let s = format!("{}", &self).to_lowercase();
+        format!("{}", s)
+    }
+}
+
+impl fmt::Display for Command {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", &self)
     }
 }
 
@@ -67,7 +73,7 @@ impl<'a> Config {
     fn execute(&self) -> CgatsResult<CgatsObject> {
         match &self.command {
             Some(cmd) => cmd.execute(self.cgats_vec()?),
-            None => Err(CgatsError::CannotCompare)
+            None => Err(CgatsError::InvalidCommand)
         }
     }
 
@@ -88,6 +94,12 @@ fn main() -> CgatsResult<()> {
             .multiple(true))
         .subcommand(SubCommand::with_name("average")
             .about("Average 2 or more CGATS color files")
+            .arg(Arg::with_name("output")
+                .value_name("output_file")
+                .takes_value(true)
+                .short("f")
+                .long("file")
+                .help("Output results to file"))
             .arg(Arg::with_name("comparefiles")
                 .value_name("FILE")
                 .multiple(true)
@@ -103,9 +115,12 @@ fn main() -> CgatsResult<()> {
     }
 
     match &config.command {
-        Some(_) => {
+        Some(cmd) => {
             let cgo = config.execute()?;
-            println!("{}", cgo.print()?);
+            match matches.subcommand_matches(cmd.display()).unwrap().value_of("output") {
+                Some(f) => cgo.write_cgats(f)?,
+                None => println!("{}", cgo.print()?)
+            }
         },
         None => {
             for file in &config.files {
