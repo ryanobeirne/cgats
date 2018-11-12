@@ -1,10 +1,12 @@
 extern crate cgats;
+use cgats::*;
 
 #[macro_use]
 extern crate clap;
+use clap::{ArgMatches, Arg, App, SubCommand};
 
 // use std::fs::File;
-use std::path::Path;
+// use std::path::Path;
 // use std::io::BufReader;
 // use std::io::BufRead;
 // use std::collections::HashMap;
@@ -33,59 +35,52 @@ struct Config {
 }
 
 impl<'a> Config {
-    fn collect(matches: clap::ArgMatches<'a>) -> Self {
-        let command = Command::from_string(matches.subcommand_name().unwrap());
-        let files: Vec<String> = matches.values_of("average").unwrap().map(|s| s.to_string()).collect();
+    fn build(matches: &ArgMatches) -> Self {
+        let cmd_name = matches.subcommand_name();
+        let command = match cmd_name {
+            Some(cmd) => Command::from_string(cmd),
+            None => None
+        };
+
+        let files = if let Some(cmd) = cmd_name {
+            match matches.subcommand_matches(cmd) {
+                Some(scm) => scm.values_of("comparefiles").unwrap().map(|m| m.to_string()).collect(),
+                None => Vec::new()
+            }
+        } else {
+            let clap_files = matches.values_of("files");
+            match clap_files {
+                Some(f) => f.map(|m| m.to_string()).collect(),
+                None => Vec::new()
+            }
+        };
+
         Self { command, files }
     }
 }
 
-fn main() -> cgats::error::CgatsResult<()> {
+fn main() -> CgatsResult<()> {
     //Parse command line arguments with clap
-    let matches = clap_app!(cgats =>
-        (version: crate_version!())
-        (author: crate_authors!())
-        (about: crate_description!())
-        (@arg FILE: +multiple "CGATS File to process.")
-        (@subcommand average =>
-            (about: "Average values from multiple CGATS files.")
-            (@arg FILE: +multiple +required "CGATS File to average.")
-        )
-    ).get_matches();
+    let matches = App::new("cgats")
+        .version(crate_version!())
+        .author(crate_authors!())
+        .about(crate_description!())
+        .arg(Arg::with_name("files")
+            .help("CGATS files")
+            .value_name("FILE")
+            .multiple(true))
+        .subcommand(SubCommand::with_name("average")
+            .about("Average 2 or more CGATS color files")
+            .arg(Arg::with_name("comparefiles")
+                .value_name("FILE")
+                .multiple(true)
+                .required(true))
+            )
+        .get_matches();
 
-    let clap_files: Vec<&str> = matches.values_of("FILE").unwrap().collect();
+    let config = Config::build(&matches);
 
-    let cgv = cgats::compare::CgatsVec::from_files(&clap_files)?;
-    let avg = cgv.average();
-    match avg {
-        Ok(cgo) => println!("{}", cgo.print()?),
-        Err(e) => eprintln!("{}", e)
-    }
-
-    std::process::exit(69);
-
-    for clap_file in clap_files {
-        if !Path::new(clap_file).is_file() {
-            eprintln!("File does not exist: '{}'", clap_file);
-            continue;
-        }
-
-        let set = cgats::CgatsObject::from_file(clap_file);
-
-        match set {
-            Ok(object) => {
-                // println!("{}", &object);
-                println!("{}", &object.print()?);
-                // println!("{:?}", &object.format);
-                // println!("{:?}", &object.data);
-                // println!("{:?}", object.data_map);
-                // for ( (index, format), value) in object.data_map.0 {
-                //     println!("{}, {}:\t{}", index, format, value);
-                // }
-            },
-            Err(e) => eprintln!("{}: {}", clap_file, e),
-        }
-    }
+    println!("{:?}", config);
 
     Ok(())
 }
