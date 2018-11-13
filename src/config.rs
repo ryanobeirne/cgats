@@ -41,7 +41,7 @@ pub struct Config {
     pub files: Vec<String>,
 }
 
-impl<'a> Config {
+impl Config {
     pub fn build(matches: &ArgMatches) -> Self {
         let cmd_name = matches.subcommand_name();
         let command = match cmd_name {
