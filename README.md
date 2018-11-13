@@ -84,3 +84,4 @@ cargo install
 - Add conversion functions and support for conversion to and from CXF/MXF
 - Add smarter detection of DATA_FORMAT fields for better comparisons
 - Add smoothing functions to correct measurement noise
+- Add DeltaE integration with my [deltae](https://github.com/robeirne/deltae) crate
