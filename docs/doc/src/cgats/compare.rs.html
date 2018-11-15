@@ -211,6 +211,9 @@
 <span id="211">211</span>
 <span id="212">212</span>
 <span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
 </pre><pre class="rust ">
 <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">iter</span>::<span class="ident">FromIterator</span>;
@@ -345,6 +348,9 @@
         <span class="ident">cgo</span>.<span class="ident">data_map</span> <span class="op">=</span> <span class="ident">map_vec</span>.<span class="ident">average</span>()<span class="question-mark">?</span>;
         <span class="comment">// Use the first object to fill in the blanks</span>
         <span class="ident">cgo</span>.<span class="ident">raw_vec</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">raw_from_prime</span>(<span class="kw-2">&amp;</span><span class="ident">cgo</span>.<span class="ident">data_map</span>)<span class="question-mark">?</span>;
+
+        <span class="comment">// Append sample count to end of first line</span>
+        <span class="ident">cgo</span>.<span class="ident">raw_vec</span>.<span class="ident">inner</span>[<span class="number">0</span>].<span class="ident">push</span>(<span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;Average of {}&quot;</span>, <span class="ident">vec_count</span>));
 
         <span class="prelude-val">Ok</span>(<span class="ident">cgo</span>)
     }
