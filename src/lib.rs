@@ -189,6 +189,14 @@ impl CgatsObject {
         Some(s)
     }
 
+    pub fn is_cb(&self) -> bool {
+        if let Some(cgt) = &self.cgats_type {
+            cgt.to_owned() == CgatsType::ColorBurst
+        } else {
+            false
+        }
+    }
+
     pub fn print(&self) -> CgatsResult<String> {
         let mut s = String::new();
 
@@ -196,7 +204,11 @@ impl CgatsObject {
             s.push_str(meta);
         }
 
-        s.push_str(&self.print_data_format()?);
+        // Don't print DATA_FORMAT if it's ColorBurst
+        if !&self.is_cb() {
+            s.push_str(&self.print_data_format()?);
+        }
+
         s.push_str(&self.print_data()?);
 
         Ok(s)
@@ -247,7 +259,7 @@ impl fmt::Display for CgatsValue {
 }
 
 // Possible CGATS types with special meanings
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum CgatsType {
     Cgats,
     ColorBurst,
