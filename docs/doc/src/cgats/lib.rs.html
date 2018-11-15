@@ -283,6 +283,18 @@
 <span id="283">283</span>
 <span id="284">284</span>
 <span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
 </pre><pre class="rust ">
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">fs</span>::<span class="ident">File</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">path</span>::<span class="ident">Path</span>;
@@ -475,6 +487,14 @@
         <span class="prelude-val">Some</span>(<span class="ident">s</span>)
     }
 
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_cb</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">bool</span> {
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">cgt</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">cgats_type</span> {
+            <span class="ident">cgt</span>.<span class="ident">to_owned</span>() <span class="op">==</span> <span class="ident">CgatsType</span>::<span class="ident">ColorBurst</span>
+        } <span class="kw">else</span> {
+            <span class="bool-val">false</span>
+        }
+    }
+
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">print</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">CgatsResult</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">String</span>::<span class="ident">new</span>();
 
@@ -482,7 +502,11 @@
             <span class="ident">s</span>.<span class="ident">push_str</span>(<span class="ident">meta</span>);
         }
 
-        <span class="ident">s</span>.<span class="ident">push_str</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">print_data_format</span>()<span class="question-mark">?</span>);
+        <span class="comment">// Don&#39;t print DATA_FORMAT if it&#39;s ColorBurst</span>
+        <span class="kw">if</span> <span class="op">!</span><span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">is_cb</span>() {
+            <span class="ident">s</span>.<span class="ident">push_str</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">print_data_format</span>()<span class="question-mark">?</span>);
+        }
+
         <span class="ident">s</span>.<span class="ident">push_str</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">print_data</span>()<span class="question-mark">?</span>);
 
         <span class="prelude-val">Ok</span>(<span class="ident">s</span>)
@@ -533,7 +557,7 @@
 }
 
 <span class="comment">// Possible CGATS types with special meanings</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">CgatsType</span> {
     <span class="ident">Cgats</span>,
     <span class="ident">ColorBurst</span>,

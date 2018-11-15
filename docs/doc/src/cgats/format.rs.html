@@ -139,6 +139,16 @@
 <span id="139">139</span>
 <span id="140">140</span>
 <span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
 </pre><pre class="rust ">
 <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
 
@@ -160,15 +170,16 @@
     <span class="ident">LAB_DE</span>, <span class="ident">LAB_DE_94</span>, <span class="ident">LAB_DE_94T</span>, <span class="ident">LAB_DE_CMC</span>, <span class="ident">LAB_DE2000</span>,
     <span class="ident">XYZ_X</span>, <span class="ident">XYZ_Y</span>, <span class="ident">XYZ_Z</span>,
     <span class="ident">XYY_X</span>, <span class="ident">XYY_Y</span>, <span class="ident">XYY_CAPY</span>,
-    <span class="ident">SPECTRAL_380</span>, <span class="ident">SPECTRAL_390</span>, <span class="ident">SPECTRAL_400</span>, <span class="ident">SPECTRAL_410</span>, <span class="ident">SPECTRAL_420</span>,
-    <span class="ident">SPECTRAL_430</span>, <span class="ident">SPECTRAL_440</span>, <span class="ident">SPECTRAL_450</span>, <span class="ident">SPECTRAL_460</span>, <span class="ident">SPECTRAL_470</span>,
-    <span class="ident">SPECTRAL_480</span>, <span class="ident">SPECTRAL_490</span>, <span class="ident">SPECTRAL_500</span>, <span class="ident">SPECTRAL_510</span>, <span class="ident">SPECTRAL_520</span>,
-    <span class="ident">SPECTRAL_530</span>, <span class="ident">SPECTRAL_540</span>, <span class="ident">SPECTRAL_550</span>, <span class="ident">SPECTRAL_560</span>, <span class="ident">SPECTRAL_570</span>,
-    <span class="ident">SPECTRAL_580</span>, <span class="ident">SPECTRAL_590</span>, <span class="ident">SPECTRAL_600</span>, <span class="ident">SPECTRAL_610</span>, <span class="ident">SPECTRAL_620</span>,
-    <span class="ident">SPECTRAL_630</span>, <span class="ident">SPECTRAL_640</span>, <span class="ident">SPECTRAL_650</span>, <span class="ident">SPECTRAL_660</span>, <span class="ident">SPECTRAL_670</span>,
-    <span class="ident">SPECTRAL_680</span>, <span class="ident">SPECTRAL_690</span>, <span class="ident">SPECTRAL_700</span>, <span class="ident">SPECTRAL_710</span>, <span class="ident">SPECTRAL_720</span>,
-    <span class="ident">SPECTRAL_730</span>, <span class="ident">SPECTRAL_740</span>, <span class="ident">SPECTRAL_750</span>, <span class="ident">SPECTRAL_760</span>, <span class="ident">SPECTRAL_770</span>,
-    <span class="ident">SPECTRAL_780</span>,
+    <span class="ident">SPECTRAL_340</span>, <span class="ident">SPECTRAL_350</span>, <span class="ident">SPECTRAL_360</span>, <span class="ident">SPECTRAL_370</span>, <span class="ident">SPECTRAL_380</span>,
+    <span class="ident">SPECTRAL_390</span>, <span class="ident">SPECTRAL_400</span>, <span class="ident">SPECTRAL_410</span>, <span class="ident">SPECTRAL_420</span>, <span class="ident">SPECTRAL_430</span>,
+    <span class="ident">SPECTRAL_440</span>, <span class="ident">SPECTRAL_450</span>, <span class="ident">SPECTRAL_460</span>, <span class="ident">SPECTRAL_470</span>, <span class="ident">SPECTRAL_480</span>,
+    <span class="ident">SPECTRAL_490</span>, <span class="ident">SPECTRAL_500</span>, <span class="ident">SPECTRAL_510</span>, <span class="ident">SPECTRAL_520</span>, <span class="ident">SPECTRAL_530</span>,
+    <span class="ident">SPECTRAL_540</span>, <span class="ident">SPECTRAL_550</span>, <span class="ident">SPECTRAL_560</span>, <span class="ident">SPECTRAL_570</span>, <span class="ident">SPECTRAL_580</span>,
+    <span class="ident">SPECTRAL_590</span>, <span class="ident">SPECTRAL_600</span>, <span class="ident">SPECTRAL_610</span>, <span class="ident">SPECTRAL_620</span>, <span class="ident">SPECTRAL_630</span>,
+    <span class="ident">SPECTRAL_640</span>, <span class="ident">SPECTRAL_650</span>, <span class="ident">SPECTRAL_660</span>, <span class="ident">SPECTRAL_670</span>, <span class="ident">SPECTRAL_680</span>,
+    <span class="ident">SPECTRAL_690</span>, <span class="ident">SPECTRAL_700</span>, <span class="ident">SPECTRAL_710</span>, <span class="ident">SPECTRAL_720</span>, <span class="ident">SPECTRAL_730</span>,
+    <span class="ident">SPECTRAL_740</span>, <span class="ident">SPECTRAL_750</span>, <span class="ident">SPECTRAL_760</span>, <span class="ident">SPECTRAL_770</span>, <span class="ident">SPECTRAL_780</span>,
+    <span class="ident">SPECTRAL_790</span>, <span class="ident">SPECTRAL_800</span>, <span class="ident">SPECTRAL_810</span>, <span class="ident">SPECTRAL_820</span>, <span class="ident">SPECTRAL_830</span>
 }
 
 <span class="comment">// Implicit DATA_FORMAT for ColorBurst LinFiles</span>
@@ -230,6 +241,10 @@
             <span class="string">&quot;LAB_DE_94&quot;</span>    <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">LAB_DE_94</span>),
             <span class="string">&quot;LAB_DE_CMC&quot;</span>   <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">LAB_DE_CMC</span>),
             <span class="string">&quot;LAB_DE_2000&quot;</span>  <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">LAB_DE2000</span>),
+            <span class="string">&quot;SPECTRAL_340&quot;</span> <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">SPECTRAL_340</span>),
+            <span class="string">&quot;SPECTRAL_350&quot;</span> <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">SPECTRAL_350</span>),
+            <span class="string">&quot;SPECTRAL_360&quot;</span> <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">SPECTRAL_360</span>),
+            <span class="string">&quot;SPECTRAL_370&quot;</span> <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">SPECTRAL_370</span>),
             <span class="string">&quot;SPECTRAL_380&quot;</span> <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">SPECTRAL_380</span>),
             <span class="string">&quot;SPECTRAL_390&quot;</span> <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">SPECTRAL_390</span>),
             <span class="string">&quot;SPECTRAL_400&quot;</span> <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">SPECTRAL_400</span>),
@@ -271,6 +286,11 @@
             <span class="string">&quot;SPECTRAL_760&quot;</span> <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">SPECTRAL_760</span>),
             <span class="string">&quot;SPECTRAL_770&quot;</span> <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">SPECTRAL_770</span>),
             <span class="string">&quot;SPECTRAL_780&quot;</span> <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">SPECTRAL_780</span>),
+            <span class="string">&quot;SPECTRAL_790&quot;</span> <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">SPECTRAL_790</span>),
+            <span class="string">&quot;SPECTRAL_800&quot;</span> <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">SPECTRAL_800</span>),
+            <span class="string">&quot;SPECTRAL_810&quot;</span> <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">SPECTRAL_810</span>),
+            <span class="string">&quot;SPECTRAL_820&quot;</span> <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">SPECTRAL_820</span>),
+            <span class="string">&quot;SPECTRAL_830&quot;</span> <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">SPECTRAL_830</span>),
             <span class="kw">_</span> <span class="op">=&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">CgatsError</span>::<span class="ident">UnknownFormatType</span>)
         }
     }
