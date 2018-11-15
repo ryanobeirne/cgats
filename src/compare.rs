@@ -132,6 +132,9 @@ impl CgatsVec {
         // Use the first object to fill in the blanks
         cgo.raw_vec = self.raw_from_prime(&cgo.data_map)?;
 
+        // Append sample count to end of first line
+        cgo.raw_vec.inner[0].push(format!("Average of {}", vec_count));
+
         Ok(cgo)
     }
 }
