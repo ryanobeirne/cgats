@@ -15,7 +15,7 @@ pub enum DataFormatType {
     RGB_R, RGB_G, RGB_B,
     D_RED, D_GREEN, D_BLUE, D_VIS,
     LAB_L, LAB_A, LAB_B, LAB_C, LAB_H,
-    LAB_DE, LAB_DE_94, LAB_DE_94T, LAB_DE_CMC, LAB_DE2000,
+    DE_1976, DE_1994, DE_1994T, DE_CMC, DE_CMC2, DE_2000,
     XYZ_X, XYZ_Y, XYZ_Z,
     XYY_X, XYY_Y, XYY_CAPY,
     SPECTRAL_340, SPECTRAL_350, SPECTRAL_360, SPECTRAL_370, SPECTRAL_380,
@@ -63,7 +63,7 @@ impl DataFormatType {
     pub fn from(s: &str) -> CgatsResult<Self> {
         use DataFormatType::*;
         match s.to_uppercase().as_ref() {
-            "SAMPLE_ID" | "SAMPLEID" | "SAMPLE" => Ok(SAMPLE_ID),
+            "SAMPLE_ID"   | "SAMPLEID" | "SAMPLE" => Ok(SAMPLE_ID),
             "SAMPLE_NAME" | "SAMPLENAME" => Ok(SAMPLE_NAME),
 	        ""        => Ok(BLANK),
             "CMYK_C"  => Ok(CMYK_C),
@@ -81,14 +81,34 @@ impl DataFormatType {
             "XYZ_X"   => Ok(XYZ_X),
             "XYZ_Y"   => Ok(XYZ_Y),
             "XYZ_Z"   => Ok(XYZ_Z),
+
             "D_RED"   => Ok(D_RED),
             "D_GREEN" => Ok(D_GREEN),
             "D_BLUE"  => Ok(D_BLUE),
             "D_VISUAL" | "D_VIS" => Ok(D_VIS),
-            "LAB_DE"       => Ok(LAB_DE),
-            "LAB_DE_94"    => Ok(LAB_DE_94),
-            "LAB_DE_CMC"   => Ok(LAB_DE_CMC),
-            "LAB_DE_2000"  => Ok(LAB_DE2000),
+
+            "LAB_DE" | "DE1976" | "DE76" | "DE" | "DE_76" | "DE_1976"
+                => Ok(DE_1976),
+
+            "LAB_DE_1994" | "DE1994" | "DE94" | "DE1994G" | "DE94G" | "DE94_G" |
+            "DE_1994" | "DE_94" | "DE_1994G" | "DE_1994_G" | "DE_94G" | "DE_94_G"
+                => Ok(DE_1994),
+
+            "LAB_DE_1994T" | "DE1994T" | "DE94T" | "DE_1994_T" | "DE_94T" |
+            "DE_1994T" | "DE_94_T" | "DE94_T"
+                => Ok(DE_1994T),
+
+            "LAB_DE_CMC" | "DECMC" | "DECMC1" | "CMC" | "CMC 1:1" | "DE_CMC1" |
+            "DE_CMC_1" | "DE_CMC"
+                => Ok(DE_CMC),
+
+            "LAB_DE_CMC2" | "DECMC2" | "CMC2" | "CMC 2:1" |
+            "DE_CMC_2" | "DE_CMC2" | "DE_CMC 2:1" | "DECMC_2"
+                => Ok(DE_CMC2),
+            
+            "LAB_DE_2001" | "DE2000" | "DE00" | "DE_2000" | "DE_00"
+                => Ok(DE_2000),
+
             "SPECTRAL_340" => Ok(SPECTRAL_340),
             "SPECTRAL_350" => Ok(SPECTRAL_350),
             "SPECTRAL_360" => Ok(SPECTRAL_360),
