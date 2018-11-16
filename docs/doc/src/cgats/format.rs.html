@@ -149,6 +149,26 @@
 <span id="149">149</span>
 <span id="150">150</span>
 <span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
 </pre><pre class="rust ">
 <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
 
@@ -167,7 +187,7 @@
     <span class="ident">RGB_R</span>, <span class="ident">RGB_G</span>, <span class="ident">RGB_B</span>,
     <span class="ident">D_RED</span>, <span class="ident">D_GREEN</span>, <span class="ident">D_BLUE</span>, <span class="ident">D_VIS</span>,
     <span class="ident">LAB_L</span>, <span class="ident">LAB_A</span>, <span class="ident">LAB_B</span>, <span class="ident">LAB_C</span>, <span class="ident">LAB_H</span>,
-    <span class="ident">LAB_DE</span>, <span class="ident">LAB_DE_94</span>, <span class="ident">LAB_DE_94T</span>, <span class="ident">LAB_DE_CMC</span>, <span class="ident">LAB_DE2000</span>,
+    <span class="ident">DE_1976</span>, <span class="ident">DE_1994</span>, <span class="ident">DE_1994T</span>, <span class="ident">DE_CMC</span>, <span class="ident">DE_CMC2</span>, <span class="ident">DE_2000</span>,
     <span class="ident">XYZ_X</span>, <span class="ident">XYZ_Y</span>, <span class="ident">XYZ_Z</span>,
     <span class="ident">XYY_X</span>, <span class="ident">XYY_Y</span>, <span class="ident">XYY_CAPY</span>,
     <span class="ident">SPECTRAL_340</span>, <span class="ident">SPECTRAL_350</span>, <span class="ident">SPECTRAL_360</span>, <span class="ident">SPECTRAL_370</span>, <span class="ident">SPECTRAL_380</span>,
@@ -215,7 +235,7 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-&gt;</span> <span class="ident">CgatsResult</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">use</span> <span class="ident">DataFormatType</span>::<span class="kw-2">*</span>;
         <span class="kw">match</span> <span class="ident">s</span>.<span class="ident">to_uppercase</span>().<span class="ident">as_ref</span>() {
-            <span class="string">&quot;SAMPLE_ID&quot;</span> <span class="op">|</span> <span class="string">&quot;SAMPLEID&quot;</span> <span class="op">|</span> <span class="string">&quot;SAMPLE&quot;</span> <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">SAMPLE_ID</span>),
+            <span class="string">&quot;SAMPLE_ID&quot;</span>   <span class="op">|</span> <span class="string">&quot;SAMPLEID&quot;</span> <span class="op">|</span> <span class="string">&quot;SAMPLE&quot;</span> <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">SAMPLE_ID</span>),
             <span class="string">&quot;SAMPLE_NAME&quot;</span> <span class="op">|</span> <span class="string">&quot;SAMPLENAME&quot;</span> <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">SAMPLE_NAME</span>),
 	        <span class="string">&quot;&quot;</span>        <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">BLANK</span>),
             <span class="string">&quot;CMYK_C&quot;</span>  <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">CMYK_C</span>),
@@ -233,14 +253,34 @@
             <span class="string">&quot;XYZ_X&quot;</span>   <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">XYZ_X</span>),
             <span class="string">&quot;XYZ_Y&quot;</span>   <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">XYZ_Y</span>),
             <span class="string">&quot;XYZ_Z&quot;</span>   <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">XYZ_Z</span>),
+
             <span class="string">&quot;D_RED&quot;</span>   <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">D_RED</span>),
             <span class="string">&quot;D_GREEN&quot;</span> <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">D_GREEN</span>),
             <span class="string">&quot;D_BLUE&quot;</span>  <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">D_BLUE</span>),
             <span class="string">&quot;D_VISUAL&quot;</span> <span class="op">|</span> <span class="string">&quot;D_VIS&quot;</span> <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">D_VIS</span>),
-            <span class="string">&quot;LAB_DE&quot;</span>       <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">LAB_DE</span>),
-            <span class="string">&quot;LAB_DE_94&quot;</span>    <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">LAB_DE_94</span>),
-            <span class="string">&quot;LAB_DE_CMC&quot;</span>   <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">LAB_DE_CMC</span>),
-            <span class="string">&quot;LAB_DE_2000&quot;</span>  <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">LAB_DE2000</span>),
+
+            <span class="string">&quot;LAB_DE&quot;</span> <span class="op">|</span> <span class="string">&quot;DE1976&quot;</span> <span class="op">|</span> <span class="string">&quot;DE76&quot;</span> <span class="op">|</span> <span class="string">&quot;DE&quot;</span> <span class="op">|</span> <span class="string">&quot;DE_76&quot;</span> <span class="op">|</span> <span class="string">&quot;DE_1976&quot;</span>
+                <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">DE_1976</span>),
+
+            <span class="string">&quot;LAB_DE_1994&quot;</span> <span class="op">|</span> <span class="string">&quot;DE1994&quot;</span> <span class="op">|</span> <span class="string">&quot;DE94&quot;</span> <span class="op">|</span> <span class="string">&quot;DE1994G&quot;</span> <span class="op">|</span> <span class="string">&quot;DE94G&quot;</span> <span class="op">|</span> <span class="string">&quot;DE94_G&quot;</span> <span class="op">|</span>
+            <span class="string">&quot;DE_1994&quot;</span> <span class="op">|</span> <span class="string">&quot;DE_94&quot;</span> <span class="op">|</span> <span class="string">&quot;DE_1994G&quot;</span> <span class="op">|</span> <span class="string">&quot;DE_1994_G&quot;</span> <span class="op">|</span> <span class="string">&quot;DE_94G&quot;</span> <span class="op">|</span> <span class="string">&quot;DE_94_G&quot;</span>
+                <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">DE_1994</span>),
+
+            <span class="string">&quot;LAB_DE_1994T&quot;</span> <span class="op">|</span> <span class="string">&quot;DE1994T&quot;</span> <span class="op">|</span> <span class="string">&quot;DE94T&quot;</span> <span class="op">|</span> <span class="string">&quot;DE_1994_T&quot;</span> <span class="op">|</span> <span class="string">&quot;DE_94T&quot;</span> <span class="op">|</span>
+            <span class="string">&quot;DE_1994T&quot;</span> <span class="op">|</span> <span class="string">&quot;DE_94_T&quot;</span> <span class="op">|</span> <span class="string">&quot;DE94_T&quot;</span>
+                <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">DE_1994T</span>),
+
+            <span class="string">&quot;LAB_DE_CMC&quot;</span> <span class="op">|</span> <span class="string">&quot;DECMC&quot;</span> <span class="op">|</span> <span class="string">&quot;DECMC1&quot;</span> <span class="op">|</span> <span class="string">&quot;CMC&quot;</span> <span class="op">|</span> <span class="string">&quot;CMC 1:1&quot;</span> <span class="op">|</span> <span class="string">&quot;DE_CMC1&quot;</span> <span class="op">|</span>
+            <span class="string">&quot;DE_CMC_1&quot;</span> <span class="op">|</span> <span class="string">&quot;DE_CMC&quot;</span>
+                <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">DE_CMC</span>),
+
+            <span class="string">&quot;LAB_DE_CMC2&quot;</span> <span class="op">|</span> <span class="string">&quot;DECMC2&quot;</span> <span class="op">|</span> <span class="string">&quot;CMC2&quot;</span> <span class="op">|</span> <span class="string">&quot;CMC 2:1&quot;</span> <span class="op">|</span>
+            <span class="string">&quot;DE_CMC_2&quot;</span> <span class="op">|</span> <span class="string">&quot;DE_CMC2&quot;</span> <span class="op">|</span> <span class="string">&quot;DE_CMC 2:1&quot;</span> <span class="op">|</span> <span class="string">&quot;DECMC_2&quot;</span>
+                <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">DE_CMC2</span>),
+            
+            <span class="string">&quot;LAB_DE_2001&quot;</span> <span class="op">|</span> <span class="string">&quot;DE2000&quot;</span> <span class="op">|</span> <span class="string">&quot;DE00&quot;</span> <span class="op">|</span> <span class="string">&quot;DE_2000&quot;</span> <span class="op">|</span> <span class="string">&quot;DE_00&quot;</span>
+                <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">DE_2000</span>),
+
             <span class="string">&quot;SPECTRAL_340&quot;</span> <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">SPECTRAL_340</span>),
             <span class="string">&quot;SPECTRAL_350&quot;</span> <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">SPECTRAL_350</span>),
             <span class="string">&quot;SPECTRAL_360&quot;</span> <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">SPECTRAL_360</span>),
