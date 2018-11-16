@@ -170,3 +170,13 @@ fn btreemap() -> CgatsResult<()> {
 
     Ok(())
 }
+
+#[test]
+fn column_order() -> CgatsResult<()> {
+    let cg0 = CgatsObject::from_file("test_files/cgats1.tsv")?;
+    let cgv = CgatsVec::from_files(&vec!["test_files/cgats1.tsv", "test_files/cgats4.tsv"])?;
+    let avg = cgv.average()?;
+    println!("{}", avg);
+    assert_eq!(cg0.data_map, avg.data_map);
+    Ok(())
+}

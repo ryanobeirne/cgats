@@ -23,7 +23,7 @@ pub use format::*;
 mod tests;
 
 // The meat and potatoes of this crate
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct CgatsObject {
     pub raw_vec: RawVec,
     pub cgats_type: Option<CgatsType>,

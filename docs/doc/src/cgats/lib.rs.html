@@ -321,7 +321,7 @@
 <span class="kw">mod</span> <span class="ident">tests</span>;
 
 <span class="comment">// The meat and potatoes of this crate</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CgatsObject</span> {
     <span class="kw">pub</span> <span class="ident">raw_vec</span>: <span class="ident">RawVec</span>,
     <span class="kw">pub</span> <span class="ident">cgats_type</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">CgatsType</span><span class="op">&gt;</span>,

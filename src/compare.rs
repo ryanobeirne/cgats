@@ -50,14 +50,14 @@ impl CgatsVec {
             }
 
             // Make sure they all have the same DataFormat
-            if cgo_prime.data_format.len() != object.data_format.len() {
-                return false;
+            for format_type in &cgo_prime.data_format {
+                if !object.data_format.contains(&format_type) {
+                    return false;
+                }
             }
-            for (index, format) in cgo_prime.data_format.iter().enumerate() {
-                for object in self.inner[1..].iter() {
-                    if object.data_format[index] != *format {
-                        return false
-                    }
+            for format_type in &object.data_format {
+                if !cgo_prime.data_format.contains(&format_type) {
+                    return false;
                 }
             }
         }
