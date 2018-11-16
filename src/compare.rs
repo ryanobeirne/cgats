@@ -42,6 +42,7 @@ impl CgatsVec {
 
         // The first object in the list
         let cgo_prime = &self.inner[0];
+        if cgo_prime.len() < 1 { return false; }
 
         for object in self.inner[1..].iter() {
             // Make sure they all have the same sample size
