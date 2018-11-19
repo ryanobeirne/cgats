@@ -21,4 +21,10 @@ pub fn build_cli() -> App<'static, 'static> {
                 .value_name("FILE")
                 .multiple(true)
                 .required(true)))
+        .subcommand(SubCommand::with_name("concatenate")
+            .about("Concatenate 2 or more CGATS color files")
+            .arg(Arg::with_name("comparefiles")
+                .value_name("FILE")
+                .multiple(true)
+                .required(true)))
 }

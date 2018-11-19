@@ -6,6 +6,7 @@ use std::fmt;
 #[derive(Debug)]
 pub enum Command {
     Average,
+    Concatenate,
     // Convert,
 }
 
@@ -13,6 +14,7 @@ impl Command {
     pub fn from_string(s: &str) -> Option<Self> {
         match s.to_lowercase().as_str() {
             "average" | "avg" => Some(Command::Average),
+            "concatenate" | "cat" => Some(Command::Concatenate),
             // "convert"         => Some(Command::Convert),
             _ => None
         }
@@ -20,7 +22,8 @@ impl Command {
 
     pub fn execute(&self, cgv: CgatsVec) -> CgatsResult<CgatsObject> {
         match &self {
-            Command::Average => cgv.average()
+            Command::Average => cgv.average(),
+            Command::Concatenate => cgv.concatenate(),
         }
     }
 

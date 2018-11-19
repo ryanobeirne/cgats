@@ -44,36 +44,9 @@ impl CgatsVec {
         let cgo_prime = &self.inner[0];
         if cgo_prime.len() < 1 { return false; }
 
-        for object in self.inner[1..].iter() {
-            // Make sure they all have the same sample size
-            if cgo_prime.len() != object.len() {
-                return false;
-            }
-
-            // Make sure they all have the same DataFormat
-            for format_type in &cgo_prime.data_format {
-                if !object.data_format.contains(&format_type) {
-                    return false;
-                }
-            }
-            for format_type in &object.data_format {
-                if !cgo_prime.data_format.contains(&format_type) {
-                    return false;
-                }
-            }
-        }
-
-        true
+        self.same_formats() && self.same_sample_count()
     }
 
-    // #[allow(dead_code)]
-    // fn average(nums: Vec<f64>) -> f64 {
-    //     let mut sum: f64 = 0.0;
-    //     for i in &nums {
-    //         sum += i;
-    //     }
-    //     sum / nums.len() as f64
-    // }
     pub fn raw_from_prime(&self, cgats_map: &CgatsMap) -> CgatsResult<RawVec> {
         let mut raw_vec = RawVec::new();
 
@@ -104,6 +77,12 @@ impl CgatsVec {
         Ok(raw_vec)
     }
 
+    pub fn to_map_vec(&self) -> MapVec {
+        self.inner.iter().map(|cgvo|
+            cgvo.data_map.clone()
+        ).collect()
+    }
+
     pub fn average(&self) -> CgatsResult<CgatsObject> {
         // The first object in the list
         let cgo_prime = &self.inner[0];
@@ -122,9 +101,7 @@ impl CgatsVec {
         } 
 
         // Collect all the DataMaps into a MapVec
-        let map_vec: MapVec = self.inner.iter().map(|cgvo|
-            cgvo.data_map.clone()
-        ).collect();
+        let map_vec = self.to_map_vec();
 
         // Use filler from first object
         let mut cgo = CgatsObject::derive_from(&cgo_prime);
@@ -135,6 +112,69 @@ impl CgatsVec {
 
         // Append sample count to end of first line
         cgo.raw_vec.inner[0].push(format!("Average of {}", vec_count));
+
+        Ok(cgo)
+    }
+
+    pub fn same_sample_count(&self) -> bool {
+        let cgo_prime = &self.inner[0];
+
+        for object in &self.inner {
+            if object.len() != cgo_prime.len() {
+                return false;
+            }
+        }
+
+        true
+    }
+
+    pub fn same_formats(&self) -> bool {
+        let cgo_prime = &self.inner[0];
+
+        for object in &self.inner {
+            // Make sure they all have the same DataFormat
+            for format_type in &cgo_prime.data_format {
+                if !object.data_format.contains(&format_type) {
+                    return false;
+                }
+            }
+            for format_type in &object.data_format {
+                if !cgo_prime.data_format.contains(&format_type) {
+                    return false;
+                }
+            }
+        }
+
+        true
+    }
+
+    pub fn concatenate(&self) -> CgatsResult<CgatsObject> {
+        let cgo_prime = &self.inner[0];
+
+        // If there's only 1 or none, we can skip out early
+        match self.inner.len() {
+            1 => return Ok(cgo_prime.clone()),
+            0 => return Err(CgatsError::CannotCompare),
+            _ => ()
+        }
+
+        // Error if DATA_FORMATS are not the same
+        if ! self.same_formats() { return Err(CgatsError::CannotCompare); }
+
+        // Start with the first DATA_FORMAT
+        let mut cgo = CgatsObject::new_with_format(
+            cgo_prime.data_format.clone()
+        );
+
+        // Convert this vec to a map
+        let map_vec = &self.to_map_vec();
+
+        // Do the concatenation
+        cgo.data_map = map_vec.concatenate()?;
+        // Generate a RawVec
+        cgo.raw_vec = self.raw_from_prime(&cgo.data_map)?;
+        // Clone the CgatsType
+        cgo.cgats_type = cgo_prime.cgats_type.clone();
 
         Ok(cgo)
     }
@@ -194,6 +234,40 @@ impl MapVec {
                 }
             }
         }
+
+        Ok(cgm)
+    }
+
+    pub fn concatenate(&self) -> CgatsResult<CgatsMap> {
+        // Early return if 1 or 0 maps in this vec
+        match &self.len() {
+            1 => return Ok(self.inner[0].clone()),
+            0 => return Err(CgatsError::CannotCompare),
+            _ => ()
+        }
+
+        // Start with the first one
+        let mut cgm = self.inner[0].clone();
+
+        // Get the data format from the map. If SAMPLE_ID is not the first type,
+        // or the type is not ColorBurst, this will return an error,
+        // so be careful with this
+        let data_format = cgm.data_format()?;
+
+        // Loop through the rest of the maps and push the values
+        // with incremented keys
+        for map in &self.inner[1..] {
+            for ((_, format), value) in &map.inner {
+                let max = cgm.max_index();
+                let increment = if *format == data_format[0] {1} else {0};
+                let sample_id = max + increment;
+                let key = (sample_id, *format);
+                cgm.inner.insert(key, value.clone());
+            }
+        }
+
+        // Rename the SAMPLE_ID's to match the index
+        cgm.reindex_sample_id();
 
         Ok(cgm)
     }

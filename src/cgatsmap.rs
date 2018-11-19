@@ -67,6 +67,51 @@ impl CgatsMap {
         Self::from_raw_vec(&raw_vec)
     }
 
+    pub fn max_index(&self) -> usize {
+        let mut max_index = 0;
+
+        for ((index, _), _) in &self.inner {
+            if index > &max_index {
+                max_index = *index
+            }
+        }
+
+        max_index
+    }
+
+    // Extract DATA_FORMAT from CgatsMap
+    pub fn data_format(&self) -> CgatsResult<DataFormat> {
+        let mut data_format = DataFormat::new();
+
+        // Loop through map keys and push the format
+        for (_, format) in self.inner.keys() {
+            if !data_format.contains(format) {
+                data_format.push(*format);
+            }
+        }
+
+        // Error if empty format
+        if data_format.len() < 1 {
+            return Err(CgatsError::UnknownFormatType)
+        }
+
+        // Check that the first format type is SAMPLE_ID unless it's ColorBurst
+        if data_format[0] != DataFormatType::SAMPLE_ID &&
+            data_format != format::ColorBurstFormat() {
+                return Err(CgatsError::InvalidID);
+        }
+
+        Ok(data_format)
+    }
+
+    // Rename/renumber SAMPLE_ID's to match index
+    pub fn reindex_sample_id(&mut self) {
+        for (key, value) in self.inner.iter_mut() {
+            if key.1 == DataFormatType::SAMPLE_ID {
+                *value = CgatsValue::from_string( &(key.0).to_string() );
+            }
+        }
+    }
 }
 
 impl fmt::Display for CgatsMap {

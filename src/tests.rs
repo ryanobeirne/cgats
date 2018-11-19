@@ -180,3 +180,33 @@ fn column_order() -> CgatsResult<()> {
     assert_eq!(cg0.data_map, avg.data_map);
     Ok(())
 }
+
+#[test]
+fn cat() -> CgatsResult<()> {
+    let cgv = CgatsVec::from_files(&vec![
+        "test_files/cgats1.tsv",
+        "test_files/cgats2.tsv",
+        "test_files/cgats3.tsv",
+        "test_files/cgats4.tsv",
+    ])?;
+
+    let cat = cgv.concatenate()?;
+
+    println!("{}", cat.print()?);    
+
+    Ok(())
+}
+
+#[test]
+fn cat_cb() -> CgatsResult<()> {
+    let cgv = CgatsVec::from_files(&vec![
+        "test_files/colorburst0.txt",
+        "test_files/colorburst1.lin",
+    ])?;
+
+    let cat = cgv.concatenate()?;
+
+    println!("{}", cat.print()?);
+
+    Ok(())
+}
