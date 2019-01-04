@@ -1,4 +1,5 @@
 use super::*;
+use std::str::FromStr;
 
 // List of all test files relative to crate root
 fn test_files<'a>() -> Vec<&'a str> {
@@ -22,8 +23,8 @@ fn data_format() -> CgatsResult<()> {
 
     println!("{:?}", cgv);
 
-    let df = DataFormatType::from("CMYK_C")?;
-    assert_eq!(df.display(), "CMYK_C");
+    let df = DataFormatType::from_str("CMYK_C")?;
+    assert_eq!(df.to_string(), "CMYK_C");
 
     Ok(())
 }

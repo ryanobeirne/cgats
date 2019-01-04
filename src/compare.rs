@@ -62,7 +62,7 @@ impl CgatsVec {
 
         // Push on the DATA_FORMAT
         raw_vec.push(vec!("BEGIN_DATA_FORMAT".to_string()));
-        raw_vec.push(cgo_prime.data_format.iter().map(|f| f.display()).collect());
+        raw_vec.push(cgo_prime.data_format.iter().map(|f| f.to_string()).collect());
         raw_vec.push(vec!("END_DATA_FORMAT".to_string()));
 
         // Push on the DATA

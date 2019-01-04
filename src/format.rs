@@ -49,7 +49,7 @@ pub fn ColorBurstFormat() -> DataFormat {
 }
 
 impl DataFormatType {
-    pub fn display(&self) -> String {
+    pub fn to_string(&self) -> String {
         format!("{}", &self)
     }
 
@@ -63,8 +63,26 @@ impl DataFormatType {
         }
     }
 
-    // Convert a &str to a DataFormatType
-    pub fn from(s: &str) -> CgatsResult<Self> {
+}
+
+impl fmt::Display for DataFormatType {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let s = format!("{:?}", self);
+
+        let result = s
+            .replace("FIVE",  "5")
+            .replace("SIX",   "6")
+            .replace("SEVEN", "7")
+            .replace("EIGHT", "8");
+
+        write!(f, "{}", result)
+    }
+}
+
+impl FromStr for DataFormatType {
+    type Err = CgatsError;
+
+    fn from_str(s: &str) -> CgatsResult<Self> {
         use DataFormatType::*;
         match s.to_uppercase().as_ref() {
             "SAMPLE_ID"   | "SAMPLEID" | "SAMPLE" => Ok(SAMPLE_ID),
@@ -199,10 +217,5 @@ impl DataFormatType {
             _ => Err(CgatsError::UnknownFormatType)
         }
     }
-}
 
-impl fmt::Display for DataFormatType {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:?}", &self)
-    }
 }

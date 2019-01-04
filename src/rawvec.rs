@@ -149,7 +149,7 @@ impl RawVec {
             match item[0].as_str() {
                 "BEGIN_DATA_FORMAT" => {
                     for format_type in self.inner[index + 1].iter() {
-                        let format = DataFormatType::from(format_type)?;
+                        let format = DataFormatType::from_str(&format_type)?;
                         data_format.push(format);
                     }
                     break;

@@ -3,6 +3,7 @@ use std::path::Path;
 use std::fmt;
 use std::collections::BTreeMap;
 use std::io::{Write, BufWriter};
+pub use std::str::FromStr;
 
 mod rawvec;
 pub use rawvec::*;
@@ -131,7 +132,7 @@ impl CgatsObject {
             return Err(CgatsError::NoDataFormat);
         }
         for (index, format) in self.data_format.iter().enumerate() {
-            s.push_str(&format.display());
+            s.push_str(&format.to_string());
             if index == self.data_format.len() - 1 {
                 s.push('\n');
             } else {
