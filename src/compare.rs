@@ -236,41 +236,6 @@ impl MapVec {
 
         Ok(cgm)
     }
-
-    // // This takes a long time. Don't do it.
-    // pub fn concatenate(&self) -> CgatsResult<CgatsMap> {
-    //     // Early return if 1 or 0 maps in this vec
-    //     match &self.len() {
-    //         1 => return Ok(self.inner[0].clone()),
-    //         0 => return Err(CgatsError::CannotCompare),
-    //         _ => ()
-    //     }
-
-    //     // Start with the first one
-    //     let mut cgm = self.inner[0].clone();
-
-    //     // Get the data format from the map. If SAMPLE_ID is not the first type,
-    //     // or the type is not ColorBurst, this will return an error,
-    //     // so be careful with this
-    //     let data_format = cgm.data_format()?;
-
-    //     // Loop through the rest of the maps and push the values
-    //     // with incremented keys
-    //     for map in &self.inner[1..] {
-    //         for ((_, format), value) in &map.inner {
-    //             let max = cgm.max_index();
-    //             let increment = if *format == data_format[0] {1} else {0};
-    //             let sample_id = max + increment;
-    //             let key = (sample_id, *format);
-    //             cgm.inner.insert(key, value.clone());
-    //         }
-    //     }
-
-    //     // Rename the SAMPLE_ID's to match the index
-    //     cgm.reindex_sample_id();
-
-    //     Ok(cgm)
-    // }
 }
 
 impl FromIterator<CgatsMap> for MapVec {
