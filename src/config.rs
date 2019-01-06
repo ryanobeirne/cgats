@@ -6,7 +6,7 @@ use std::fmt;
 #[derive(Debug)]
 pub enum Command {
     Average,
-    Concatenate,
+    Cat,
     // Convert,
 }
 
@@ -14,7 +14,7 @@ impl Command {
     pub fn from_string(s: &str) -> Option<Self> {
         match s.to_lowercase().as_str() {
             "average" | "avg" => Some(Command::Average),
-            "concatenate" | "cat" => Some(Command::Concatenate),
+            "concatenate" | "cat" | "append" => Some(Command::Cat),
             // "convert"         => Some(Command::Convert),
             _ => None
         }
@@ -23,7 +23,7 @@ impl Command {
     pub fn execute(&self, cgv: CgatsVec) -> CgatsResult<CgatsObject> {
         match &self {
             Command::Average => cgv.average(),
-            Command::Concatenate => cgv.concatenate(),
+            Command::Cat => cgv.concatenate(),
         }
     }
 
@@ -55,7 +55,10 @@ impl Config {
 
         let files = if let Some(cmd) = cmd_name {
             match matches.subcommand_matches(cmd) {
-                Some(scm) => scm.values_of("comparefiles").unwrap().map(|m| m.to_string()).collect(),
+                Some(scm) => scm.values_of("comparefiles")
+                    .expect("Did not find 'comparefiles'")
+                    .map(|m| m.to_string())
+                    .collect(),
                 None => Vec::new()
             }
         } else {
@@ -78,5 +81,21 @@ impl Config {
 
     pub fn cgats_vec(&self) -> CgatsResult<CgatsVec> {
         CgatsVec::from_files(&self.files)
+    }
+}
+
+impl fmt::Display for Config {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let mut s = String::from("Config {\n\tcommand: ");
+
+        s.push_str(&format!("{:?}\n", self.command));
+
+        for file in &self.files {
+            s.push_str(&format!("\tfile: {}\n", file));
+        }
+
+        s.push('}');
+
+        write!(f, "{}", s)
     }
 }

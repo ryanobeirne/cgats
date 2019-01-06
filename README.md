@@ -53,6 +53,7 @@ ARGS:
 
 SUBCOMMANDS:
     average    Average 2 or more CGATS color files
+    cat        Concatenate 2 or more CGATS color files
     help       Prints this message or the help of the given subcommand(s)
 ```
 

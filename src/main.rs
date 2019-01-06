@@ -12,16 +12,27 @@ fn main() -> CgatsResult<()> {
     //Parse command line arguments with clap
     let matches = cli::build_cli().get_matches();
     let config = Config::build(&matches);
+    // println!("{}", config);
 
-    if config.files.len() < 1 {
-        eprintln!("{}", matches.usage());
+    if config.files.is_empty() {
+        eprintln!("{}", matches.usage()); 
+        std::process::exit(1);
+    } else if config.files.len() > 1 && config.command.is_none() {
+        eprintln!("{}", matches.usage()); 
         std::process::exit(1);
     }
 
     match &config.command {
         Some(cmd) => {
             let cgo = config.execute()?;
-            match matches.subcommand_matches(cmd.display()).unwrap().value_of("output") {
+            match matches.subcommand_matches(cmd.display())
+                .expect(
+                    &format!(
+                        "Did not find subcommand_matches for '{}'",
+                        cmd.display()
+                ))
+                .value_of("output")
+            {
                 Some(f) => cgo.write_cgats(f)?,
                 None => println!("{}", cgo.print()?)
             }
