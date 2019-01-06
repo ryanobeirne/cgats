@@ -17,9 +17,6 @@ fn main() -> CgatsResult<()> {
     if config.files.is_empty() {
         eprintln!("{}", matches.usage()); 
         std::process::exit(1);
-    } else if config.files.len() > 1 && config.command.is_none() {
-        eprintln!("{}", matches.usage()); 
-        std::process::exit(1);
     }
 
     match &config.command {
