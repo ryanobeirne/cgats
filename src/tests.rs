@@ -49,8 +49,7 @@ fn test_extract_data_format() -> CgatsResult<()> {
 // Test the extraction of DATA
 #[test]
 fn test_extract_data() -> CgatsResult<()>{
-    let cgo = CgatsObject::from_file("test_files/cgats1.tsv")?;
-    let data = cgo.raw_vec.extract_data()?;
+    let data = CgatsObject::from_file("test_files/cgats1.tsv")?.data()?;
     println!("{:?}", data);
 
     let data_vec = vec![
@@ -63,7 +62,7 @@ fn test_extract_data() -> CgatsResult<()>{
        vec!["7",  "Green",   "100", "0",   "100", "0"  ],
        vec!["8",  "3cBlack", "100", "100", "100", "0"  ],
        vec!["9",  "4cBlack", "100", "100", "100", "100"],
-       vec!["10",  "3cGray",  "50",  "40",  "40",  "0"  ],
+       vec!["10", "3cGray",  "50",  "40",  "40",  "0"  ],
        vec!["11", "1cGray",  "0",   "0",   "0",   "50" ],
     ];
 
@@ -153,16 +152,17 @@ fn meta() -> CgatsResult<()> {
 
 #[test]
 fn compare_average() -> CgatsResult<()> {
-    let cgo0 = CgatsObject::from_file("test_files/cgats1.tsv")?;
-    let cgo1 = CgatsObject::from_file("test_files/cgats2.tsv")?;
-    let mut cgo_vec = compare::CgatsVec::new();
+    let avg = CgatsVec::from_files(
+        &vec![
+            "test_files/cgats1.tsv",
+            "test_files/cgats2.tsv",
+        ]
+    ).average()?;
 
-    cgo_vec.push(cgo0);
-    cgo_vec.push(cgo1);
+    println!("{}", &avg.print()?);
 
-    let cgo_avg = cgo_vec.average()?;
-
-    println!("{}", &cgo_avg.print()?);
+    let expected = CgatsObject::from_file("test_files/cgats5.tsv")?;
+    assert_eq!(avg, expected);
 
     Ok(())
 }
@@ -180,7 +180,7 @@ fn btreemap() -> CgatsResult<()> {
 #[test]
 fn column_order() -> CgatsResult<()> {
     let cg0 = CgatsObject::from_file("test_files/cgats1.tsv")?;
-    let cgv = CgatsVec::from_files(&vec!["test_files/cgats1.tsv", "test_files/cgats4.tsv"])?;
+    let cgv = CgatsVec::from_files(&vec!["test_files/cgats1.tsv", "test_files/cgats4.tsv"]);
     let avg = cgv.average()?;
     println!("{}", avg);
     assert_eq!(cg0.data_map, avg.data_map);
@@ -194,7 +194,7 @@ fn reindex() -> CgatsResult<()> {
         "test_files/cgats2.tsv",
         "test_files/cgats3.tsv",
         "test_files/cgats4.tsv",
-    ])?;
+    ]);
 
     let cat = cgv.concatenate()?;
 
@@ -216,7 +216,7 @@ fn cat_cb() -> CgatsResult<()> {
     let cgv = CgatsVec::from_files(&vec![
         "test_files/colorburst0.txt",
         "test_files/colorburst1.lin",
-    ])?;
+    ]);
 
     let cat = cgv.concatenate()?;
 

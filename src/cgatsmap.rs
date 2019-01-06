@@ -37,7 +37,7 @@ impl CgatsMap {
         Ok(Self {inner})
     }
 
-    pub fn to_data_vec(&self) -> CgatsResult<DataVec> {
+    pub fn to_data_vec(&self) -> DataVec {
         let mut data_vec = DataVec::new();
         let mut index_map: BTreeMap<usize, bool> = BTreeMap::new();
         let mut format_map: BTreeMap<DataFormatType, bool> = BTreeMap::new();
@@ -61,7 +61,7 @@ impl CgatsMap {
             data_vec.insert(*index, data_line);
         }
         
-        Ok(data_vec)
+        data_vec
     }
 
     pub fn from_file<T: AsRef<Path>>(file: T) -> CgatsResult<Self> {

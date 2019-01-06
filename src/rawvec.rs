@@ -27,6 +27,10 @@ impl RawVec {
         self.inner.len()
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.inner.is_empty()
+    }
+
     // Get the CgatsType from the first line in the RawVec (first line in file)
     pub fn get_cgats_type(&self) -> Option<CgatsType> {
         let mut s = String::new();
@@ -61,15 +65,9 @@ impl RawVec {
             };
 
             // If the file uses carriage returns, split those up as well
-            let cr_split = text.split("\r");
-
-            // Push each line into a Vector of &str's unless it's a blank line
-            let mut v_cr:Vec<&str> = Vec::new();
-            for cr_line in cr_split {
-                if ! cr_line.is_empty() {
-                    v_cr.push(cr_line.trim());
-                }
-            }
+            let v_cr = text.split("\r")
+                .filter(|l| !l.is_empty())
+                .map(|l| l.trim());
 
             // Push each item in a line into a Vector
             for split_line in v_cr {
@@ -86,7 +84,7 @@ impl RawVec {
         } 
 
         // Make sure the file is not empty
-        if self.len() < 1 {
+        if self.is_empty() {
             Err(CgatsError::EmptyFile)
         } else {
             Ok(())

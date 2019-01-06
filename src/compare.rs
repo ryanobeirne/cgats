@@ -25,14 +25,14 @@ impl CgatsVec {
         self.inner.len()
     }
 
-    pub fn from_files<T: AsRef<Path>>(file_vec: &Vec<T>) -> CgatsResult<Self> {
-        let mut cgats_vec = Self::new();
+    pub fn is_empty(&self) -> bool {
+        self.inner.is_empty()
+    }
 
-        for file in file_vec {
-            cgats_vec.push(CgatsObject::from_file(file)?);
-        }
-
-        Ok(cgats_vec)
+    pub fn from_files<T: AsRef<Path>>(files: &Vec<T>) -> Self {
+        files.iter()
+            .filter_map(|f| CgatsObject::from_file(f).ok())
+            .collect()
     }
 
     // Check that all CgatsObjects have the same data type and sample count
@@ -42,7 +42,7 @@ impl CgatsVec {
 
         // The first object in the list
         let cgo_prime = &self.inner[0];
-        if cgo_prime.len() < 1 { return false; }
+        if cgo_prime.is_empty() { return false; }
 
         self.same_formats() && self.same_sample_count()
     }
@@ -68,7 +68,7 @@ impl CgatsVec {
         // Push on the DATA
         raw_vec.push(vec!["BEGIN_DATA".to_string()]);
         // This is very important
-        let data_vec = cgats_map.to_data_vec()?;
+        let data_vec = cgats_map.to_data_vec();
         for v in data_vec {
             raw_vec.push(v);
         }

@@ -93,6 +93,10 @@ impl CgatsObject {
         }
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.data_map.is_empty()
+    }
+
     pub fn map(&mut self) -> CgatsResult<()> {
         if self.data_map.is_empty() {
             return Err(CgatsError::EmptyFile);
@@ -166,7 +170,7 @@ impl CgatsObject {
 
         // Print DATA
         s.push_str("BEGIN_DATA\n");
-        let data = &self.data_map.to_data_vec()?;
+        let data = &self.data_map.to_data_vec();
         if data.len() == 0 {
             return Err(CgatsError::NoData);
         }

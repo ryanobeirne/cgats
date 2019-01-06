@@ -74,12 +74,12 @@ impl Config {
 
     pub fn execute(&self) -> CgatsResult<CgatsObject> {
         match &self.command {
-            Some(cmd) => cmd.execute(self.cgats_vec()?),
+            Some(cmd) => cmd.execute(self.cgats_vec()),
             None => Err(CgatsError::InvalidCommand)
         }
     }
 
-    pub fn cgats_vec(&self) -> CgatsResult<CgatsVec> {
+    pub fn cgats_vec(&self) -> CgatsVec {
         CgatsVec::from_files(&self.files)
     }
 }
