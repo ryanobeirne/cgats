@@ -1,11 +1,14 @@
 use super::*;
 
 // List of all test files relative to crate root
-fn test_files<'a>() -> Vec<&'a str> {
+fn test_files() -> Vec<&'static str> {
     vec![
         "test_files/cgats_format.tsv",
         "test_files/cgats0.txt",
         "test_files/cgats1.tsv",
+        "test_files/cgats2.tsv",
+        "test_files/cgats3.tsv",
+        "test_files/cgats4.tsv",
         "test_files/colorburst0.txt",
         "test_files/colorburst1.lin",
         "test_files/curve0.txt",
@@ -99,7 +102,10 @@ fn cgats_type() -> CgatsResult<()>{
     for file in test_files() {
         let cgo = CgatsObject::from_file(file);
         match cgo {
-            Ok(object) => println!("{}: {:?}", file, object.cgats_type),
+            Ok(object) => {
+                println!("{}: {:?}", file, object.cgats_type);
+                assert!(object.cgats_type.is_some());
+            },
             Err(e) => eprintln!("{}: {}", file, e),
         }
     }

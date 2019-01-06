@@ -6,16 +6,17 @@ use std::io;
 // Custom error types for CGATS
 #[derive(Debug)]
 pub enum CgatsError {
+    CannotCompare,
+    EmptyFile,
+    FileError,
+    FormatDataMismatch,
+    InvalidCommand,
+    InvalidID,
     NoData,
     NoDataFormat,
-    FormatDataMismatch,
+    UnknownCgatsType,
     UnknownFormatType,
-    FileError,
-    EmptyFile,
-    InvalidID,
-    CannotCompare,
-    InvalidCommand,
-    WriteError
+    WriteError,
 }
 
 // Custom Result type for CgatsError
@@ -32,15 +33,16 @@ impl Error for CgatsError {
     fn description(&self) -> &str {
         use CgatsError::*;
         match &self {
+            CannotCompare      => "Cannot compare data sets!",
+            EmptyFile          => "File is empty!",
+            FileError          => "Problem reading file!",
+            FormatDataMismatch => "DATA length does not match DATA_FORMAT length!",
+            InvalidCommand     => "Invalid Compare command!",
+            InvalidID          => "SAMPLE_ID is not an integer!",
             NoData             => "Cannot find BEGIN_DATA tag!",
             NoDataFormat       => "Cannot find BEGIN_DATA_FORMAT tag!",
-            FormatDataMismatch => "DATA length does not match DATA_FORMAT length!",
+            UnknownCgatsType   => "Cannot determine CGATS type!",
             UnknownFormatType  => "Unknown Data Format Type!",
-            FileError          => "Problem reading file!",
-            EmptyFile          => "File is empty!",
-            InvalidID          => "SAMPLE_ID is not an integer!",
-            CannotCompare      => "Cannot compare data sets!",
-            InvalidCommand     => "Invalid Compare command!",
             WriteError         => "Problem writing to file!",
         }
     }

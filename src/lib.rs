@@ -314,22 +314,23 @@ impl CgatsType {
         format!("{}", &self)
     }
 
-    // Checks if a string contains the the CgatsType name and
-    // returns an option of that type
-    pub fn from(s: &str) -> Option<Self> {
+}
+
+impl FromStr for CgatsType {
+    type Err = CgatsError;
+
+    fn from_str(s: &str) -> CgatsResult<Self> {
         use CgatsType::*;
         let types: Vec<Self> = vec![Cgats, ColorBurst, Curve];
 
-        for t in types {
-            let cgats_type = t.display().to_lowercase();
-            let finder = s.to_lowercase().find(cgats_type.as_str());
-            match finder {
-                Some(_) => return Some(t),
-                None => continue,
-            };
+        for t in types.into_iter() {
+            let tstring = &t.display().to_lowercase();
+            if s.to_lowercase().contains(tstring) {
+                return Ok(t);
+            }
         }
 
-       None
+       Err(CgatsError::UnknownCgatsType)
     }
 }
 

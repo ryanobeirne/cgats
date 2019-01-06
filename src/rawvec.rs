@@ -37,7 +37,10 @@ impl RawVec {
         }
 
         // Search the string for a CgatsType
-        CgatsType::from(&s)
+        match CgatsType::from_str(&s) {
+            Ok(cgt) => Some(cgt),
+            Err(_) => None,
+        }
     }
 
     pub fn from_file<T: AsRef<Path>>(file: T) -> CgatsResult<Self> {
