@@ -15,6 +15,10 @@ impl CgatsMap {
         Self { inner: DataMap::new() }
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.inner.is_empty()
+    }
+
     pub fn from_raw_vec(raw_vec: &RawVec) -> CgatsResult<Self> {
         let mut inner: DataMap = BTreeMap::new();
         
@@ -106,10 +110,11 @@ impl CgatsMap {
 
     // Rename/renumber SAMPLE_ID's to match index
     pub fn reindex_sample_id(&mut self) {
-        for (key, value) in self.inner.iter_mut() {
-            if key.1 == DataFormatType::SAMPLE_ID {
-                *value = CgatsValue::from_string( &(key.0).to_string() );
-            }
+        for (index,(_, value)) in self.inner.iter_mut()
+            .filter(|((_,k), _)| k == &DataFormatType::SAMPLE_ID)
+            .enumerate()
+        {
+            *value = CgatsValue::from_float((index + 1) as CgatsFloat);
         }
     }
 }

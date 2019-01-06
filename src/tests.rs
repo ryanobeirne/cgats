@@ -88,7 +88,7 @@ fn test_extract_data_and_format() -> CgatsResult<()>{
 #[test]
 fn text() {
     let text = "one two 3 \"4\" 5 six seven";
-    let split: Vec<f64> = text.split_whitespace().filter_map(|i| i.parse().ok()).collect();
+    let split: Vec<CgatsFloat> = text.split_whitespace().filter_map(|i| i.parse().ok()).collect();
     println!("{:?}", split);
 }
 
@@ -182,7 +182,7 @@ fn column_order() -> CgatsResult<()> {
 }
 
 #[test]
-fn cat() -> CgatsResult<()> {
+fn reindex() -> CgatsResult<()> {
     let cgv = CgatsVec::from_files(&vec![
         "test_files/cgats1.tsv",
         "test_files/cgats2.tsv",
@@ -193,6 +193,14 @@ fn cat() -> CgatsResult<()> {
     let cat = cgv.concatenate()?;
 
     println!("{}", cat.print()?);    
+
+    let max_id = cat.data_map.inner.iter()
+        .filter(|(k,_)| k.1 == DataFormatType::SAMPLE_ID)
+        .map(|(_, v)| v.float as usize)
+        .max()
+        .expect("No SAMPLE_ID found!");
+
+    assert_eq!(cat.len(), max_id);
 
     Ok(())
 }

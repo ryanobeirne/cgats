@@ -93,6 +93,19 @@ impl CgatsObject {
         }
     }
 
+    pub fn map(&mut self) -> CgatsResult<()> {
+        if self.data_map.is_empty() {
+            return Err(CgatsError::EmptyFile);
+        }
+
+        self.data_map = CgatsMap::from_raw_vec(&self.raw_vec)?;
+        Ok(())
+    }
+
+    pub fn reindex_sample_id(&mut self) {
+        self.data_map.reindex_sample_id()
+    }
+
     // New CgatsObject from a file
     pub fn from_file<T: AsRef<Path>>(file: T) -> CgatsResult<Self> {
         // Read file into a RawVec
@@ -153,11 +166,12 @@ impl CgatsObject {
 
         // Print DATA
         s.push_str("BEGIN_DATA\n");
-        let data = &self.data()?;
+        let data = &self.data_map.to_data_vec()?;
         if data.len() == 0 {
             return Err(CgatsError::NoData);
         }
-        for line in &data.inner {
+
+        for line in data {
             for (index, item) in line.iter().enumerate() {
                 s.push_str(item);
                 if index == line.len() - 1 {
@@ -219,6 +233,30 @@ impl CgatsObject {
         Ok(s)
     }
 
+    pub fn append(&mut self, other: &mut Self) -> Option<()> {
+        let end_data = self.raw_vec.pop();
+        if let Some(line) = &end_data {
+            if line[0] != "END_DATA".to_string() {
+                self.raw_vec.push(line.clone());
+            }
+        }
+
+        let mut other_data = match other.data() {
+            Ok(raw_vec) => raw_vec,
+            Err(_) => RawVec::new(),
+        };
+
+        self.raw_vec.inner.append(&mut other_data.inner);
+
+        if let Some(line) = end_data {
+            if line[0] == "END_DATA".to_string() {
+                self.raw_vec.push(line);
+            }
+        }
+
+        Some(())
+    }
+
 }
 
 impl fmt::Display for CgatsObject {
@@ -251,7 +289,7 @@ impl CgatsValue {
         Self {value, float, is_float}
     }
 
-    fn from_float(float: f64) -> Self {
+    fn from_float(float: CgatsFloat) -> Self {
         let value = compare::round_to(float, 4).to_string();
         Self { value, float, is_float: true }
     }

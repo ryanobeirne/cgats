@@ -88,7 +88,7 @@ impl CgatsVec {
         let cgo_prime = &self.inner[0];
         
         // If there's only one or none, we can skip out early
-        let vec_count = self.inner.len();
+        let vec_count = self.len();
         match vec_count {
             1 => return Ok(cgo_prime.clone()),
             0 => return Err(CgatsError::NoData),
@@ -152,7 +152,7 @@ impl CgatsVec {
         let cgo_prime = &self.inner[0];
 
         // If there's only 1 or none, we can skip out early
-        match self.inner.len() {
+        match self.len() {
             1 => return Ok(cgo_prime.clone()),
             0 => return Err(CgatsError::CannotCompare),
             _ => ()
@@ -162,19 +162,18 @@ impl CgatsVec {
         if ! self.same_formats() { return Err(CgatsError::CannotCompare); }
 
         // Start with the first DATA_FORMAT
-        let mut cgo = CgatsObject::new_with_format(
-            cgo_prime.data_format.clone()
-        );
+        let mut cgo = cgo_prime.clone();
 
-        // Convert this vec to a map
-        let map_vec = &self.to_map_vec();
+        // Loop through the objects and append the raw_vecs
+        for object in &self.inner[1..] {
+            cgo.append(&mut object.clone());
+        }
 
-        // Do the concatenation
-        cgo.data_map = map_vec.concatenate()?;
-        // Generate a RawVec
-        cgo.raw_vec = self.raw_from_prime(&cgo.data_map)?;
-        // Clone the CgatsType
-        cgo.cgats_type = cgo_prime.cgats_type.clone();
+        // Create the data_map
+        cgo.map()?;
+
+        // Renumber SAMPLE_ID's
+        cgo.reindex_sample_id();
 
         Ok(cgo)
     }
@@ -223,9 +222,9 @@ impl MapVec {
                 if format.is_float() {
                     let current = match cgm.inner.get(&key) {
                         Some(c) => c.float,
-                        None => 0_f64
+                        None => 0 as CgatsFloat,
                     };
-                    let float = current + &value.float / *&self.len() as f64;
+                    let float = current + &value.float / *&self.len() as CgatsFloat;
                     cgm.inner.insert( key, CgatsValue::from_float(float) );
                 } else {
                     if !cgm.inner.contains_key(&key) {
@@ -238,39 +237,40 @@ impl MapVec {
         Ok(cgm)
     }
 
-    pub fn concatenate(&self) -> CgatsResult<CgatsMap> {
-        // Early return if 1 or 0 maps in this vec
-        match &self.len() {
-            1 => return Ok(self.inner[0].clone()),
-            0 => return Err(CgatsError::CannotCompare),
-            _ => ()
-        }
+    // // This takes a long time. Don't do it.
+    // pub fn concatenate(&self) -> CgatsResult<CgatsMap> {
+    //     // Early return if 1 or 0 maps in this vec
+    //     match &self.len() {
+    //         1 => return Ok(self.inner[0].clone()),
+    //         0 => return Err(CgatsError::CannotCompare),
+    //         _ => ()
+    //     }
 
-        // Start with the first one
-        let mut cgm = self.inner[0].clone();
+    //     // Start with the first one
+    //     let mut cgm = self.inner[0].clone();
 
-        // Get the data format from the map. If SAMPLE_ID is not the first type,
-        // or the type is not ColorBurst, this will return an error,
-        // so be careful with this
-        let data_format = cgm.data_format()?;
+    //     // Get the data format from the map. If SAMPLE_ID is not the first type,
+    //     // or the type is not ColorBurst, this will return an error,
+    //     // so be careful with this
+    //     let data_format = cgm.data_format()?;
 
-        // Loop through the rest of the maps and push the values
-        // with incremented keys
-        for map in &self.inner[1..] {
-            for ((_, format), value) in &map.inner {
-                let max = cgm.max_index();
-                let increment = if *format == data_format[0] {1} else {0};
-                let sample_id = max + increment;
-                let key = (sample_id, *format);
-                cgm.inner.insert(key, value.clone());
-            }
-        }
+    //     // Loop through the rest of the maps and push the values
+    //     // with incremented keys
+    //     for map in &self.inner[1..] {
+    //         for ((_, format), value) in &map.inner {
+    //             let max = cgm.max_index();
+    //             let increment = if *format == data_format[0] {1} else {0};
+    //             let sample_id = max + increment;
+    //             let key = (sample_id, *format);
+    //             cgm.inner.insert(key, value.clone());
+    //         }
+    //     }
 
-        // Rename the SAMPLE_ID's to match the index
-        cgm.reindex_sample_id();
+    //     // Rename the SAMPLE_ID's to match the index
+    //     cgm.reindex_sample_id();
 
-        Ok(cgm)
-    }
+    //     Ok(cgm)
+    // }
 }
 
 impl FromIterator<CgatsMap> for MapVec {
@@ -285,7 +285,7 @@ impl FromIterator<CgatsMap> for MapVec {
     }
 }
 
-pub fn round_to(float: f64, places: i32) -> f64 {
-    let mult = 10_f64.powi(places);
+pub fn round_to(float: CgatsFloat, places: i32) -> CgatsFloat {
+    let mult = (10 as CgatsFloat).powi(places);
     (float * mult).round() / mult
 }
