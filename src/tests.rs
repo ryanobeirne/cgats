@@ -1,5 +1,4 @@
 use super::*;
-use std::str::FromStr;
 
 // List of all test files relative to crate root
 fn test_files<'a>() -> Vec<&'a str> {

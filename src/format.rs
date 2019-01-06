@@ -1,4 +1,5 @@
 use super::*;
+pub use std::str::FromStr;
 
 // Container for what is between BEGIN_DATA_FORMAT and END_DATA_FORMAT
 pub type DataFormat = Vec<DataFormatType>;
@@ -67,9 +68,7 @@ impl DataFormatType {
 
 impl fmt::Display for DataFormatType {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let s = format!("{:?}", self);
-
-        let result = s
+        let result = format!("{:?}", self)
             .replace("FIVE",  "5")
             .replace("SIX",   "6")
             .replace("SEVEN", "7")

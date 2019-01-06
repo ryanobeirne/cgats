@@ -3,7 +3,6 @@ use std::path::Path;
 use std::fmt;
 use std::collections::BTreeMap;
 use std::io::{Write, BufWriter};
-pub use std::str::FromStr;
 
 mod rawvec;
 pub use rawvec::*;
@@ -22,6 +21,11 @@ pub use format::*;
 
 #[cfg(test)]
 mod tests;
+
+// Color measurements deal with very small numbers, so I feel like I should
+// be using more accurate floats, but I'm going to stick with f32 for now.
+// This type alias will make it easy to change.
+type CgatsFloat = f32;
 
 // The meat and potatoes of this crate
 #[derive(Debug, Clone, PartialEq)]
@@ -234,15 +238,15 @@ impl fmt::Display for CgatsObject {
 #[derive(Debug, PartialEq, PartialOrd, Clone)]
 pub struct CgatsValue {
     pub value: String,
-    pub float: f64,
+    pub float: CgatsFloat,
     pub is_float: bool,
 }
 
 impl CgatsValue {
     fn from_string(val: &str) -> Self {
-        let (value, float, is_float) = match val.parse::<f64>() {
+        let (value, float, is_float) = match val.parse::<CgatsFloat>() {
             Ok(f) => ( compare::round_to(f, 4).to_string(), f, true ),
-            Err(_) => ( val.to_string(), 0_f64, false )
+            Err(_) => ( val.to_string(), 0 as CgatsFloat, false )
         };
         Self {value, float, is_float}
     }
