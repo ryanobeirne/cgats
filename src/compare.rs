@@ -48,6 +48,8 @@ impl CgatsVec {
     }
 
     pub fn raw_from_prime(&self, cgats_map: &CgatsMap) -> CgatsResult<RawVec> {
+        if self.is_empty() { return Err(CgatsError::CannotCompare) }
+
         let mut raw_vec = RawVec::new();
 
         // The first object in the list

@@ -39,7 +39,7 @@ impl Error for CgatsError {
             FormatDataMismatch => "DATA length does not match DATA_FORMAT length!",
             InvalidCommand     => "Invalid Compare command!",
             InvalidID          => "SAMPLE_ID is not an integer!",
-            NoData             => "Cannot find BEGIN_DATA tag!",
+            NoData             => "Color Data not found!",
             NoDataFormat       => "Cannot find BEGIN_DATA_FORMAT tag!",
             UnknownCgatsType   => "Cannot determine CGATS type!",
             UnknownFormatType  => "Unknown Data Format Type!",
@@ -50,7 +50,7 @@ impl Error for CgatsError {
 
 impl convert::From<io::Error> for CgatsError {
    fn from(e: io::Error) -> Self {
-       eprintln!("{}",e);
+       eprintln!("{}: {:?}",e, e.kind());
        CgatsError::FileError
    } 
 } 

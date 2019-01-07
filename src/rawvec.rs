@@ -197,7 +197,7 @@ impl RawVec {
         }
 
         // Check that we actually found some data
-        if data_vec.len() < 1 {
+        if data_vec.is_empty() {
             Err(CgatsError::NoData)
         } else {
             Ok(data_vec)
