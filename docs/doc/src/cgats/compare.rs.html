@@ -282,14 +282,14 @@
         <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">len</span>()
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_files</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;&gt;</span>(<span class="ident">file_vec</span>: <span class="kw-2">&amp;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="ident">CgatsResult</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cgats_vec</span> <span class="op">=</span> <span class="self">Self</span>::<span class="ident">new</span>();
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_empty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">bool</span> {
+        <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">is_empty</span>()
+    }
 
-        <span class="kw">for</span> <span class="ident">file</span> <span class="kw">in</span> <span class="ident">file_vec</span> {
-            <span class="ident">cgats_vec</span>.<span class="ident">push</span>(<span class="ident">CgatsObject</span>::<span class="ident">from_file</span>(<span class="ident">file</span>)<span class="question-mark">?</span>);
-        }
-
-        <span class="prelude-val">Ok</span>(<span class="ident">cgats_vec</span>)
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_files</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;&gt;</span>(<span class="ident">files</span>: <span class="kw-2">&amp;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="self">Self</span> {
+        <span class="ident">files</span>.<span class="ident">iter</span>()
+            .<span class="ident">filter_map</span>(<span class="op">|</span><span class="ident">f</span><span class="op">|</span> <span class="ident">CgatsObject</span>::<span class="ident">from_file</span>(<span class="ident">f</span>).<span class="ident">ok</span>())
+            .<span class="ident">collect</span>()
     }
 
     <span class="comment">// Check that all CgatsObjects have the same data type and sample count</span>
@@ -299,7 +299,7 @@
 
         <span class="comment">// The first object in the list</span>
         <span class="kw">let</span> <span class="ident">cgo_prime</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">inner</span>[<span class="number">0</span>];
-        <span class="kw">if</span> <span class="ident">cgo_prime</span>.<span class="ident">len</span>() <span class="op">&lt;</span> <span class="number">1</span> { <span class="kw">return</span> <span class="bool-val">false</span>; }
+        <span class="kw">if</span> <span class="ident">cgo_prime</span>.<span class="ident">is_empty</span>() { <span class="kw">return</span> <span class="bool-val">false</span>; }
 
         <span class="self">self</span>.<span class="ident">same_formats</span>() <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">same_sample_count</span>()
     }
@@ -325,7 +325,7 @@
         <span class="comment">// Push on the DATA</span>
         <span class="ident">raw_vec</span>.<span class="ident">push</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;BEGIN_DATA&quot;</span>.<span class="ident">to_string</span>()]);
         <span class="comment">// This is very important</span>
-        <span class="kw">let</span> <span class="ident">data_vec</span> <span class="op">=</span> <span class="ident">cgats_map</span>.<span class="ident">to_data_vec</span>()<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">data_vec</span> <span class="op">=</span> <span class="ident">cgats_map</span>.<span class="ident">to_data_vec</span>();
         <span class="kw">for</span> <span class="ident">v</span> <span class="kw">in</span> <span class="ident">data_vec</span> {
             <span class="ident">raw_vec</span>.<span class="ident">push</span>(<span class="ident">v</span>);
         }
