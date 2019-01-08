@@ -80,9 +80,10 @@ impl CgatsVec {
     }
 
     pub fn to_map_vec(&self) -> MapVec {
-        self.inner.iter().map(|cgvo|
-            cgvo.data_map.clone()
-        ).collect()
+        self.inner.iter()
+            .map(|cgo|
+                cgo.data_map.clone())
+            .collect()
     }
 
     pub fn average(&self) -> CgatsResult<CgatsObject> {

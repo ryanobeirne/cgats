@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["RawVec",""]],"type":[["DataLine",""],["DataSet",""],["DataVec",""]]});

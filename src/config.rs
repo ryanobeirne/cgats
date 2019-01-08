@@ -7,6 +7,7 @@ use std::fmt;
 pub enum Command {
     Average,
     Cat,
+    Delta,
     // Convert,
 }
 
@@ -15,6 +16,7 @@ impl Command {
         match s.to_lowercase().as_str() {
             "average" | "avg" => Some(Command::Average),
             "concatenate" | "cat" | "append" => Some(Command::Cat),
+            "delta" | "deltae" | "de" => Some(Command::Delta),
             // "convert"         => Some(Command::Convert),
             _ => None
         }
@@ -24,6 +26,7 @@ impl Command {
         match &self {
             Command::Average => cgv.average(),
             Command::Cat => cgv.concatenate(),
+            Command::Delta => cgv.deltae(deltae::DEMethod::DE2000),
         }
     }
 
@@ -72,7 +75,7 @@ impl Config {
         Self { command, files }
     }
 
-    pub fn execute(&self) -> CgatsResult<CgatsObject> {
+    pub fn collect(&self) -> CgatsResult<CgatsObject> {
         match &self.command {
             Some(cmd) => cmd.execute(self.cgats_vec()),
             None => Err(CgatsError::InvalidCommand)

@@ -19,6 +19,10 @@ pub use error::*;
 mod format;
 pub use format::*;
 
+mod delta;
+pub use delta::*;
+extern crate deltae;
+
 #[cfg(test)]
 mod tests;
 
@@ -218,6 +222,12 @@ impl CgatsObject {
         } else {
             false
         }
+    }
+
+    pub fn has_lab(&self) -> bool {
+        self.data_format.contains(&DataFormatType::LAB_L) &&
+        self.data_format.contains(&DataFormatType::LAB_A) &&
+        self.data_format.contains(&DataFormatType::LAB_B)
     }
 
     pub fn print(&self) -> CgatsResult<String> {

@@ -74,10 +74,9 @@ cgats average test_files/cgats0.tsv test_files/cgats1.tsv test_files/cgats2.tsv
 First, you'll need to [download and install rust](https://rustup.rs). Then:
 
 ```sh
-git clone https://github.com/robeirne/cgats
+git clone --recurse-submodules https://github.com/robeirne/cgats
 cd cgats
-cargo build --release
-cargo install
+cargo install --path ./ --force
 ```
 
 ### TODO
@@ -85,4 +84,3 @@ cargo install
 - Add conversion functions and support for conversion to and from CXF/MXF
 - Add smarter detection of DATA_FORMAT fields for better comparisons
 - Add smoothing functions to correct measurement noise
-- Add DeltaE integration with my [deltae](https://github.com/robeirne/deltae) crate

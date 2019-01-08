@@ -6,3 +6,4 @@ description = "Parse, transform, and write CGATS color files"
 
 [dependencies]
 clap = "2.32.0"
+deltae = {git = "https://github.com/robeirne/deltae"}

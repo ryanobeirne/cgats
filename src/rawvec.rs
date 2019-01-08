@@ -53,6 +53,20 @@ impl RawVec {
         Ok(raw_vec)
     }
 
+    pub fn from_data_vec(data_vec: DataVec) -> Self {
+        let mut inner = vec![
+            vec!["BEGIN DATA".to_string()],
+        ];
+
+        for line in data_vec.into_iter() {
+            inner.push(line);
+        }
+
+        inner.push(vec!["END DATA".to_string()]);
+
+        RawVec { inner }
+    }
+
     // Read a file into a Vector of a Vector of lines (RawVec)
     pub fn read_file<T: AsRef<Path>>(&mut self, file: T) -> CgatsResult<()> {
         let f = File::open(file)?;

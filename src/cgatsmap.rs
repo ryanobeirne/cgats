@@ -60,8 +60,18 @@ impl CgatsMap {
             }
             data_vec.insert(*index, data_line);
         }
-        
+
         data_vec
+    }
+
+    pub fn to_cgats_object(&self) -> CgatsObject {
+        let mut cgo = CgatsObject::new_with_type(CgatsType::Cgats);
+
+        cgo.raw_vec = RawVec { inner: vec![vec!["CGATS.17".to_string()]] };
+        cgo.data_format = self.data_format();
+        cgo.data_map.inner = self.inner.clone();
+
+        cgo
     }
 
     pub fn from_file<T: AsRef<Path>>(file: T) -> CgatsResult<Self> {
@@ -71,41 +81,41 @@ impl CgatsMap {
         Self::from_raw_vec(&raw_vec)
     }
 
-    pub fn max_index(&self) -> usize {
-        let mut max_index = 0;
-
-        for ((index, _), _) in &self.inner {
-            if index > &max_index {
-                max_index = *index
+    pub fn sample_count(&self) -> usize {
+        match self.inner.iter()
+            .map(|((index, _), _)| index)
+            .max() {
+                Some(u) => *u + 1,
+                None => 0
             }
-        }
-
-        max_index
     }
 
     // Extract DATA_FORMAT from CgatsMap
-    pub fn data_format(&self) -> CgatsResult<DataFormat> {
-        let mut data_format = DataFormat::new();
+    pub fn data_format(&self) -> DataFormat {
+        self.inner.keys()
+            .filter(|(index, _)| *index == 0)
+            .map(|(_, format)| *format)
+            .collect()
+    }
 
-        // Loop through map keys and push the format
-        for (_, format) in self.inner.keys() {
-            if !data_format.contains(format) {
-                data_format.push(*format);
-            }
+    pub fn append_column(&mut self, other: &mut Self) -> CgatsResult<()> {
+        if other.sample_count() != self.sample_count() {
+            return Err(CgatsError::CannotCompare)
         }
 
-        // Error if empty format
-        if data_format.len() < 1 {
-            return Err(CgatsError::UnknownFormatType)
-        }
+        self.inner.append(&mut other.inner);
 
-        // Check that the first format type is SAMPLE_ID unless it's ColorBurst
-        if data_format[0] != DataFormatType::SAMPLE_ID &&
-            data_format != format::ColorBurstFormat() {
-                return Err(CgatsError::InvalidID);
-        }
+        Ok(())
+    }
 
-        Ok(data_format)
+    pub fn sample_id_map(&self) -> Self {
+        CgatsMap {
+            inner: self.inner
+                .keys()
+                .map(|(index, _)|
+                    ( (*index, DataFormatType::SAMPLE_ID), CgatsValue::from_string(&index.to_string()) )
+                ).collect()
+        }
     }
 
     // Rename/renumber SAMPLE_ID's to match index

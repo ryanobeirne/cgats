@@ -21,7 +21,7 @@ fn main() -> CgatsResult<()> {
 
     match &config.command {
         Some(cmd) => {
-            let cgo = config.execute()?;
+            let cgo = config.collect()?;
             match matches.subcommand_matches(cmd.display())
                 .expect(
                     &format!(

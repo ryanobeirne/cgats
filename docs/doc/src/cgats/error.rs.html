@@ -103,7 +103,7 @@
             <span class="ident">FormatDataMismatch</span> <span class="op">=&gt;</span> <span class="string">&quot;DATA length does not match DATA_FORMAT length!&quot;</span>,
             <span class="ident">InvalidCommand</span>     <span class="op">=&gt;</span> <span class="string">&quot;Invalid Compare command!&quot;</span>,
             <span class="ident">InvalidID</span>          <span class="op">=&gt;</span> <span class="string">&quot;SAMPLE_ID is not an integer!&quot;</span>,
-            <span class="ident">NoData</span>             <span class="op">=&gt;</span> <span class="string">&quot;Cannot find BEGIN_DATA tag!&quot;</span>,
+            <span class="ident">NoData</span>             <span class="op">=&gt;</span> <span class="string">&quot;Color Data not found!&quot;</span>,
             <span class="ident">NoDataFormat</span>       <span class="op">=&gt;</span> <span class="string">&quot;Cannot find BEGIN_DATA_FORMAT tag!&quot;</span>,
             <span class="ident">UnknownCgatsType</span>   <span class="op">=&gt;</span> <span class="string">&quot;Cannot determine CGATS type!&quot;</span>,
             <span class="ident">UnknownFormatType</span>  <span class="op">=&gt;</span> <span class="string">&quot;Unknown Data Format Type!&quot;</span>,
@@ -114,7 +114,7 @@
 
 <span class="kw">impl</span> <span class="ident">convert</span>::<span class="ident">From</span><span class="op">&lt;</span><span class="ident">io</span>::<span class="ident">Error</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">CgatsError</span> {
    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">e</span>: <span class="ident">io</span>::<span class="ident">Error</span>) <span class="op">-&gt;</span> <span class="self">Self</span> {
-       <span class="macro">eprintln</span><span class="macro">!</span>(<span class="string">&quot;{}&quot;</span>,<span class="ident">e</span>);
+       <span class="macro">eprintln</span><span class="macro">!</span>(<span class="string">&quot;{}: {:?}&quot;</span>,<span class="ident">e</span>, <span class="ident">e</span>.<span class="ident">kind</span>());
        <span class="ident">CgatsError</span>::<span class="ident">FileError</span>
    } 
 } 
