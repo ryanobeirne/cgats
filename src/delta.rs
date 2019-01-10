@@ -1,6 +1,5 @@
 use super::*;
-use deltae::*;
-use deltae::color::LabValue;
+use deltae::{color::LabValue, DEMethod, DeltaE};
 
 impl CgatsVec {
     pub fn can_delta(&self) -> bool {
