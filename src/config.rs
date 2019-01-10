@@ -22,11 +22,11 @@ impl Command {
         }
     }
 
-    pub fn execute(&self, cgv: CgatsVec) -> CgatsResult<CgatsObject> {
+    pub fn execute(&self, cmd_opts: &CmdOpts, cgv: CgatsVec) -> CgatsResult<CgatsObject> {
         match &self {
             Command::Average => cgv.average(),
             Command::Cat => cgv.concatenate(),
-            Command::Delta => cgv.deltae(deltae::DEMethod::DE2000),
+            Command::Delta => cgv.deltae(deltae::DEMethod::from(&cmd_opts[0])),
         }
     }
 
@@ -42,9 +42,12 @@ impl fmt::Display for Command {
     }
 }
 
+pub type CmdOpts = Vec<String>;
+
 #[derive(Debug)]
 pub struct Config {
     pub command: Option<Command>,
+    pub cmd_opts: CmdOpts,
     pub files: Vec<String>,
 }
 
@@ -56,28 +59,36 @@ impl Config {
             None => None
         };
 
+        let mut cmd_opts = Vec::<String>::new();
+
         let files = if let Some(cmd) = cmd_name {
             match matches.subcommand_matches(cmd) {
-                Some(scm) => scm.values_of("comparefiles")
+                Some(scm) => {
+                    cmd_opts.push(
+                        scm.value_of("method").unwrap_or("de2000").to_string()
+                    );
+                    scm.values_of("comparefiles")
                     .expect("Did not find 'comparefiles'")
-                    .map(|m| m.to_string())
-                    .collect(),
+                    .map(|s| s.to_string())
+                    .collect()
+                },
                 None => Vec::new()
             }
         } else {
             let clap_files = matches.values_of("files");
             match clap_files {
-                Some(f) => f.map(|m| m.to_string()).collect(),
+                Some(f) => f.map(|s| s.to_string()).collect(),
                 None => Vec::new()
             }
         };
 
-        Self { command, files }
+
+        Self { command, cmd_opts, files }
     }
 
     pub fn collect(&self) -> CgatsResult<CgatsObject> {
         match &self.command {
-            Some(cmd) => cmd.execute(self.cgats_vec()),
+            Some(cmd) => cmd.execute(&self.cmd_opts, self.cgats_vec()),
             None => Err(CgatsError::InvalidCommand)
         }
     }
