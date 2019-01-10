@@ -224,3 +224,18 @@ fn cat_cb() -> CgatsResult<()> {
 
     Ok(())
 }
+
+#[test]
+fn all_eq() -> CgatsResult<()> {
+    let cgv = CgatsVec::from_files(&vec![
+        "test_files/cgats0.txt",
+        "test_files/cgats0.txt",
+        "test_files/cgats0.txt",
+        "test_files/cgats0.txt",
+        "test_files/cgats6.txt",
+    ]);
+
+    assert!(cgv.all_eq());
+
+    Ok(())
+}

@@ -79,6 +79,11 @@ impl CgatsVec {
         Ok(raw_vec)
     }
 
+    pub fn all_eq(&self) -> bool {
+        self.inner.iter()
+            .all(|cgv| *cgv == self.inner[0])
+    }
+
     pub fn to_map_vec(&self) -> MapVec {
         self.inner.iter()
             .map(|cgo|
