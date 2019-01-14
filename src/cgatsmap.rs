@@ -27,10 +27,12 @@ impl CgatsMap {
 
         for (line_index, line) in data.inner.iter().enumerate() {
             for (index, format) in data_format.iter().enumerate() {
-                inner.insert(
-                    (line_index, *format),
-                    CgatsValue::from_string(&line[index])
-                );
+                if *format != DataFormatType::BLANK {
+                    inner.insert(
+                        (line_index, *format),
+                        CgatsValue::from_string(&line[index])
+                    );
+                }
             }
         }
 

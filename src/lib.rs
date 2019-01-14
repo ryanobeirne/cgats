@@ -91,10 +91,7 @@ impl CgatsObject {
     }
 
     pub fn len(&self) -> usize {
-        match self.data() {
-            Ok(data) => data.len(),
-            Err(_) => 0
-        }
+        self.data_map.inner.len() / self.data_format.len()
     }
 
     pub fn is_empty(&self) -> bool {
@@ -217,17 +214,11 @@ impl CgatsObject {
     }
 
     pub fn is_cb(&self) -> bool {
-        if let Some(cgt) = &self.cgats_type {
-            cgt.to_owned() == CgatsType::ColorBurst
-        } else {
-            false
-        }
+        self.cgats_type == Some(CgatsType::ColorBurst)
     }
 
     pub fn has_lab(&self) -> bool {
-        self.data_format.contains(&DataFormatType::LAB_L) &&
-        self.data_format.contains(&DataFormatType::LAB_A) &&
-        self.data_format.contains(&DataFormatType::LAB_B)
+        self.data_map.has_lab()
     }
 
     pub fn print(&self) -> CgatsResult<String> {
@@ -280,8 +271,10 @@ impl fmt::Display for CgatsObject {
             Some(cgt) => cgt.display(),
             None => "None".to_string()
         };
+
+        let data_format = format::fmt_data_format(&self.data_format);
         
-        let format = format!("{}({}){:?}", cgt, &self.len(), &self.data_format);
+        let format = format!("{}({}):{}", cgt, &self.len(), data_format);
 
         write!(f, "{}", format)
     }

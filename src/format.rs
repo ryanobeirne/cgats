@@ -4,6 +4,22 @@ pub use std::str::FromStr;
 // Container for what is between BEGIN_DATA_FORMAT and END_DATA_FORMAT
 pub type DataFormat = Vec<DataFormatType>;
 
+pub fn fmt_data_format(data_format: &DataFormat) -> String {
+    let mut s = String::from("[");
+
+    for f in data_format {
+        s.push_str(&format!(
+            "{}, ", f.to_string())
+        );
+    }
+
+    s.pop();
+    s.pop();
+    s.push(']');
+
+    s
+}
+
 // Known data format types: This list is incomplete
 #[allow(non_camel_case_types)]
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
@@ -86,7 +102,7 @@ impl FromStr for DataFormatType {
         match s.to_uppercase().as_ref() {
             "SAMPLE_ID"   | "SAMPLEID" | "SAMPLE" => Ok(SAMPLE_ID),
             "SAMPLE_NAME" | "SAMPLENAME" => Ok(SAMPLE_NAME),
-	        ""        => Ok(BLANK),
+	        "" | "BLANK" => Ok(BLANK),
 
             "RGB_R"   => Ok(RGB_R),
             "RGB_G"   => Ok(RGB_G),
