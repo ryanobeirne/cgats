@@ -4,32 +4,30 @@ use std::iter::FromIterator;
 pub type CgatsSet = Vec<CgatsObject>;
 
 #[derive(Debug, Clone)]
-pub struct CgatsVec {
-    pub inner: CgatsSet,
-}
+pub struct CgatsVec(pub CgatsSet);
 
 impl CgatsVec {
-    pub fn new() -> Self {
-        Self { inner: CgatsSet::new() }
+    pub fn new() -> CgatsVec {
+        CgatsVec(CgatsSet::new())
     }
 
     pub fn push(&mut self, value: CgatsObject) {
-        self.inner.push(value)
+        self.0.push(value)
     }
 
     pub fn pop(&mut self) -> Option<CgatsObject> {
-        self.inner.pop()
+        self.0.pop()
     }
 
     pub fn len(&self) -> usize {
-        self.inner.len()
+        self.0.len()
     }
 
     pub fn is_empty(&self) -> bool {
-        self.inner.is_empty()
+        self.0.is_empty()
     }
 
-    pub fn from_files<T: AsRef<Path>>(files: &Vec<T>) -> Self {
+    pub fn from_files<T: AsRef<Path>>(files: &Vec<T>) -> CgatsVec {
         files.iter()
             .filter_map(|f| CgatsObject::from_file(f).ok())
             .collect()
@@ -41,7 +39,7 @@ impl CgatsVec {
         if self.len() < 2 { return true; }
 
         // The first object in the list
-        let cgo_prime = &self.inner[0];
+        let cgo_prime = &self.0[0];
         if cgo_prime.is_empty() { return false; }
 
         self.same_formats() && self.same_sample_count()
@@ -53,11 +51,11 @@ impl CgatsVec {
         let mut raw_vec = RawVec::new();
 
         // The first object in the list
-        let cgo_prime = &self.inner[0];
+        let cgo_prime = &self.0[0];
 
         // Collect metadata from first object
         if let Some(metadata) = cgo_prime.metadata() {
-            for line in metadata.inner {
+            for line in metadata.0 {
                 raw_vec.push(line);
             }
         }
@@ -80,12 +78,12 @@ impl CgatsVec {
     }
 
     pub fn all_eq(&self) -> bool {
-        self.inner.iter()
-            .all(|cgv| *cgv == self.inner[0])
+        self.0.iter()
+            .all(|cgv| *cgv == self.0[0])
     }
 
     pub fn to_map_vec(&self) -> MapVec {
-        self.inner.iter()
+        self.0.iter()
             .map(|cgo|
                 cgo.data_map.clone())
             .collect()
@@ -93,7 +91,7 @@ impl CgatsVec {
 
     pub fn average(&self) -> CgatsResult<CgatsObject> {
         // The first object in the list
-        let cgo_prime = &self.inner[0];
+        let cgo_prime = &self.0[0];
         
         // If there's only one or none, we can skip out early
         let vec_count = self.len();
@@ -119,15 +117,15 @@ impl CgatsVec {
         cgo.raw_vec = self.raw_from_prime(&cgo.data_map)?;
 
         // Append sample count to end of first line
-        cgo.raw_vec.inner[0].push(format!("Average of {}", vec_count));
+        cgo.raw_vec.0[0].push(format!("Average of {}", vec_count));
 
         Ok(cgo)
     }
 
     pub fn same_sample_count(&self) -> bool {
-        let cgo_prime = &self.inner[0];
+        let cgo_prime = &self.0[0];
 
-        for object in &self.inner {
+        for object in &self.0 {
             if object.len() != cgo_prime.len() {
                 return false;
             }
@@ -137,9 +135,9 @@ impl CgatsVec {
     }
 
     pub fn same_formats(&self) -> bool {
-        let cgo_prime = &self.inner[0];
+        let cgo_prime = &self.0[0];
 
-        for object in &self.inner {
+        for object in &self.0 {
             // Make sure they all have the same DataFormat
             for format_type in &cgo_prime.data_format {
                 if !object.data_format.contains(&format_type) {
@@ -157,7 +155,7 @@ impl CgatsVec {
     }
 
     pub fn concatenate(&self) -> CgatsResult<CgatsObject> {
-        let cgo_prime = &self.inner[0];
+        let cgo_prime = &self.0[0];
 
         // If there's only 1 or none, we can skip out early
         match self.len() {
@@ -173,7 +171,7 @@ impl CgatsVec {
         let mut cgo = cgo_prime.clone();
 
         // Loop through the objects and append the raw_vecs
-        for object in &self.inner[1..] {
+        for object in &self.0[1..] {
             cgo.append(&mut object.clone());
         }
 
@@ -188,8 +186,8 @@ impl CgatsVec {
 }
 
 impl FromIterator<CgatsObject> for CgatsVec {
-    fn from_iter<I: IntoIterator<Item=CgatsObject>>(iter: I) -> Self {
-        let mut c = Self::new();
+    fn from_iter<I: IntoIterator<Item=CgatsObject>>(iter: I) -> CgatsVec {
+        let mut c = CgatsVec::new();
 
         for i in iter {
             c.push(i);
@@ -200,43 +198,41 @@ impl FromIterator<CgatsObject> for CgatsVec {
 }
 
 #[derive(Debug, Clone)]
-pub struct MapVec {
-    inner:  Vec<CgatsMap>,
-}
+pub struct MapVec (Vec<CgatsMap>);
 
 impl MapVec {
-    pub fn new() -> Self {
-        Self { inner: Vec::new() }
+    pub fn new() -> MapVec {
+        MapVec(Vec::new())
     }
 
     pub fn len(&self) -> usize {
-        self.inner.len()
+        self.0.len()
     }
 
     pub fn push(&mut self, value: CgatsMap) {
-        self.inner.push(value)
+        self.0.push(value)
     }
 
     pub fn pop(&mut self) -> Option<CgatsMap> {
-        self.inner.pop()
+        self.0.pop()
     }
 
     pub fn average(&self) -> CgatsResult<CgatsMap> {
         let mut cgm = CgatsMap::new();
 
-        for map in &self.inner {
-            for ((index, format), value) in &map.inner {
+        for map in &self.0 {
+            for ((index, format), value) in &map.0 {
                 let key = (*index, *format);
                 if format.is_float() {
-                    let current = match cgm.inner.get(&key) {
+                    let current = match cgm.0.get(&key) {
                         Some(c) => c.float,
                         None => 0 as CgatsFloat,
                     };
                     let float = current + &value.float / *&self.len() as CgatsFloat;
-                    cgm.inner.insert( key, CgatsValue::from_float(float) );
+                    cgm.0.insert( key, CgatsValue::from_float(float) );
                 } else {
-                    if !cgm.inner.contains_key(&key) {
-                        cgm.inner.insert(key, value.clone());
+                    if !cgm.0.contains_key(&key) {
+                        cgm.insert(key, value.clone());
                     }
                 }
             }
@@ -247,8 +243,8 @@ impl MapVec {
 }
 
 impl FromIterator<CgatsMap> for MapVec {
-    fn from_iter<I: IntoIterator<Item=CgatsMap>>(iter: I) -> Self {
-        let mut c = Self::new();
+    fn from_iter<I: IntoIterator<Item=CgatsMap>>(iter: I) -> MapVec {
+        let mut c = MapVec::new();
 
         for i in iter {
             c.push(i);

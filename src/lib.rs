@@ -41,8 +41,8 @@ pub struct CgatsObject {
 }
 
 impl CgatsObject {
-    pub fn new() -> Self {
-        Self {
+    pub fn new() -> CgatsObject {
+        CgatsObject {
             raw_vec: RawVec::new(),
             cgats_type: None,
             data_format: DataFormat::new(),
@@ -69,14 +69,14 @@ impl CgatsObject {
     }
 
     // New empty CgatsObject of a given CgatsType
-    pub fn new_with_type(cgats_type: CgatsType) -> Self {
-        let mut cgo = Self::new();
+    pub fn new_with_type(cgats_type: CgatsType) -> CgatsObject {
+        let mut cgo = CgatsObject::new();
         cgo.cgats_type = Some(cgats_type);
         cgo
     }
 
-    pub fn derive_from(other: &Self) -> Self {
-        Self {
+    pub fn derive_from(other: &CgatsObject) -> CgatsObject {
+        CgatsObject {
             raw_vec: RawVec::new(),
             cgats_type: other.cgats_type.clone(),
             data_format: other.data_format.clone(),
@@ -84,14 +84,14 @@ impl CgatsObject {
         }
     }
 
-    pub fn new_with_format(data_format: DataFormat) -> Self {
-        let mut cgo = Self::new();
+    pub fn new_with_format(data_format: DataFormat) -> CgatsObject {
+        let mut cgo = CgatsObject::new();
         cgo.data_format = data_format;
         cgo
     }
 
     pub fn len(&self) -> usize {
-        self.data_map.inner.len() / self.data_format.len()
+        self.data_map.0.len() / self.data_format.len()
     }
 
     pub fn is_empty(&self) -> bool {
@@ -112,7 +112,7 @@ impl CgatsObject {
     }
 
     // New CgatsObject from a file
-    pub fn from_file<T: AsRef<Path>>(file: T) -> CgatsResult<Self> {
+    pub fn from_file<T: AsRef<Path>>(file: T) -> CgatsResult<CgatsObject> {
         // Read file into a RawVec
         let mut raw_vec = RawVec::new();
         raw_vec.read_file(file)?;
@@ -120,13 +120,13 @@ impl CgatsObject {
         CgatsObject::from_raw_vec(raw_vec)
     }
 
-    pub fn from_raw_vec(raw_vec: RawVec) -> CgatsResult<Self> {
+    pub fn from_raw_vec(raw_vec: RawVec) -> CgatsResult<CgatsObject> {
         // Determine the CgatsType from the first line of the file
         let cgats_type = raw_vec.get_cgats_type();
         let data_format = raw_vec.extract_data_format()?;
 
         // Validate that the data format and the data have the same item count
-        for line in raw_vec.extract_data()?.inner {
+        for line in raw_vec.extract_data()?.0 {
             if line.len() != data_format.len() {
                 return Err(CgatsError::FormatDataMismatch);
             } 
@@ -134,7 +134,7 @@ impl CgatsObject {
 
         let data_map = CgatsMap::from_raw_vec(&raw_vec)?;
 
-        Ok(Self{raw_vec, cgats_type, data_format, data_map})
+        Ok(CgatsObject{raw_vec, cgats_type, data_format, data_map})
     }
 
     pub fn metadata(&self) -> Option<RawVec> {
@@ -199,7 +199,7 @@ impl CgatsObject {
         if metadata.len() == 0 {
             return Some(s);
         }
-        for line in &metadata.inner {
+        for line in &metadata.0 {
             for (index, item) in line.iter().enumerate() {
                 s.push_str(item);
                 if index == line.len() - 1 {
@@ -238,7 +238,7 @@ impl CgatsObject {
         Ok(s)
     }
 
-    pub fn append(&mut self, other: &mut Self) -> Option<()> {
+    pub fn append(&mut self, other: &mut CgatsObject) -> Option<()> {
         let end_data = self.raw_vec.pop();
         if let Some(line) = &end_data {
             if line[0] != "END_DATA".to_string() {
@@ -251,7 +251,7 @@ impl CgatsObject {
             Err(_) => RawVec::new(),
         };
 
-        self.raw_vec.inner.append(&mut other_data.inner);
+        self.raw_vec.0.append(&mut other_data.0);
 
         if let Some(line) = end_data {
             if line[0] == "END_DATA".to_string() {
@@ -288,17 +288,17 @@ pub struct CgatsValue {
 }
 
 impl CgatsValue {
-    fn from_string(val: &str) -> Self {
+    fn from_string(val: &str) -> CgatsValue {
         let (value, float, is_float) = match val.parse::<CgatsFloat>() {
             Ok(f) => ( compare::round_to(f, 4).to_string(), f, true ),
             Err(_) => ( val.to_string(), 0 as CgatsFloat, false )
         };
-        Self {value, float, is_float}
+        CgatsValue {value, float, is_float}
     }
 
-    fn from_float(float: CgatsFloat) -> Self {
+    fn from_float(float: CgatsFloat) -> CgatsValue {
         let value = compare::round_to(float, 4).to_string();
-        Self { value, float, is_float: true }
+        CgatsValue { value, float, is_float: true }
     }
 }
 
@@ -326,9 +326,9 @@ impl CgatsType {
 impl FromStr for CgatsType {
     type Err = CgatsError;
 
-    fn from_str(s: &str) -> CgatsResult<Self> {
+    fn from_str(s: &str) -> CgatsResult<CgatsType> {
         use CgatsType::*;
-        let types: Vec<Self> = vec![Cgats, ColorBurst, Curve];
+        let types: Vec<CgatsType> = vec![Cgats, ColorBurst, Curve];
 
         for t in types.into_iter() {
             let tstring = &t.display().to_lowercase();

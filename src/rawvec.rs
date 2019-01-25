@@ -6,29 +6,27 @@ pub type DataSet = Vec<DataLine>;
 pub type DataVec =  Vec<DataLine>;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct RawVec {
-    pub inner: DataSet,
-}
+pub struct RawVec(pub DataSet);
 
 impl RawVec {
-    pub fn new() -> Self {
-        Self { inner: DataSet::new() }
+    pub fn new() -> RawVec {
+        RawVec(DataSet::new())
     }
 
     pub fn pop(&mut self) -> Option<DataLine> {
-        self.inner.pop()
+        self.0.pop()
     }
 
     pub fn push(&mut self, value: DataLine) {
-        self.inner.push(value)
+        self.0.push(value)
     }
 
     pub fn len(&self) -> usize {
-        self.inner.len()
+        self.0.len()
     }
 
     pub fn is_empty(&self) -> bool {
-        self.inner.is_empty()
+        self.0.is_empty()
     }
 
     // Get the CgatsType from the first line in the RawVec (first line in file)
@@ -36,7 +34,7 @@ impl RawVec {
         let mut s = String::new();
 
         // Push the first line into a single string
-        for item in self.inner[0].iter() {
+        for item in self.0[0].iter() {
             s.push_str(&item.to_lowercase());
         }
 
@@ -47,13 +45,13 @@ impl RawVec {
         }
     }
 
-    pub fn from_file<T: AsRef<Path>>(file: T) -> CgatsResult<Self> {
-        let mut raw_vec = Self::new();
+    pub fn from_file<T: AsRef<Path>>(file: T) -> CgatsResult<RawVec> {
+        let mut raw_vec = RawVec::new();
         raw_vec.read_file(file)?;
         Ok(raw_vec)
     }
 
-    pub fn from_data_vec(data_vec: DataVec) -> Self {
+    pub fn from_data_vec(data_vec: DataVec) -> RawVec {
         let mut inner = vec![
             vec!["BEGIN DATA".to_string()],
         ];
@@ -64,7 +62,7 @@ impl RawVec {
 
         inner.push(vec!["END DATA".to_string()]);
 
-        RawVec { inner }
+        RawVec(inner)
     }
 
     // Read a file into a Vector of a Vector of lines (RawVec)
@@ -107,7 +105,7 @@ impl RawVec {
 
     // Extract metadata from CGATS file: anything that is not between bookends:
     // e.g. BEGIN_DATA_FORMAT...END_DATA_FORMAT // BEGIN_DATA...END_DATA
-    pub fn extract_meta_data(&self) -> Option<Self> {
+    pub fn extract_meta_data(&self) -> Option<RawVec> {
         // No sense in doing anything if there's nothing here
         if self.len() < 1 {
             return None;
@@ -127,7 +125,7 @@ impl RawVec {
         let mut index = 0;
         let mut tag_switch = true;
         while index < self.len() {
-            let item = &self.inner[index];
+            let item = &self.0[index];
             if bookends.contains(&item[0].as_str()) {
                 if tag_switch { tag_switch = false } else { tag_switch = true };
                 index += 1;
@@ -160,10 +158,10 @@ impl RawVec {
 
         // Loop through the RawVec and find the BEGIN_DATA_FORMAT tag
         // then take the next line as a tab-delimited Vector
-        for (index, item) in self.inner.iter().enumerate() {
+        for (index, item) in self.0.iter().enumerate() {
             match item[0].as_str() {
                 "BEGIN_DATA_FORMAT" => {
-                    for format_type in self.inner[index + 1].iter() {
+                    for format_type in self.0[index + 1].iter() {
                         let format = DataFormatType::from_str(&format_type)?;
                         data_format.push(format);
                     }
@@ -183,7 +181,7 @@ impl RawVec {
     }
 
     // Extract the data betweeen BEGIN_DATA and END_DATA into a RawVec
-    pub fn extract_data(&self) -> CgatsResult<Self> {
+    pub fn extract_data(&self) -> CgatsResult<RawVec> {
         // We need at least 3 lines to define DATA
         if self.len() < 3 {
             return Err(CgatsError::NoData);
@@ -193,11 +191,11 @@ impl RawVec {
         let mut data_vec = RawVec::new();
 
         // Loop through the first item of each line and look for the tags.
-        for (index, item) in self.inner.iter().enumerate() {
+        for (index, item) in self.0.iter().enumerate() {
             match item[0].as_str() {
                 "BEGIN_DATA" => {
                     // Loop through each line after BEGIN_DATA and push the next
-                    for format_type in self.inner[index + 1..].iter() {
+                    for format_type in self.0[index + 1..].iter() {
                         data_vec.push(format_type.to_vec());
                     }
                 },

@@ -4,9 +4,9 @@ use deltae::{color::LabValue, DEMethod, DeltaE};
 impl CgatsVec {
     pub fn can_delta(&self) -> bool {
         self.len() == 2 &&
-        self.inner[0].len() == self.inner[1].len() &&
-        self.inner[0].has_lab() &&
-        self.inner[1].has_lab()
+        self.0[0].len() == self.0[1].len() &&
+        self.0[0].has_lab() &&
+        self.0[1].has_lab()
     }
 
     pub fn deltae(&self, method: DEMethod) -> CgatsResult<CgatsObject> {
@@ -16,15 +16,15 @@ impl CgatsVec {
 
         let dft_method = DataFormatType::from_de_method(method);
 
-        let lab_vec0 = self.inner[0].data_map.to_lab_vec()?;
-        let lab_vec1 = self.inner[1].data_map.to_lab_vec()?;
+        let lab_vec0 = self.0[0].data_map.to_lab_vec()?;
+        let lab_vec1 = self.0[1].data_map.to_lab_vec()?;
 
         let mut cgo = CgatsObject::new_with_type(CgatsType::Cgats);
-        cgo.raw_vec = RawVec { inner: vec![
+        cgo.raw_vec = RawVec(vec![
             vec!["CGATS.17".to_string()],
-        ]};
+        ]);
 
-        cgo.data_map.inner = lab_vec0.iter()
+        cgo.data_map.0 = lab_vec0.iter()
             .enumerate()            
             .map(|(index, lab)| {
                 let de = DeltaE::new(lab, &lab_vec1[index], method);
@@ -57,7 +57,7 @@ impl CgatsMap {
         let mut lab_arr: Vec<[CgatsFloat; 3]> = Vec::new();
         lab_arr.resize(self.sample_count(), [0.0, 0.0, 0.0]);
 
-        for (i, f, v) in self.inner.iter()
+        for (i, f, v) in self.0.iter()
         .map(|((index, format), value)| (index, format, value.float) ) {
             if *f == DataFormatType::LAB_L {
                 lab_arr[*i][0] = v;
@@ -81,9 +81,9 @@ impl CgatsMap {
     }
 
     pub fn has_lab(&self) -> bool {
-        self.inner.contains_key(&(0, DataFormatType::LAB_L)) &&
-        self.inner.contains_key(&(0, DataFormatType::LAB_A)) &&
-        self.inner.contains_key(&(0, DataFormatType::LAB_B))
+        self.0.contains_key(&(0, DataFormatType::LAB_L)) &&
+        self.0.contains_key(&(0, DataFormatType::LAB_A)) &&
+        self.0.contains_key(&(0, DataFormatType::LAB_B))
     }
 }
 
@@ -114,7 +114,7 @@ mod test {
         let delta_cgo = cgv.deltae(DEMethod::DE2000)?;
 
         assert_eq!(
-            delta_cgo.data_map.inner.get(&(125, DataFormatType::DE_2000)).unwrap().value,
+            delta_cgo.data_map.0.get(&(125, DataFormatType::DE_2000)).unwrap().value,
             "13.8491"
         );
 

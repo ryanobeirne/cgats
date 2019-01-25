@@ -66,7 +66,7 @@ fn test_extract_data() -> CgatsResult<()>{
        vec!["11", "1cGray",  "0",   "0",   "0",   "50" ],
     ];
 
-    assert_eq!(data_vec, data.inner);
+    assert_eq!(data_vec, data.0);
 
     Ok(())
 }
@@ -79,7 +79,7 @@ fn test_extract_data_and_format() -> CgatsResult<()>{
     let data = cgo.raw_vec.extract_data()?;
     println!("FORMAT [{}]:\n{:?}\n\nDATA [{}]:\n{:?}", format.len(), format, data.len(), data);
 
-    for line in data.inner {
+    for line in data.0 {
         assert_eq!(line.len(), format.len())
     }
 
@@ -120,7 +120,7 @@ fn cgats_map() {
 
         match cgo {
             Ok(cgo) => {
-                for ((id, format), value) in cgo.data_map.inner {
+                for ((id, format), value) in cgo.data_map.0 {
                     println!("{}, {}:\t{}", id, format, value);
                 }
             },
@@ -171,7 +171,7 @@ fn compare_average() -> CgatsResult<()> {
 fn btreemap() -> CgatsResult<()> {
     let cgo = CgatsObject::from_file("test_files/cgats1.tsv")?;
     let cgm = cgo.data_map;
-    let val = cgm.inner.get(&(0,DataFormatType::SAMPLE_NAME)).unwrap();
+    let val = cgm.0.get(&(0,DataFormatType::SAMPLE_NAME)).unwrap();
     println!("{}", val);
 
     Ok(())
@@ -200,7 +200,7 @@ fn reindex() -> CgatsResult<()> {
 
     println!("{}", cat.print()?);    
 
-    let max_id = cat.data_map.inner.iter()
+    let max_id = cat.data_map.0.iter()
         .filter(|(k,_)| k.1 == DataFormatType::SAMPLE_ID)
         .map(|(_, v)| v.float as usize)
         .max()
