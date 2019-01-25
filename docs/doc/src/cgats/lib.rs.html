@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form js-only"><div class="search-container"><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../..//index.html'><img src='../../rust-logo.png' alt='logo' width='100'></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form js-only"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -346,14 +346,7 @@
 <span id="346">346</span>
 <span id="347">347</span>
 <span id="348">348</span>
-<span id="349">349</span>
-<span id="350">350</span>
-<span id="351">351</span>
-<span id="352">352</span>
-<span id="353">353</span>
-<span id="354">354</span>
-<span id="355">355</span>
-</pre><pre class="rust ">
+</pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">fs</span>::<span class="ident">File</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">path</span>::<span class="ident">Path</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">fmt</span>;
@@ -397,8 +390,8 @@
 }
 
 <span class="kw">impl</span> <span class="ident">CgatsObject</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-&gt;</span> <span class="ident">CgatsObject</span> {
+        <span class="ident">CgatsObject</span> {
             <span class="ident">raw_vec</span>: <span class="ident">RawVec</span>::<span class="ident">new</span>(),
             <span class="ident">cgats_type</span>: <span class="prelude-val">None</span>,
             <span class="ident">data_format</span>: <span class="ident">DataFormat</span>::<span class="ident">new</span>(),
@@ -425,14 +418,14 @@
     }
 
     <span class="comment">// New empty CgatsObject of a given CgatsType</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_with_type</span>(<span class="ident">cgats_type</span>: <span class="ident">CgatsType</span>) <span class="op">-&gt;</span> <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cgo</span> <span class="op">=</span> <span class="self">Self</span>::<span class="ident">new</span>();
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_with_type</span>(<span class="ident">cgats_type</span>: <span class="ident">CgatsType</span>) <span class="op">-&gt;</span> <span class="ident">CgatsObject</span> {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cgo</span> <span class="op">=</span> <span class="ident">CgatsObject</span>::<span class="ident">new</span>();
         <span class="ident">cgo</span>.<span class="ident">cgats_type</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">cgats_type</span>);
         <span class="ident">cgo</span>
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">derive_from</span>(<span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) <span class="op">-&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">derive_from</span>(<span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">CgatsObject</span>) <span class="op">-&gt;</span> <span class="ident">CgatsObject</span> {
+        <span class="ident">CgatsObject</span> {
             <span class="ident">raw_vec</span>: <span class="ident">RawVec</span>::<span class="ident">new</span>(),
             <span class="ident">cgats_type</span>: <span class="ident">other</span>.<span class="ident">cgats_type</span>.<span class="ident">clone</span>(),
             <span class="ident">data_format</span>: <span class="ident">other</span>.<span class="ident">data_format</span>.<span class="ident">clone</span>(),
@@ -440,17 +433,14 @@
         }
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_with_format</span>(<span class="ident">data_format</span>: <span class="ident">DataFormat</span>) <span class="op">-&gt;</span> <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cgo</span> <span class="op">=</span> <span class="self">Self</span>::<span class="ident">new</span>();
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_with_format</span>(<span class="ident">data_format</span>: <span class="ident">DataFormat</span>) <span class="op">-&gt;</span> <span class="ident">CgatsObject</span> {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cgo</span> <span class="op">=</span> <span class="ident">CgatsObject</span>::<span class="ident">new</span>();
         <span class="ident">cgo</span>.<span class="ident">data_format</span> <span class="op">=</span> <span class="ident">data_format</span>;
         <span class="ident">cgo</span>
     }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">usize</span> {
-        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">data</span>() {
-            <span class="prelude-val">Ok</span>(<span class="ident">data</span>) <span class="op">=&gt;</span> <span class="ident">data</span>.<span class="ident">len</span>(),
-            <span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=&gt;</span> <span class="number">0</span>
-        }
+        <span class="self">self</span>.<span class="ident">data_map</span>.<span class="number">0</span>.<span class="ident">len</span>() <span class="op">/</span> <span class="self">self</span>.<span class="ident">data_format</span>.<span class="ident">len</span>()
     }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_empty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">bool</span> {
@@ -471,7 +461,7 @@
     }
 
     <span class="comment">// New CgatsObject from a file</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_file</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;&gt;</span>(<span class="ident">file</span>: <span class="ident">T</span>) <span class="op">-&gt;</span> <span class="ident">CgatsResult</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_file</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;&gt;</span>(<span class="ident">file</span>: <span class="ident">T</span>) <span class="op">-&gt;</span> <span class="ident">CgatsResult</span><span class="op">&lt;</span><span class="ident">CgatsObject</span><span class="op">&gt;</span> {
         <span class="comment">// Read file into a RawVec</span>
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">raw_vec</span> <span class="op">=</span> <span class="ident">RawVec</span>::<span class="ident">new</span>();
         <span class="ident">raw_vec</span>.<span class="ident">read_file</span>(<span class="ident">file</span>)<span class="question-mark">?</span>;
@@ -479,13 +469,13 @@
         <span class="ident">CgatsObject</span>::<span class="ident">from_raw_vec</span>(<span class="ident">raw_vec</span>)
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_raw_vec</span>(<span class="ident">raw_vec</span>: <span class="ident">RawVec</span>) <span class="op">-&gt;</span> <span class="ident">CgatsResult</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_raw_vec</span>(<span class="ident">raw_vec</span>: <span class="ident">RawVec</span>) <span class="op">-&gt;</span> <span class="ident">CgatsResult</span><span class="op">&lt;</span><span class="ident">CgatsObject</span><span class="op">&gt;</span> {
         <span class="comment">// Determine the CgatsType from the first line of the file</span>
         <span class="kw">let</span> <span class="ident">cgats_type</span> <span class="op">=</span> <span class="ident">raw_vec</span>.<span class="ident">get_cgats_type</span>();
         <span class="kw">let</span> <span class="ident">data_format</span> <span class="op">=</span> <span class="ident">raw_vec</span>.<span class="ident">extract_data_format</span>()<span class="question-mark">?</span>;
 
         <span class="comment">// Validate that the data format and the data have the same item count</span>
-        <span class="kw">for</span> <span class="ident">line</span> <span class="kw">in</span> <span class="ident">raw_vec</span>.<span class="ident">extract_data</span>()<span class="question-mark">?</span>.<span class="ident">inner</span> {
+        <span class="kw">for</span> <span class="ident">line</span> <span class="kw">in</span> <span class="ident">raw_vec</span>.<span class="ident">extract_data</span>()<span class="question-mark">?</span>.<span class="number">0</span> {
             <span class="kw">if</span> <span class="ident">line</span>.<span class="ident">len</span>() <span class="op">!=</span> <span class="ident">data_format</span>.<span class="ident">len</span>() {
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">CgatsError</span>::<span class="ident">FormatDataMismatch</span>);
             } 
@@ -493,7 +483,7 @@
 
         <span class="kw">let</span> <span class="ident">data_map</span> <span class="op">=</span> <span class="ident">CgatsMap</span>::<span class="ident">from_raw_vec</span>(<span class="kw-2">&amp;</span><span class="ident">raw_vec</span>)<span class="question-mark">?</span>;
 
-        <span class="prelude-val">Ok</span>(<span class="self">Self</span>{<span class="ident">raw_vec</span>, <span class="ident">cgats_type</span>, <span class="ident">data_format</span>, <span class="ident">data_map</span>})
+        <span class="prelude-val">Ok</span>(<span class="ident">CgatsObject</span>{<span class="ident">raw_vec</span>, <span class="ident">cgats_type</span>, <span class="ident">data_format</span>, <span class="ident">data_map</span>})
     }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">metadata</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RawVec</span><span class="op">&gt;</span> {
@@ -558,7 +548,7 @@
         <span class="kw">if</span> <span class="ident">metadata</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">0</span> {
             <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">s</span>);
         }
-        <span class="kw">for</span> <span class="ident">line</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">metadata</span>.<span class="ident">inner</span> {
+        <span class="kw">for</span> <span class="ident">line</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">metadata</span>.<span class="number">0</span> {
             <span class="kw">for</span> (<span class="ident">index</span>, <span class="ident">item</span>) <span class="kw">in</span> <span class="ident">line</span>.<span class="ident">iter</span>().<span class="ident">enumerate</span>() {
                 <span class="ident">s</span>.<span class="ident">push_str</span>(<span class="ident">item</span>);
                 <span class="kw">if</span> <span class="ident">index</span> <span class="op">==</span> <span class="ident">line</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">1</span> {
@@ -573,17 +563,11 @@
     }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_cb</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">bool</span> {
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">cgt</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">cgats_type</span> {
-            <span class="ident">cgt</span>.<span class="ident">to_owned</span>() <span class="op">==</span> <span class="ident">CgatsType</span>::<span class="ident">ColorBurst</span>
-        } <span class="kw">else</span> {
-            <span class="bool-val">false</span>
-        }
+        <span class="self">self</span>.<span class="ident">cgats_type</span> <span class="op">==</span> <span class="prelude-val">Some</span>(<span class="ident">CgatsType</span>::<span class="ident">ColorBurst</span>)
     }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">has_lab</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">data_format</span>.<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="ident">DataFormatType</span>::<span class="ident">LAB_L</span>) <span class="op">&amp;&amp;</span>
-        <span class="self">self</span>.<span class="ident">data_format</span>.<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="ident">DataFormatType</span>::<span class="ident">LAB_A</span>) <span class="op">&amp;&amp;</span>
-        <span class="self">self</span>.<span class="ident">data_format</span>.<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="ident">DataFormatType</span>::<span class="ident">LAB_B</span>)
+        <span class="self">self</span>.<span class="ident">data_map</span>.<span class="ident">has_lab</span>()
     }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">print</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">CgatsResult</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> {
@@ -603,7 +587,7 @@
         <span class="prelude-val">Ok</span>(<span class="ident">s</span>)
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">append</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">append</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">CgatsObject</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">end_data</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">raw_vec</span>.<span class="ident">pop</span>();
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">line</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">end_data</span> {
             <span class="kw">if</span> <span class="ident">line</span>[<span class="number">0</span>] <span class="op">!=</span> <span class="string">&quot;END_DATA&quot;</span>.<span class="ident">to_string</span>() {
@@ -616,7 +600,7 @@
             <span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=&gt;</span> <span class="ident">RawVec</span>::<span class="ident">new</span>(),
         };
 
-        <span class="self">self</span>.<span class="ident">raw_vec</span>.<span class="ident">inner</span>.<span class="ident">append</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">other_data</span>.<span class="ident">inner</span>);
+        <span class="self">self</span>.<span class="ident">raw_vec</span>.<span class="number">0</span>.<span class="ident">append</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">other_data</span>.<span class="number">0</span>);
 
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">line</span>) <span class="op">=</span> <span class="ident">end_data</span> {
             <span class="kw">if</span> <span class="ident">line</span>[<span class="number">0</span>] <span class="op">==</span> <span class="string">&quot;END_DATA&quot;</span>.<span class="ident">to_string</span>() {
@@ -636,8 +620,10 @@
             <span class="prelude-val">Some</span>(<span class="ident">cgt</span>) <span class="op">=&gt;</span> <span class="ident">cgt</span>.<span class="ident">display</span>(),
             <span class="prelude-val">None</span> <span class="op">=&gt;</span> <span class="string">&quot;None&quot;</span>.<span class="ident">to_string</span>()
         };
+
+        <span class="kw">let</span> <span class="ident">data_format</span> <span class="op">=</span> <span class="ident">format</span>::<span class="ident">fmt_data_format</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">data_format</span>);
         
-        <span class="kw">let</span> <span class="ident">format</span> <span class="op">=</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{}({}){:?}&quot;</span>, <span class="ident">cgt</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">len</span>(), <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">data_format</span>);
+        <span class="kw">let</span> <span class="ident">format</span> <span class="op">=</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{}({}):{}&quot;</span>, <span class="ident">cgt</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">len</span>(), <span class="ident">data_format</span>);
 
         <span class="macro">write</span><span class="macro">!</span>(<span class="ident">f</span>, <span class="string">&quot;{}&quot;</span>, <span class="ident">format</span>)
     }
@@ -651,17 +637,17 @@
 }
 
 <span class="kw">impl</span> <span class="ident">CgatsValue</span> {
-    <span class="kw">fn</span> <span class="ident">from_string</span>(<span class="ident">val</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">from_string</span>(<span class="ident">val</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-&gt;</span> <span class="ident">CgatsValue</span> {
         <span class="kw">let</span> (<span class="ident">value</span>, <span class="ident">float</span>, <span class="ident">is_float</span>) <span class="op">=</span> <span class="kw">match</span> <span class="ident">val</span>.<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">CgatsFloat</span><span class="op">&gt;</span>() {
             <span class="prelude-val">Ok</span>(<span class="ident">f</span>) <span class="op">=&gt;</span> ( <span class="ident">compare</span>::<span class="ident">round_to</span>(<span class="ident">f</span>, <span class="number">4</span>).<span class="ident">to_string</span>(), <span class="ident">f</span>, <span class="bool-val">true</span> ),
             <span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=&gt;</span> ( <span class="ident">val</span>.<span class="ident">to_string</span>(), <span class="number">0</span> <span class="kw">as</span> <span class="ident">CgatsFloat</span>, <span class="bool-val">false</span> )
         };
-        <span class="self">Self</span> {<span class="ident">value</span>, <span class="ident">float</span>, <span class="ident">is_float</span>}
+        <span class="ident">CgatsValue</span> {<span class="ident">value</span>, <span class="ident">float</span>, <span class="ident">is_float</span>}
     }
 
-    <span class="kw">fn</span> <span class="ident">from_float</span>(<span class="ident">float</span>: <span class="ident">CgatsFloat</span>) <span class="op">-&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">from_float</span>(<span class="ident">float</span>: <span class="ident">CgatsFloat</span>) <span class="op">-&gt;</span> <span class="ident">CgatsValue</span> {
         <span class="kw">let</span> <span class="ident">value</span> <span class="op">=</span> <span class="ident">compare</span>::<span class="ident">round_to</span>(<span class="ident">float</span>, <span class="number">4</span>).<span class="ident">to_string</span>();
-        <span class="self">Self</span> { <span class="ident">value</span>, <span class="ident">float</span>, <span class="ident">is_float</span>: <span class="bool-val">true</span> }
+        <span class="ident">CgatsValue</span> { <span class="ident">value</span>, <span class="ident">float</span>, <span class="ident">is_float</span>: <span class="bool-val">true</span> }
     }
 }
 
@@ -689,9 +675,9 @@
 <span class="kw">impl</span> <span class="ident">FromStr</span> <span class="kw">for</span> <span class="ident">CgatsType</span> {
     <span class="kw">type</span> <span class="prelude-val">Err</span> <span class="op">=</span> <span class="ident">CgatsError</span>;
 
-    <span class="kw">fn</span> <span class="ident">from_str</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-&gt;</span> <span class="ident">CgatsResult</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">from_str</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-&gt;</span> <span class="ident">CgatsResult</span><span class="op">&lt;</span><span class="ident">CgatsType</span><span class="op">&gt;</span> {
         <span class="kw">use</span> <span class="ident">CgatsType</span>::<span class="kw-2">*</span>;
-        <span class="kw">let</span> <span class="ident">types</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="ident">Cgats</span>, <span class="ident">ColorBurst</span>, <span class="ident">Curve</span>];
+        <span class="kw">let</span> <span class="ident">types</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">CgatsType</span><span class="op">&gt;</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="ident">Cgats</span>, <span class="ident">ColorBurst</span>, <span class="ident">Curve</span>];
 
         <span class="kw">for</span> <span class="ident">t</span> <span class="kw">in</span> <span class="ident">types</span>.<span class="ident">into_iter</span>() {
             <span class="kw">let</span> <span class="ident">tstring</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">t</span>.<span class="ident">display</span>().<span class="ident">to_lowercase</span>();
@@ -708,5 +694,5 @@
     <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt</span>::<span class="ident">Formatter</span>) <span class="op">-&gt;</span> <span class="ident">fmt</span>::<span class="prelude-ty">Result</span> {
         <span class="macro">write</span><span class="macro">!</span>(<span class="ident">f</span>, <span class="string">&quot;{:?}&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>)
     }
-}</pre>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><aside id="help" class="hidden"><div><h1 class="hidden">Help</h1><div class="shortcuts"><h2>Keyboard Shortcuts</h2><dl><dt><kbd>?</kbd></dt><dd>Show this help dialog</dd><dt><kbd>S</kbd></dt><dd>Focus the search field</dd><dt><kbd>↑</kbd></dt><dd>Move up in search results</dd><dt><kbd>↓</kbd></dt><dd>Move down in search results</dd><dt><kbd>↹</kbd></dt><dd>Switch tab</dd><dt><kbd>&#9166;</kbd></dt><dd>Go to active search result</dd><dt><kbd>+</kbd></dt><dd>Expand all sections</dd><dt><kbd>-</kbd></dt><dd>Collapse all sections</dd></dl></div><div class="infos"><h2>Search Tricks</h2><p>Prefix searches with a type followed by a colon (e.g. <code>fn:</code>) to restrict the search to a given type.</p><p>Accepted types are: <code>fn</code>, <code>mod</code>, <code>struct</code>, <code>enum</code>, <code>trait</code>, <code>type</code>, <code>macro</code>, and <code>const</code>.</p><p>Search functions by type signature (e.g. <code>vec -> usize</code> or <code>* -> vec</code>)</p><p>Search multiple things at once by splitting your query with comma (e.g. <code>str,u8</code> or <code>String,struct:Vec,test</code>)</p></div></div></aside><script>window.rootPath = "../../";window.currentCrate = "cgats";</script><script src="../../aliases.js"></script><script src="../../main.js"></script><script defer src="../../search-index.js"></script></body></html>
+}</pre></div>
+</section><section id="search" class="content hidden"></section><section class="footer"></section><aside id="help" class="hidden"><div><h1 class="hidden">Help</h1><div class="shortcuts"><h2>Keyboard Shortcuts</h2><dl><dt><kbd>?</kbd></dt><dd>Show this help dialog</dd><dt><kbd>S</kbd></dt><dd>Focus the search field</dd><dt><kbd>↑</kbd></dt><dd>Move up in search results</dd><dt><kbd>↓</kbd></dt><dd>Move down in search results</dd><dt><kbd>↹</kbd></dt><dd>Switch tab</dd><dt><kbd>&#9166;</kbd></dt><dd>Go to active search result</dd><dt><kbd>+</kbd></dt><dd>Expand all sections</dd><dt><kbd>-</kbd></dt><dd>Collapse all sections</dd></dl></div><div class="infos"><h2>Search Tricks</h2><p>Prefix searches with a type followed by a colon (e.g., <code>fn:</code>) to restrict the search to a given type.</p><p>Accepted types are: <code>fn</code>, <code>mod</code>, <code>struct</code>, <code>enum</code>, <code>trait</code>, <code>type</code>, <code>macro</code>, and <code>const</code>.</p><p>Search functions by type signature (e.g., <code>vec -> usize</code> or <code>* -> vec</code>)</p><p>Search multiple things at once by splitting your query with comma (e.g., <code>str,u8</code> or <code>String,struct:Vec,test</code>)</p></div></div></aside><script>window.rootPath = "../../";window.currentCrate = "cgats";</script><script src="../../aliases.js"></script><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>
