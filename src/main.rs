@@ -30,13 +30,13 @@ fn main() -> CgatsResult<()> {
                 ))
                 .value_of("output")
             {
-                Some(f) => cgo.write_cgats(f)?,
-                None => println!("{}", cgo.print()?)
+                Some(f) => cgo.write_to_file(f)?,
+                None => println!("{}", cgo.write())
             }
         },
         None => {
             for file in &config.files {
-                match CgatsObject::from_file(&file) {
+                match Cgats::from_file(&file) {
                     Ok(cgo) => println!("'{}':\n\t{}", file, cgo),
                     Err(e) => eprintln!("'{}':\n\t{}", file, e)
                 }

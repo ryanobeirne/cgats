@@ -1,3 +1,3 @@
 var N = null;var sourcesIndex = {};
-sourcesIndex["cgats"] = {"name":"","dirs":[],"files":["cgatsmap.rs","compare.rs","delta.rs","error.rs","format.rs","lib.rs","rawvec.rs"]};
+sourcesIndex["cgats"] = {"name":"","dirs":[],"files":["cgats.rs","compare.rs","data_map.rs","data_vec.rs","error.rs","field.rs","lib.rs","vendor.rs"]};
 createSourceSidebar();

@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["CgatsError",""],["CgatsType",""],["DataFormatType",""]],"fn":[["ColorBurstFormat",""],["fmt_data_format",""],["round_to",""]],"struct":[["CgatsMap",""],["CgatsObject",""],["CgatsValue",""],["CgatsVec",""],["MapVec",""],["RawVec",""]],"trait":[["FromStr","Parse a value from a string"]],"type":[["CgatsResult",""],["CgatsSet",""],["DataFormat",""],["DataLine",""],["DataMap",""],["DataSet",""],["DataVec",""],["MapKey",""]]});
+initSidebarItems({"enum":[["CgatsError",""]],"struct":[["Cgats",""],["CgatsVec",""]],"type":[["CgatsResult",""]]});

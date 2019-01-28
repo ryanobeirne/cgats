@@ -4,7 +4,7 @@ use std::convert;
 use std::io;
 
 // Custom error types for CGATS
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum CgatsError {
     CannotCompare,
     EmptyFile,
@@ -14,7 +14,7 @@ pub enum CgatsError {
     InvalidID,
     NoData,
     NoDataFormat,
-    UnknownCgatsType,
+    UnknownVendor,
     UnknownFormatType,
     WriteError,
 }
@@ -41,7 +41,7 @@ impl Error for CgatsError {
             InvalidID          => "SAMPLE_ID is not an integer!",
             NoData             => "Color Data not found!",
             NoDataFormat       => "Cannot find BEGIN_DATA_FORMAT tag!",
-            UnknownCgatsType   => "Cannot determine CGATS type!",
+            UnknownVendor      => "Cannot determine Vendor!",
             UnknownFormatType  => "Unknown Data Format Type!",
             WriteError         => "Problem writing to file!",
         }

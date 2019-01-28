@@ -1,33 +1,18 @@
 use super::*;
-pub use std::str::FromStr;
+use std::str::FromStr;
+use std::fmt;
 
 // Container for what is between BEGIN_DATA_FORMAT and END_DATA_FORMAT
-pub type DataFormat = Vec<DataFormatType>;
-
-pub fn fmt_data_format(data_format: &DataFormat) -> String {
-    let mut s = String::from("[");
-
-    for f in data_format {
-        s.push_str(&format!(
-            "{}, ", f.to_string())
-        );
-    }
-
-    s.pop();
-    s.pop();
-    s.push(']');
-
-    s
-}
+pub type DataFormat = Vec<Field>;
 
 // Known data format types: This list is incomplete
 #[allow(non_camel_case_types)]
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
-pub enum DataFormatType {
+pub enum Field {
     // String
     SAMPLE_ID, SAMPLE_NAME, BLANK,
 
-    // f64
+    // Float
     RGB_R, RGB_G, RGB_B,
     CMYK_C, CMYK_M, CMYK_Y, CMYK_K,
     FIVECLR_1, FIVECLR_2, FIVECLR_3, FIVECLR_4, FIVECLR_5,
@@ -55,23 +40,19 @@ pub enum DataFormatType {
 #[allow(non_snake_case)]
 pub fn ColorBurstFormat() -> DataFormat {
     vec![
-        DataFormatType::D_RED,
-        DataFormatType::D_GREEN,
-        DataFormatType::D_BLUE,
-        DataFormatType::D_VIS,
-        DataFormatType::LAB_L,
-        DataFormatType::LAB_A,
-        DataFormatType::LAB_B,
+        Field::D_RED,
+        Field::D_GREEN,
+        Field::D_BLUE,
+        Field::D_VIS,
+        Field::LAB_L,
+        Field::LAB_A,
+        Field::LAB_B,
     ]
 }
 
-impl DataFormatType {
-    pub fn to_string(&self) -> String {
-        format!("{}", &self)
-    }
-
+impl Field {
     pub fn is_float(&self) -> bool {
-        use DataFormatType::*;
+        use Field::*;
         match &self {
             SAMPLE_NAME => false,
             SAMPLE_ID => false,
@@ -82,7 +63,7 @@ impl DataFormatType {
 
 }
 
-impl fmt::Display for DataFormatType {
+impl fmt::Display for Field {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let result = format!("{:?}", self)
             .replace("FIVE",  "5")
@@ -94,15 +75,15 @@ impl fmt::Display for DataFormatType {
     }
 }
 
-impl FromStr for DataFormatType {
+impl FromStr for Field {
     type Err = CgatsError;
 
     fn from_str(s: &str) -> CgatsResult<Self> {
-        use DataFormatType::*;
+        use Field::*;
         match s.to_uppercase().as_ref() {
             "SAMPLE_ID"   | "SAMPLEID" | "SAMPLE" => Ok(SAMPLE_ID),
             "SAMPLE_NAME" | "SAMPLENAME" => Ok(SAMPLE_NAME),
-	        "" | "BLANK" => Ok(BLANK),
+            "" | "BLANK" => Ok(BLANK),
 
             "RGB_R"   => Ok(RGB_R),
             "RGB_G"   => Ok(RGB_G),
@@ -151,6 +132,9 @@ impl FromStr for DataFormatType {
             "XYZ_X"   => Ok(XYZ_X),
             "XYZ_Y"   => Ok(XYZ_Y),
             "XYZ_Z"   => Ok(XYZ_Z),
+            "XYY_X"   => Ok(XYY_X),
+            "XYY_Y"   => Ok(XYY_Y),
+            "XYY_CAPY" => Ok(XYY_CAPY),
 
             "D_RED"   => Ok(D_RED),
             "D_GREEN" => Ok(D_GREEN),

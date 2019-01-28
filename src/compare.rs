@@ -1,260 +1,205 @@
 use super::*;
-use std::iter::FromIterator;
 
-pub type CgatsSet = Vec<CgatsObject>;
+extern crate deltae;
+use deltae::*;
 
-#[derive(Debug, Clone)]
-pub struct CgatsVec(pub CgatsSet);
+use std::str::FromStr;
+use std::path::Path;
+
+impl Cgats {
+    fn derive(&self) -> Cgats {
+        Cgats {
+            vendor: self.vendor,
+            meta: self.meta.clone(),
+            fields: self.fields.clone(),
+            data_map: DataMap::new(),
+        }
+    }
+
+    fn reindex_sample_id(&mut self) {
+        let sid_index = self.fields.iter()
+            .position(|f| *f == Field::SAMPLE_ID);
+
+        match sid_index {
+            Some(index) => {
+                for (key, value) in self.data_map.iter_mut(){
+                    value.values[index] = CgatsValue::from_str(&key.to_string())
+                        .expect("Cannot parse value from key <usize>!");
+                }
+            },
+            None => ()
+        }
+
+    }
+
+    fn insert_sample_id(&mut self) {
+        let sid_index = self.fields.iter()
+            .position(|f| *f == Field::SAMPLE_ID);
+
+        match sid_index {
+            Some(_) => {
+                self.reindex_sample_id();
+            },
+            None => {
+                self.fields.insert(0, Field::SAMPLE_ID);
+                for (key, value) in self.data_map.iter_mut(){
+                    value.values.insert(0,
+                        CgatsValue::from_str(&key.to_string())
+                            .expect("Cannot parse value from key <usize>!")
+                    );
+                }
+            },
+        }
+    }
+
+    fn has_lab(&self) -> bool {
+        self.fields.contains(&Field::LAB_L) &&
+        self.fields.contains(&Field::LAB_A) &&
+        self.fields.contains(&Field::LAB_B)
+    }
+}
+
+#[test]
+fn reindex() -> CgatsResult<()> {
+    let mut cgo = Cgats::from_file("test_files/colorburst0.txt")?;
+    cgo.insert_sample_id();
+    println!("{}", cgo.write());
+
+    Ok(())
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CgatsVec {
+    collection: Vec<Cgats>,
+}
 
 impl CgatsVec {
-    pub fn new() -> CgatsVec {
-        CgatsVec(CgatsSet::new())
-    }
-
-    pub fn push(&mut self, value: CgatsObject) {
-        self.0.push(value)
-    }
-
-    pub fn pop(&mut self) -> Option<CgatsObject> {
-        self.0.pop()
-    }
-
-    pub fn len(&self) -> usize {
-        self.0.len()
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.0.is_empty()
-    }
-
-    pub fn from_files<T: AsRef<Path>>(files: &Vec<T>) -> CgatsVec {
-        files.iter()
-            .filter_map(|f| CgatsObject::from_file(f).ok())
-            .collect()
-    }
-
-    // Check that all CgatsObjects have the same data type and sample count
-    pub fn is_comparable(&self) -> bool {
-        // If there are less than 2, we can skip out early
-        if self.len() < 2 { return true; }
-
-        // The first object in the list
-        let cgo_prime = &self.0[0];
-        if cgo_prime.is_empty() { return false; }
-
-        self.same_formats() && self.same_sample_count()
-    }
-
-    pub fn raw_from_prime(&self, cgats_map: &CgatsMap) -> CgatsResult<RawVec> {
-        if self.is_empty() { return Err(CgatsError::CannotCompare) }
-
-        let mut raw_vec = RawVec::new();
-
-        // The first object in the list
-        let cgo_prime = &self.0[0];
-
-        // Collect metadata from first object
-        if let Some(metadata) = cgo_prime.metadata() {
-            for line in metadata.0 {
-                raw_vec.push(line);
-            }
+    pub fn from_files<P: AsRef<Path>>(files: &Vec<P>) -> CgatsVec {
+        CgatsVec {
+            collection: files.iter()
+                .filter_map(|f| Cgats::from_file(f).ok())
+                .collect()
         }
+    }
 
-        // Push on the DATA_FORMAT
-        raw_vec.push(vec!("BEGIN_DATA_FORMAT".to_string()));
-        raw_vec.push(cgo_prime.data_format.iter().map(|f| f.to_string()).collect());
-        raw_vec.push(vec!("END_DATA_FORMAT".to_string()));
-
-        // Push on the DATA
-        raw_vec.push(vec!["BEGIN_DATA".to_string()]);
-        // This is very important
-        let data_vec = cgats_map.to_data_vec();
-        for v in data_vec {
-            raw_vec.push(v);
+    fn can_compare(&self) -> CgatsResult<()> {
+        if self.collection.is_empty() {
+            return Err(CgatsError::NoData);
         }
-        raw_vec.push(vec!["END_DATA".to_string()]);
-
-        Ok(raw_vec)
-    }
-
-    pub fn all_eq(&self) -> bool {
-        self.0.iter()
-            .all(|cgv| *cgv == self.0[0])
-    }
-
-    pub fn to_map_vec(&self) -> MapVec {
-        self.0.iter()
-            .map(|cgo|
-                cgo.data_map.clone())
-            .collect()
-    }
-
-    pub fn average(&self) -> CgatsResult<CgatsObject> {
-        // The first object in the list
-        let cgo_prime = &self.0[0];
         
-        // If there's only one or none, we can skip out early
-        let vec_count = self.len();
-        match vec_count {
-            1 => return Ok(cgo_prime.clone()),
-            0 => return Err(CgatsError::NoData),
-            _ => ()
-        }
+        let prime = &self.collection[0];
 
-        // Make sure all the objects are comparable
-        if !self.is_comparable() {
+        if ! self.collection.iter().all(|c|
+            c.sample_count() == prime.sample_count() ||
+            c.fields == prime.fields
+        ) {
             return Err(CgatsError::CannotCompare);
-        } 
+        }
 
-        // Collect all the DataMaps into a MapVec
-        let map_vec = self.to_map_vec();
-
-        // Use filler from first object
-        let mut cgo = CgatsObject::derive_from(&cgo_prime);
-        // Average the DataMaps
-        cgo.data_map = map_vec.average()?;
-        // Use the first object to fill in the blanks
-        cgo.raw_vec = self.raw_from_prime(&cgo.data_map)?;
-
-        // Append sample count to end of first line
-        cgo.raw_vec.0[0].push(format!("Average of {}", vec_count));
-
-        Ok(cgo)
+        Ok(())
     }
 
-    pub fn same_sample_count(&self) -> bool {
-        let cgo_prime = &self.0[0];
+    fn can_delta(&self) -> bool {
+        self.collection.len() == 2 &&
+        self.collection.iter().all(|cgo| cgo.has_lab())
+    }
 
-        for object in &self.0 {
-            if object.len() != cgo_prime.len() {
-                return false;
+    fn same_fields(&self) -> bool {
+        self.collection.iter()
+            .map(|cgo| &cgo.fields)
+            .all(|fields| fields == &self.collection[0].fields)
+    }
+
+    pub fn average(&self) -> CgatsResult<Cgats> {
+        self.can_compare()?;
+
+        let len = self.collection.len();
+        if len == 1 {
+            return Ok(self.collection[0].clone())
+        }
+        
+        let prime = &self.collection[0];
+        let mut cgats = prime.derive();
+
+        for cgo in &self.collection {
+            for (key, sample) in cgo.data_map.iter() {
+                let div_sample = sample.divide_values(len);
+                let prime_sample = prime.data_map.get(key).expect("Map does not contain key!");
+                let entry = cgats.data_map.entry(*key)
+                    .or_insert(prime_sample.zero());
+
+                *entry = entry.add_values(&div_sample);
             }
         }
 
-        true
+        cgats.meta.lines[0].raw_samples.push(format!("Average of {}", len));
+
+        Ok(cgats)
     }
 
-    pub fn same_formats(&self) -> bool {
-        let cgo_prime = &self.0[0];
-
-        for object in &self.0 {
-            // Make sure they all have the same DataFormat
-            for format_type in &cgo_prime.data_format {
-                if !object.data_format.contains(&format_type) {
-                    return false;
-                }
-            }
-            for format_type in &object.data_format {
-                if !cgo_prime.data_format.contains(&format_type) {
-                    return false;
-                }
-            }
+    pub fn concatenate(&self) -> CgatsResult<Cgats> {
+        if !self.same_fields() {
+            return Err(CgatsError::CannotCompare);
         }
 
-        true
-    }
-
-    pub fn concatenate(&self) -> CgatsResult<CgatsObject> {
-        let cgo_prime = &self.0[0];
-
-        // If there's only 1 or none, we can skip out early
-        match self.len() {
-            1 => return Ok(cgo_prime.clone()),
-            0 => return Err(CgatsError::CannotCompare),
-            _ => ()
-        }
-
-        // Error if DATA_FORMATS are not the same
-        if ! self.same_formats() { return Err(CgatsError::CannotCompare); }
-
-        // Start with the first DATA_FORMAT
-        let mut cgo = cgo_prime.clone();
-
-        // Loop through the objects and append the raw_vecs
-        for object in &self.0[1..] {
-            cgo.append(&mut object.clone());
-        }
-
-        // Create the data_map
-        cgo.map()?;
-
-        // Renumber SAMPLE_ID's
-        cgo.reindex_sample_id();
-
-        Ok(cgo)
-    }
-}
-
-impl FromIterator<CgatsObject> for CgatsVec {
-    fn from_iter<I: IntoIterator<Item=CgatsObject>>(iter: I) -> CgatsVec {
-        let mut c = CgatsVec::new();
-
-        for i in iter {
-            c.push(i);
-        }
-
-        c
-    }
-}
-
-#[derive(Debug, Clone)]
-pub struct MapVec (Vec<CgatsMap>);
-
-impl MapVec {
-    pub fn new() -> MapVec {
-        MapVec(Vec::new())
-    }
-
-    pub fn len(&self) -> usize {
-        self.0.len()
-    }
-
-    pub fn push(&mut self, value: CgatsMap) {
-        self.0.push(value)
-    }
-
-    pub fn pop(&mut self) -> Option<CgatsMap> {
-        self.0.pop()
-    }
-
-    pub fn average(&self) -> CgatsResult<CgatsMap> {
-        let mut cgm = CgatsMap::new();
-
-        for map in &self.0 {
-            for ((index, format), value) in &map.0 {
-                let key = (*index, *format);
-                if format.is_float() {
-                    let current = match cgm.0.get(&key) {
-                        Some(c) => c.float,
-                        None => 0 as CgatsFloat,
-                    };
-                    let float = current + &value.float / *&self.len() as CgatsFloat;
-                    cgm.0.insert( key, CgatsValue::from_float(float) );
-                } else {
-                    if !cgm.0.contains_key(&key) {
-                        cgm.insert(key, value.clone());
+        match self.collection.first() {
+            Some(cgo) => {
+                let mut new = cgo.clone();
+                for other in self.collection.iter().skip(1) {
+                    for sample in other.data_map.values() {
+                        new.data_map.insert(new.data_map.len(), sample.clone());
                     }
                 }
-            }
+                new.reindex_sample_id();
+                Ok(new)
+            },
+            None => Err(CgatsError::NoData),
+        }
+    }
+
+    pub fn deltae(&self, method: DEMethod) -> CgatsResult<Cgats> {
+        if !self.can_delta() {
+            return Err(CgatsError::CannotCompare);
         }
 
-        Ok(cgm)
+        unimplemented!()
     }
 }
 
-impl FromIterator<CgatsMap> for MapVec {
-    fn from_iter<I: IntoIterator<Item=CgatsMap>>(iter: I) -> MapVec {
-        let mut c = MapVec::new();
+#[test]
+fn average_cgats() -> CgatsResult<()> {
+    let cgv = CgatsVec::from_files(&vec!["test_files/cgats1.tsv", "test_files/cgats2.tsv"]);
+    let avg = cgv.average()?;
 
-        for i in iter {
-            c.push(i);
-        }
+    let expected = Cgats::from_file("test_files/cgats5.tsv")?;
 
-        c
-    }
+    println!("{}", avg.write());
+
+    assert_eq!(avg.data_map, expected.data_map);
+    Ok(())
 }
 
-pub fn round_to(float: CgatsFloat, places: i32) -> CgatsFloat {
-    let mult = (10 as CgatsFloat).powi(places);
-    (float * mult).round() / mult
+#[test]
+fn average_cb() -> CgatsResult<()> {
+    let cgv = CgatsVec::from_files(&vec!["test_files/colorburst1.lin", "test_files/colorburst2.lin"]);
+    let avg = cgv.average()?;
+
+    let expected = Cgats::from_file("test_files/colorburst3.lin")?;
+
+    println!("{}", avg.write());
+
+    assert_eq!(avg.data_map, expected.data_map);
+    Ok(())
+}
+
+#[test]
+fn cat_cgats() -> CgatsResult<()> {
+    let cgv = CgatsVec::from_files(&vec!["test_files/cgats1.tsv", "test_files/cgats2.tsv"]);
+    let cat = cgv.concatenate()?;
+
+    println!("{}", cat.write());
+
+    assert_eq!(cat.data_map.keys().last(), Some(&21));
+    assert_eq!(cat.data_map.len(), 22);
+    Ok(())
 }

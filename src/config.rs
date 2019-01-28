@@ -22,7 +22,7 @@ impl Command {
         }
     }
 
-    pub fn execute(&self, cmd_opts: &CmdOpts, cgv: CgatsVec) -> CgatsResult<CgatsObject> {
+    pub fn execute(&self, cmd_opts: &CmdOpts, cgv: CgatsVec) -> CgatsResult<Cgats> {
         match &self {
             Command::Average => cgv.average(),
             Command::Cat => cgv.concatenate(),
@@ -86,7 +86,7 @@ impl Config {
         Self { command, cmd_opts, files }
     }
 
-    pub fn collect(&self) -> CgatsResult<CgatsObject> {
+    pub fn collect(&self) -> CgatsResult<Cgats> {
         match &self.command {
             Some(cmd) => cmd.execute(&self.cmd_opts, self.cgats_vec()),
             None => Err(CgatsError::InvalidCommand)

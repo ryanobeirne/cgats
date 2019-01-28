@@ -3,7 +3,11 @@ name = "cgats"
 version = "0.1.0"
 authors = ["Ryan O'Beirne <robeirne@spoonflower.com>"]
 description = "Parse, transform, and write CGATS color files"
+edition = "2018"
 
 [dependencies]
 clap = "2.32.0"
 deltae = {git = "https://github.com/robeirne/deltae"}
+
+[dev-dependencies]
+mktemp = "0.3.1"
