@@ -4,6 +4,9 @@ use std::collections::BTreeMap;
 use std::str::FromStr;
 use std::fmt;
 
+extern crate deltae;
+use deltae::color::LabValue;
+
 pub type DataMap = BTreeMap<usize, Sample>;
 
 // type MapKey = (usize, Field);
@@ -16,7 +19,7 @@ pub struct CgatsValue {
 }
 
 impl CgatsValue {
-    fn from_float(float: Float) -> CgatsValue {
+    pub fn from_float(float: Float) -> CgatsValue {
         CgatsValue {
             string: float.to_string(),
             float: Some(float),
@@ -121,6 +124,14 @@ impl Sample {
                 }
             ).collect()
         }
+    }
+
+    pub fn to_lab(&self, indexes: &[usize; 3]) -> Option<LabValue> {
+        let l = self.values[indexes[0]].float? as f64;
+        let a = self.values[indexes[1]].float? as f64;
+        let b = self.values[indexes[2]].float? as f64;
+
+        Some(LabValue {l, a, b})
     }
 }
 

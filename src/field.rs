@@ -1,4 +1,8 @@
 use super::*;
+
+extern crate deltae;
+use deltae::DEMethod;
+
 use std::str::FromStr;
 use std::fmt;
 
@@ -61,6 +65,23 @@ impl Field {
         }
     }
 
+    pub fn from_de_method(method: DEMethod) -> Field {
+        match method {
+            DEMethod::DE1976  => Field::DE_1976,
+            DEMethod::DE1994  => Field::DE_1994,
+            DEMethod::DE1994T => Field::DE_1994T,
+            DEMethod::DE2000  => Field::DE_2000,
+            DEMethod::DECMC1  => Field::DE_CMC,
+            DEMethod::DECMC2  => Field::DE_CMC2,
+        }
+    }
+
+    pub fn lab_indexes(fields: &DataFormat) -> Option<[usize; 3]> {
+        let l = fields.iter().position(|f| *f == Field::LAB_L)?;
+        let a = fields.iter().position(|f| *f == Field::LAB_A)?;
+        let b = fields.iter().position(|f| *f == Field::LAB_B)?;
+        Some([ l, a, b ])
+    }
 }
 
 impl fmt::Display for Field {

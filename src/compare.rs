@@ -7,6 +7,15 @@ use std::str::FromStr;
 use std::path::Path;
 
 impl Cgats {
+    fn new_with_fields(fields: DataFormat) -> Cgats {
+        Cgats {
+            vendor: Some(Vendor::Cgats),
+            meta: DataVec::new(),
+            fields,
+            data_map: DataMap::new(),
+        }
+    }
+
     fn derive(&self) -> Cgats {
         Cgats {
             vendor: self.vendor,
@@ -101,6 +110,7 @@ impl CgatsVec {
 
     fn can_delta(&self) -> bool {
         self.collection.len() == 2 &&
+        self.collection[0].sample_count() == self.collection[1].sample_count() &&
         self.collection.iter().all(|cgo| cgo.has_lab())
     }
 
@@ -162,13 +172,48 @@ impl CgatsVec {
             return Err(CgatsError::CannotCompare);
         }
 
-        unimplemented!()
+        let mut cgats = Cgats::new_with_fields(vec![
+            Field::SAMPLE_ID, Field::from_de_method(method)
+        ]);
+
+        cgats.vendor = Some(Vendor::Cgats);
+        cgats.meta = DataVec {
+            lines: vec![DataLine {
+                raw_samples: vec!["CGATS.17".to_string()]
+            }]
+        };
+
+        let (sample0, sample1) = (&self.collection[0], &self.collection[1]);
+
+        // We can unwrap these because `self.can_delta()` already vetted that both samples contain LAB
+        let lab0_indexes = Field::lab_indexes(&sample0.fields).expect("Cannot find LAB in fields!");
+        let lab1_indexes = Field::lab_indexes(&sample1.fields).expect("Cannot find LAB in fields!");
+
+        for (index, sample) in sample0.data_map.iter() {
+            let lab0 = sample.to_lab(&lab0_indexes)
+                .expect("Cannot find LAB in fields!");
+            let lab1 = sample1.data_map
+                .get(index).expect("Key doesn't exist in map!")
+                .to_lab(&lab1_indexes).expect("Cannot find LAB in fields!");
+            let de = DeltaE::new(&lab0, &lab1, method);
+            cgats.data_map.insert(*index,
+                Sample {
+                    values: vec![
+                        CgatsValue::from_str(&index.to_string())?,
+                        CgatsValue::from_float(de.value as Float),
+                    ]
+                });
+        }
+
+        Ok(cgats)
     }
 }
 
 #[test]
 fn average_cgats() -> CgatsResult<()> {
-    let cgv = CgatsVec::from_files(&vec!["test_files/cgats1.tsv", "test_files/cgats2.tsv"]);
+    let cgv = CgatsVec::from_files(&vec![
+        "test_files/cgats1.tsv", "test_files/cgats2.tsv"
+    ]);
     let avg = cgv.average()?;
 
     let expected = Cgats::from_file("test_files/cgats5.tsv")?;
@@ -181,7 +226,9 @@ fn average_cgats() -> CgatsResult<()> {
 
 #[test]
 fn average_cb() -> CgatsResult<()> {
-    let cgv = CgatsVec::from_files(&vec!["test_files/colorburst1.lin", "test_files/colorburst2.lin"]);
+    let cgv = CgatsVec::from_files(&vec![
+        "test_files/colorburst1.lin", "test_files/colorburst2.lin"
+    ]);
     let avg = cgv.average()?;
 
     let expected = Cgats::from_file("test_files/colorburst3.lin")?;
@@ -194,12 +241,31 @@ fn average_cb() -> CgatsResult<()> {
 
 #[test]
 fn cat_cgats() -> CgatsResult<()> {
-    let cgv = CgatsVec::from_files(&vec!["test_files/cgats1.tsv", "test_files/cgats2.tsv"]);
+    let cgv = CgatsVec::from_files(&vec![
+        "test_files/cgats1.tsv", "test_files/cgats2.tsv"
+    ]);
     let cat = cgv.concatenate()?;
 
     println!("{}", cat.write());
 
     assert_eq!(cat.data_map.keys().last(), Some(&21));
     assert_eq!(cat.data_map.len(), 22);
+    Ok(())
+}
+
+#[test]
+fn deltae() -> CgatsResult<()> {
+    let cgv = CgatsVec::from_files(&vec![
+        "test_files/colorburst2.lin", "test_files/colorburst3.lin"
+    ]);
+    let de_cgo = cgv.deltae(deltae::DEMethod::DE2000)?;
+    let temp = test::mktemp()?;
+    de_cgo.write_to_file(&temp)?;
+
+    let reconstructed = Cgats::from_file(&temp)?;
+    let expected = Cgats::from_file("test_files/deltae0.txt")?;
+
+    assert_eq!(reconstructed.data_map, expected.data_map);
+    std::fs::remove_file(temp)?;
     Ok(())
 }

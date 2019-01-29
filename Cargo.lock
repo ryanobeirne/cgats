@@ -23,10 +23,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "cgats"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "clap 2.32.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "deltae 0.1.0 (git+https://github.com/robeirne/deltae)",
+ "deltae 0.1.1 (git+https://github.com/robeirne/deltae)",
  "mktemp 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -46,8 +46,8 @@ dependencies = [
 
 [[package]]
 name = "deltae"
-version = "0.1.0"
-source = "git+https://github.com/robeirne/deltae#de64d2f1cbff4db0f8888a35856bddd81d7370a5"
+version = "0.1.1"
+source = "git+https://github.com/robeirne/deltae#83a4e616d0bf82cbbaf5bbf6ab5e52fcbefba643"
 dependencies = [
  "clap 2.32.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -196,7 +196,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum atty 0.2.11 (registry+https://github.com/rust-lang/crates.io-index)" = "9a7d5b8723950951411ee34d271d99dddcc2035a16ab25310ea2c8cfd4369652"
 "checksum bitflags 1.0.4 (registry+https://github.com/rust-lang/crates.io-index)" = "228047a76f468627ca71776ecdebd732a3423081fcf5125585bcd7c49886ce12"
 "checksum clap 2.32.0 (registry+https://github.com/rust-lang/crates.io-index)" = "b957d88f4b6a63b9d70d5f454ac8011819c6efa7727858f458ab71c756ce2d3e"
-"checksum deltae 0.1.0 (git+https://github.com/robeirne/deltae)" = "<none>"
+"checksum deltae 0.1.1 (git+https://github.com/robeirne/deltae)" = "<none>"
 "checksum fuchsia-cprng 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "81f7f8eb465745ea9b02e2704612a9946a59fa40572086c6fd49d6ddcf30bf31"
 "checksum libc 0.2.46 (registry+https://github.com/rust-lang/crates.io-index)" = "023a4cd09b2ff695f9734c1934145a315594b7986398496841c7031a5a1bbdbd"
 "checksum mktemp 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)" = "77001ceb9eed65439f3dc2a2543f9ba1417d912686bf224a7738d0966e6dcd69"

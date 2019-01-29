@@ -65,7 +65,7 @@ fn reconstruct() -> CgatsResult<()> {
     Ok(())
 }
 
-fn mktemp() -> CgatsResult<PathBuf> {
+pub fn mktemp() -> CgatsResult<PathBuf> {
     let temp = Temp::new_file()?.to_path_buf();
     File::create(&temp)?;
     Ok(temp)

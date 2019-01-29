@@ -1,5 +1,6 @@
 use super::*;
 use clap::ArgMatches;
+use std::str::FromStr;
 
 use std::fmt;
 
@@ -26,7 +27,7 @@ impl Command {
         match &self {
             Command::Average => cgv.average(),
             Command::Cat => cgv.concatenate(),
-            Command::Delta => cgv.deltae(deltae::DEMethod::from(&cmd_opts[0])),
+            Command::Delta => cgv.deltae(deltae::DEMethod::from_str(&cmd_opts[0])?),
         }
     }
 
