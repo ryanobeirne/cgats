@@ -161,6 +161,7 @@ impl CgatsVec {
                     }
                 }
                 new.reindex_sample_id();
+                new.meta.meta_renumber_sets(new.data_map.len());
                 Ok(new)
             },
             None => Err(CgatsError::NoData),

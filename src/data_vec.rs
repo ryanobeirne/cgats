@@ -21,6 +21,10 @@ impl DataLine {
     fn push(&mut self, string: String) {
         self.raw_samples.push(string)
     }
+
+    fn from(raw_samples: Vec<String>) -> DataLine {
+        DataLine { raw_samples }
+    }
 }
 
 #[derive(Debug, Default, Clone, Eq, PartialEq)]
@@ -198,7 +202,6 @@ pub fn from_file<P: AsRef<Path>>(path: P) -> CgatsResult<DataVec> {
         meta_vec
     }
 
-
     // Get the CgatsType from the first line in the RawVec (first line in file)
     pub fn get_vendor(&self) -> Option<Vendor> {
         let s = self.lines.first()?.raw_samples.iter()
@@ -209,6 +212,14 @@ pub fn from_file<P: AsRef<Path>>(path: P) -> CgatsResult<DataVec> {
         match Vendor::from_str(&s) {
             Ok(cgt) => Some(cgt),
             Err(_) => None,
+        }
+    }
+    
+    pub fn meta_renumber_sets(&mut self, num: usize) {
+        for line in self.lines.iter_mut() {
+            if line.raw_samples[0].contains("NUMBER_OF_SETS") {
+                *line = DataLine::from(vec!["NUMBER_OF_SETS".to_string(), num.to_string()]);
+            }
         }
     }
 }
