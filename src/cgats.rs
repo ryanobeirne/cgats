@@ -15,14 +15,17 @@ pub struct Cgats {
 
 impl Cgats {
     pub fn new() -> Cgats {
+    //! Create a new empty CGATS object
         Cgats::default()
     }
 
     pub fn sample_count(&self) -> usize {
+    //! Returns the number of samples in the data
         self.data_map.len()
     }
 
     pub fn new_with_vendor(vendor: Vendor) -> Cgats {
+    //! Create a new empty CGATS object with a Vendor
         Cgats {
             vendor: Some(vendor),
             ..Cgats::default()
@@ -30,6 +33,7 @@ impl Cgats {
     }
 
     pub fn from_file<P: AsRef<Path>>(path: P) -> CgatsResult<Cgats> {
+    //! Create a CGATS object from an existing CGATS file
         let raw = DataVec::from_file(path)?;
 
         let vendor = raw.get_vendor();
@@ -46,29 +50,31 @@ impl Cgats {
     }
 
     pub fn write_to_file<P: AsRef<Path>>(&self, file: P) -> CgatsResult<()> {
-        let f = File::create(file)?;
-        let mut buf = BufWriter::new(f);
-        write!(buf, "{}", self.write())?;
+    //! Write a CGATS object to a properly formatted CGATS file
+        let mut buf = BufWriter::new(File::create(file)?);
+        write!(buf, "{}", self.format())?;
         Ok(())
     }
 
-    pub fn write(&self) -> String {
-        let mut string = String::new();
-
-        string.push_str(&self.write_meta());
-        string.push_str(&self.write_fields());
-        string.push_str(&self.write_data_map());
-
-        string
+    pub fn format(&self) -> String {
+    //! Format the entire CGATS object to a string
+        format!("{}{}{}",
+            &self.format_meta(),
+            &self.format_fields(),
+            &self.format_data_map(),
+        )
     }
 
-    fn write_meta(&self) -> String {
+    fn format_meta(&self) -> String {
+    //! Format the CGATS metadata section to a string
         format!("{}", self.meta)
     }
 
-    fn write_fields(&self) -> String {
+    fn format_fields(&self) -> String {
+    //! Format the DATA_FORMAT section to a string
         let mut s = String::new();
 
+        // ColorBurst does not include DATA_FORMAT information in LineFiles
         if self.vendor == Some(Vendor::ColorBurst) {
             return s;
         }
@@ -79,24 +85,24 @@ impl Cgats {
             s.push_str(&format!("{}\t", field));
         }
 
+        // Pop off the last tab ('\t')
         s.pop();
         s.push_str("\nEND_DATA_FORMAT\n");
 
         format!("{}", s)
     }
 
-    fn write_data_map(&self) -> String {
-        let mut string = "BEGIN_DATA\n".to_string();
+    fn format_data_map(&self) -> String {
+    //! Format the DATA section to a string
+        format!("{}{}{}",
+            "BEGIN_DATA\n",
 
-        string.push_str(
             &self.data_map.iter()
                 .map(|(_index, sample)| format!("{}\n", sample))
-                .collect::<String>()
-        );
+                .collect::<String>(),
 
-        string.push_str("END_DATA\n");
-
-        string
+            "END_DATA\n"
+        )
     }
 
 }
@@ -142,13 +148,13 @@ fn cgats_display() -> CgatsResult<()> {
 fn write_meta() -> CgatsResult<()> {
     let cgats = Cgats::from_file("test_files/cgats1.tsv")?;
     assert_eq!(
-        cgats.write_meta(),
+        cgats.format_meta(),
         "CGATS.17\n"
     );
 
     let colorburst = Cgats::from_file("test_files/colorburst0.txt")?;
     assert_eq!(
-        colorburst.write_meta(),
+        colorburst.format_meta(),
         "ColorBurst\n"
     );
 
@@ -159,18 +165,18 @@ fn write_meta() -> CgatsResult<()> {
 fn write_fields() -> CgatsResult<()> {
     let cgats = Cgats::from_file("test_files/cgats1.tsv")?;
     assert_eq!(
-        cgats.write_fields(),
+        cgats.format_fields(),
         "BEGIN_DATA_FORMAT\nSAMPLE_ID\tSAMPLE_NAME\tCMYK_C\tCMYK_M\tCMYK_Y\tCMYK_K\nEND_DATA_FORMAT\n"
     );
 
     let curve = Cgats::from_file("test_files/curve0.txt")?;
     assert_eq!(
-        curve.write_fields(),
+        curve.format_fields(),
         "BEGIN_DATA_FORMAT\nSAMPLE_ID\tSAMPLE_NAME\tCMYK_C\tCMYK_M\tCMYK_Y\tCMYK_K\nEND_DATA_FORMAT\n"  
     );
 
     let colorburst = Cgats::from_file("test_files/colorburst0.txt")?;
-    assert_eq!(colorburst.write_fields(), "");
+    assert_eq!(colorburst.format_fields(), "");
 
     Ok(())
 }
@@ -178,6 +184,6 @@ fn write_fields() -> CgatsResult<()> {
 #[test]
 fn write_data_map() -> CgatsResult<()> {
     let cgats = Cgats::from_file("test_files/cgats1.tsv")?;
-    println!("{}", cgats.write_data_map());
+    println!("{}", cgats.format_data_map());
     Ok(())
 }

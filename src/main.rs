@@ -31,7 +31,7 @@ fn main() -> CgatsResult<()> {
                 .value_of("output")
             {
                 Some(f) => cgo.write_to_file(f)?,
-                None => println!("{}", cgo.write())
+                None => println!("{}", cgo.format())
             }
         },
         None => {

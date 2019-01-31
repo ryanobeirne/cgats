@@ -72,7 +72,7 @@ impl Cgats {
 fn reindex() -> CgatsResult<()> {
     let mut cgo = Cgats::from_file("test_files/colorburst0.txt")?;
     cgo.insert_sample_id();
-    println!("{}", cgo.write());
+    println!("{}", cgo.format());
 
     Ok(())
 }
@@ -219,7 +219,7 @@ fn average_cgats() -> CgatsResult<()> {
 
     let expected = Cgats::from_file("test_files/cgats5.tsv")?;
 
-    println!("{}", avg.write());
+    println!("{}", avg.format());
 
     assert_eq!(avg.data_map, expected.data_map);
     Ok(())
@@ -234,7 +234,7 @@ fn average_cb() -> CgatsResult<()> {
 
     let expected = Cgats::from_file("test_files/colorburst3.lin")?;
 
-    println!("{}", avg.write());
+    println!("{}", avg.format());
 
     assert_eq!(avg.data_map, expected.data_map);
     Ok(())
@@ -247,7 +247,7 @@ fn cat_cgats() -> CgatsResult<()> {
     ]);
     let cat = cgv.concatenate()?;
 
-    println!("{}", cat.write());
+    println!("{}", cat.format());
 
     assert_eq!(cat.data_map.keys().last(), Some(&21));
     assert_eq!(cat.data_map.len(), 22);

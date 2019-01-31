@@ -52,14 +52,14 @@ fn bad_files() {
 #[test]
 fn reconstruct() -> CgatsResult<()> {
     for cgats in test_files_cgats() {
-        println!("---CGATS---\n{}---CGATS---\n", cgats.write());
+        println!("---CGATS---\n{}---CGATS---\n", cgats.format());
 
         let temp = mktemp()?;
         cgats.write_to_file(&temp)?;
         let reconstructed = Cgats::from_file(&temp)?;
-        println!("---RECONSTRUCTED---\n{}---RECONSTRUCTED---\n", reconstructed.write());
+        println!("---RECONSTRUCTED---\n{}---RECONSTRUCTED---\n", reconstructed.format());
 
-        assert_eq!(cgats.write(), reconstructed.write());
+        assert_eq!(cgats.format(), reconstructed.format());
         std::fs::remove_file(temp)?;
     }
     Ok(())

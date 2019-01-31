@@ -214,7 +214,7 @@ pub fn from_file<P: AsRef<Path>>(path: P) -> CgatsResult<DataVec> {
             Err(_) => None,
         }
     }
-    
+
     pub fn meta_renumber_sets(&mut self, num: usize) {
         for line in self.lines.iter_mut() {
             if line.raw_samples[0].contains("NUMBER_OF_SETS") {
