@@ -22,7 +22,7 @@ impl DataLine {
         self.raw_samples.push(string)
     }
 
-    fn from(raw_samples: Vec<String>) -> DataLine {
+    pub fn from(raw_samples: Vec<String>) -> DataLine {
         DataLine { raw_samples }
     }
 }
@@ -33,40 +33,44 @@ pub struct DataVec {
 }
 
 impl DataVec {
-pub fn new() -> DataVec {
-    DataVec{
-        lines: Vec::new()
-    }
-}
-
-pub fn from_file<P: AsRef<Path>>(path: P) -> CgatsResult<DataVec> {
-    let mut data_vec = DataVec::new();
-
-    // Loop through lines and trim trailing whitespace
-    for line in BufReader::new(File::open(path)?).lines() {
-        let text = match line {
-            Ok(txt) => txt.trim().to_string(),
-            Err(_)  => "".to_string()
-        };
-
-        // If the file uses carriage returns, split those up as well
-        let v_cr = text.split("\r")
-            .filter(|l| !l.is_empty())
-            .map(|l| l.trim());
-
-        // Push each item in a line into a Vector
-        for split_line in v_cr {
-            let split = split_line.split("\t");
-            let mut v = DataLine::new();
-
-            for item in split {
-                v.push(item.trim().to_string());
-            }
-
-            // Push the Vectors into the RawVec
-            data_vec.lines.push(v);
+    pub fn new() -> DataVec {
+        DataVec{
+            lines: Vec::new()
         }
-    } 
+    }
+
+    pub fn from(lines: Vec<DataLine>) -> DataVec {
+        DataVec { lines }
+    }
+
+    pub fn from_file<P: AsRef<Path>>(path: P) -> CgatsResult<DataVec> {
+        let mut data_vec = DataVec::new();
+
+        // Loop through lines and trim trailing whitespace
+        for line in BufReader::new(File::open(path)?).lines() {
+            let text = match line {
+                Ok(txt) => txt.trim().to_string(),
+                Err(_)  => "".to_string()
+            };
+
+            // If the file uses carriage returns, split those up as well
+            let v_cr = text.split("\r")
+                .filter(|l| !l.is_empty())
+                .map(|l| l.trim());
+
+            // Push each item in a line into a Vector
+            for split_line in v_cr {
+                let split = split_line.split("\t");
+                let mut v = DataLine::new();
+
+                for item in split {
+                    v.push(item.trim().to_string());
+                }
+
+                // Push the Vectors into the RawVec
+                data_vec.lines.push(v);
+            }
+        }
 
         // Make sure the file is not empty
         if data_vec.lines.is_empty() {

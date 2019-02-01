@@ -178,11 +178,9 @@ impl CgatsVec {
         ]);
 
         cgats.vendor = Some(Vendor::Cgats);
-        cgats.meta = DataVec {
-            lines: vec![DataLine {
-                raw_samples: vec!["CGATS.17".to_string()]
-            }]
-        };
+        cgats.meta = DataVec::from(vec![
+            DataLine::from(vec!["CGATS.17".to_string()]),
+        ]);
 
         let (sample0, sample1) = (&self.collection[0], &self.collection[1]);
 
@@ -206,7 +204,22 @@ impl CgatsVec {
                 });
         }
 
+        cgats.meta.lines.push(
+            DataLine::from(vec!["NUMBER_OF_SETS".to_string(), cgats.data_map.len().to_string()])
+        );
+        cgats.meta.lines.push(
+            DataLine::from(vec!["NUMBER_OF_FIELDS".to_string(), cgats.fields.len().to_string()])
+        );
+
         Ok(cgats)
+    }
+}
+
+impl Cgats {
+    pub fn deltae(self, other: Cgats, method: DEMethod) -> CgatsResult<Cgats> {
+        CgatsVec {
+            collection: vec![self, other]
+        }.deltae(method)
     }
 }
 
