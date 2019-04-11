@@ -3,10 +3,22 @@ use super::*;
 extern crate deltae;
 use deltae::*;
 
-use std::str::FromStr;
+pub use std::str::FromStr;
 use std::path::Path;
 
 impl Cgats {
+    pub fn average(collection: Vec<Cgats>) -> CgatsResult<Cgats> {
+        CgatsVec { collection }.average()
+    }
+
+    pub fn concatenate(collection: Vec<Cgats>) -> CgatsResult<Cgats> {
+        CgatsVec { collection }.concatenate()
+    }
+
+    pub fn deltae(self, other: Cgats, method: DEMethod) -> CgatsResult<Cgats> {
+        CgatsVec { collection: vec![self, other] }.deltae(method)
+    }
+
     fn new_with_fields(fields: DataFormat) -> Cgats {
         Cgats {
             vendor: Some(Vendor::Cgats),
@@ -212,14 +224,6 @@ impl CgatsVec {
         );
 
         Ok(cgats)
-    }
-}
-
-impl Cgats {
-    pub fn deltae(self, other: Cgats, method: DEMethod) -> CgatsResult<Cgats> {
-        CgatsVec {
-            collection: vec![self, other]
-        }.deltae(method)
     }
 }
 
