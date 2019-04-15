@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["CgatsError",""]],"struct":[["Cgats",""],["CgatsVec",""]],"type":[["CgatsResult",""]]});

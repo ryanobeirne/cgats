@@ -8,6 +8,7 @@ edition = "2018"
 [dependencies]
 clap = "2.32.0"
 deltae = {git = "https://github.com/robeirne/deltae"}
+statistical = "1.0.0"
 
 [dev-dependencies]
 mktemp = "0.3.1"

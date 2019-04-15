@@ -18,9 +18,9 @@ impl DeReport {
         let mut de_list =  DeList::try_from(de_cgats)?;
         let overall =  DeSummary::from(&de_list);
 
-        let split =    DeList::split_90_10(&mut de_list)?;
-        let best_90 =  DeSummary::from(&split[0]);
-        let worst_10 = DeSummary::from(&split[1]);
+        let [best_90_list, worst_10_list] = DeList::split_pct(&mut de_list, 0.9);
+        let best_90 = DeSummary::from(&best_90_list);
+        let worst_10 = DeSummary::from(&worst_10_list);
 
         let de_method = de_list.de_method;
 
@@ -97,7 +97,7 @@ impl DeList {
     }
 
     fn min(&self) -> Float {
-        *self.list.iter().max_by(|a, b| a.partial_cmp(b).unwrap()).unwrap()
+        *self.list.iter().min_by(|a, b| a.partial_cmp(b).unwrap()).unwrap()
     }
 
     fn max(&self) -> Float {
@@ -105,18 +105,32 @@ impl DeList {
     }
 
     fn stdev(&self) -> Float {
-        standard_deviation(&self.list.as_slice(), None)
+        if self.list.len() <= 1 {
+            0.0
+        } else {
+            standard_deviation(&self.list.as_slice(), None)
+        }
     }
 
-    fn split_90_10(&mut self) -> CgatsResult<[DeList; 2]> {
+    fn split_pct(&mut self, pct: Float) -> [DeList; 2] {
+        if pct <= 0.0 || pct >= 1.0 {
+            panic!("Split must be between 0.0 and 1.0");
+        }
+
         let de_method = self.de_method;
 
         self.list.sort_by(|a, b| a.partial_cmp(b).unwrap());
         
-        let split_index = ((self.list.len() as Float) * 0.9) as usize; 
+        let mut split_index = ((self.list.len() as Float) * pct) as usize; 
+        if split_index == 0 {
+            split_index = 1;
+        } else if split_index == self.list.len() {
+            split_index = self.list.len() - 1
+        }
+
         let (best_90, worst_10) = self.list.split_at(split_index);
 
-        Ok([
+        [
             DeList {
                 de_method,
                 list: best_90.into_iter().map(|f| *f).collect(),
@@ -125,7 +139,7 @@ impl DeList {
                 de_method,
                 list: worst_10.into_iter().map(|f| *f).collect(),
             }
-        ])
+        ]
     }
 }
 
