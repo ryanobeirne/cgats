@@ -4,7 +4,6 @@ use std::collections::BTreeMap;
 use std::str::FromStr;
 use std::fmt;
 
-extern crate deltae;
 use deltae::color::LabValue;
 
 pub type DataMap = BTreeMap<usize, Sample>;

@@ -25,6 +25,10 @@ impl DataLine {
     pub fn from(raw_samples: Vec<String>) -> DataLine {
         DataLine { raw_samples }
     }
+
+    pub fn insert(&mut self, index: usize, s: &str) {
+        self.raw_samples.insert(index, String::from(s))
+    }
 }
 
 #[derive(Debug, Default, Clone, Eq, PartialEq)]
@@ -37,6 +41,10 @@ impl DataVec {
         DataVec{
             lines: Vec::new()
         }
+    }
+
+    pub fn insert(&mut self, index: usize, s: &str) {
+        self.lines.insert(index, DataLine::from(vec![String::from(s)]))
     }
 
     pub fn from(lines: Vec<DataLine>) -> DataVec {

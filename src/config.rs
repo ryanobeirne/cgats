@@ -1,6 +1,8 @@
-use super::*;
+use cgats::*;
 use clap::ArgMatches;
 use std::str::FromStr;
+use deltae::DEMethod;
+use crate::DeReport;
 
 use std::fmt;
 
@@ -18,16 +20,22 @@ impl Command {
             "average" | "avg" => Some(Command::Average),
             "concatenate" | "cat" | "append" => Some(Command::Cat),
             "delta" | "deltae" | "de" => Some(Command::Delta),
-            // "convert"         => Some(Command::Convert),
             _ => None
         }
     }
 
-    pub fn execute(&self, cmd_opts: &CmdOpts, cgv: CgatsVec) -> CgatsResult<Cgats> {
+    pub fn execute(&self, cmd_opts: &CmdOpts, cgv: CgatsVec) -> CgatsResult<(Option<DeReport>, Cgats)> {
         match &self {
-            Command::Average => cgv.average(),
-            Command::Cat => cgv.concatenate(),
-            Command::Delta => cgv.deltae(deltae::DEMethod::from_str(&cmd_opts[0])?),
+            Command::Average => Ok((None, cgv.average()?)),
+            Command::Cat => Ok((None, cgv.concatenate()?)),
+            Command::Delta => {
+                let cgo = cgv.deltae(DEMethod::from_str(&cmd_opts[0])?)?;
+                if cmd_opts.contains(&"report".to_string()) {
+                    Ok((DeReport::new(&cgo).ok(), cgo))
+                } else {
+                    Ok((None, cgo))
+                }
+            },
         }
     }
 
@@ -65,9 +73,12 @@ impl Config {
         let files = if let Some(cmd) = cmd_name {
             match matches.subcommand_matches(cmd) {
                 Some(scm) => {
-                    cmd_opts.push(
-                        scm.value_of("method").unwrap_or("de2000").to_string()
-                    );
+                    if cmd == "delta" {
+                        cmd_opts.push(scm.value_of("method").unwrap_or("de2000").to_string());
+                        if scm.is_present("report") {
+                            cmd_opts.push("report".to_string());
+                        }
+                    }
                     scm.values_of("comparefiles")
                     .expect("Did not find 'comparefiles'")
                     .map(|s| s.to_string())
@@ -87,7 +98,7 @@ impl Config {
         Self { command, cmd_opts, files }
     }
 
-    pub fn collect(&self) -> CgatsResult<Cgats> {
+    pub fn collect(&self) -> CgatsResult<(Option<DeReport>, Cgats)> {
         match &self.command {
             Some(cmd) => cmd.execute(&self.cmd_opts, self.cgats_vec()),
             None => Err(CgatsError::InvalidCommand)

@@ -3,6 +3,11 @@ use std::fmt;
 use std::convert;
 use std::io;
 
+#[macro_export]
+macro_rules! err {
+    ($($tt:tt)*) => { Err(CgatsError::Other(format!($($tt)*))) }
+}
+
 // Custom error types for CGATS
 #[derive(Debug, PartialEq, Eq)]
 pub enum CgatsError {
@@ -10,6 +15,7 @@ pub enum CgatsError {
     EmptyFile,
     FileError,
     FormatDataMismatch,
+    IncompleteData,
     InvalidCommand,
     InvalidID,
     NoData,
@@ -17,6 +23,7 @@ pub enum CgatsError {
     UnknownVendor,
     UnknownFormatType,
     WriteError,
+    Other(String)
 }
 
 // Custom Result type for CgatsError
@@ -37,6 +44,7 @@ impl Error for CgatsError {
             EmptyFile          => "File is empty!",
             FileError          => "Problem reading file!",
             FormatDataMismatch => "DATA length does not match DATA_FORMAT length!",
+            IncompleteData     => "Not enough data for the calculation!",
             InvalidCommand     => "Invalid Compare command!",
             InvalidID          => "SAMPLE_ID is not an integer!",
             NoData             => "Color Data not found!",
@@ -44,6 +52,7 @@ impl Error for CgatsError {
             UnknownVendor      => "Cannot determine Vendor!",
             UnknownFormatType  => "Unknown Data Format Type!",
             WriteError         => "Problem writing to file!",
+            Other(message)     => &message,
         }
     }
 }

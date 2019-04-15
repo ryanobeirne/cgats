@@ -1,10 +1,10 @@
 use super::*;
 
-extern crate deltae;
-use deltae::*;
+use deltae::{DeltaE, DEMethod};
 
 pub use std::str::FromStr;
 use std::path::Path;
+use std::convert::TryFrom;
 
 impl Cgats {
     pub fn average(collection: Vec<Cgats>) -> CgatsResult<Cgats> {
@@ -17,6 +17,26 @@ impl Cgats {
 
     pub fn deltae(self, other: Cgats, method: DEMethod) -> CgatsResult<Cgats> {
         CgatsVec { collection: vec![self, other] }.deltae(method)
+    }
+
+    pub fn de_method(&self) -> CgatsResult<(usize, DEMethod)> {
+        for (index, field) in self.fields.iter().enumerate() {
+            if let Ok(method) = DEMethod::try_from(field) {
+                return Ok((index, method));
+            }
+        }
+
+        Err(CgatsError::IncompleteData)
+    }
+
+    pub fn field_index(&self, field: &Field) -> Option<usize> {
+        for (i, f) in self.fields.iter().enumerate() {
+            if f == field {
+                return Some(i);
+            }
+        }
+
+        None
     }
 
     fn new_with_fields(fields: DataFormat) -> Cgats {
@@ -54,6 +74,9 @@ impl Cgats {
     }
 
     fn insert_sample_id(&mut self) {
+        self.vendor = Some(Vendor::Cgats);
+        self.meta.insert(0, "CGATS.17");
+
         let sid_index = self.fields.iter()
             .position(|f| *f == Field::SAMPLE_ID);
 

@@ -1,11 +1,7 @@
 use super::*;
-
-use std::fs::File;
-
-extern crate mktemp;
 use mktemp::Temp;
-
 use std::path::PathBuf;
+use std::fs::File;
 
 pub const GOOD_FILES: [&str; 11] = [
     "test_files/cgats0.txt",

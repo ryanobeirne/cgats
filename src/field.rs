@@ -1,10 +1,10 @@
 use super::*;
 
-extern crate deltae;
 use deltae::DEMethod;
 
 use std::str::FromStr;
 use std::fmt;
+use std::convert::TryFrom;
 
 // Container for what is between BEGIN_DATA_FORMAT and END_DATA_FORMAT
 pub type DataFormat = Vec<Field>;
@@ -76,11 +76,52 @@ impl Field {
         }
     }
 
+    pub fn to_de_method(&self) -> Option<DEMethod> {
+        match self {
+            Field::DE_1976  => Some(DEMethod::DE1976),
+            Field::DE_1994  => Some(DEMethod::DE1994),
+            Field::DE_1994T => Some(DEMethod::DE1994T),
+            Field::DE_2000  => Some(DEMethod::DE2000),
+            Field::DE_CMC   => Some(DEMethod::DECMC1),
+            Field::DE_CMC2  => Some(DEMethod::DECMC2),
+            _ => None,
+        }
+    }
+
     pub fn lab_indexes(fields: &DataFormat) -> Option<[usize; 3]> {
         let l = fields.iter().position(|f| *f == Field::LAB_L)?;
         let a = fields.iter().position(|f| *f == Field::LAB_A)?;
         let b = fields.iter().position(|f| *f == Field::LAB_B)?;
         Some([ l, a, b ])
+    }
+}
+
+impl From<&DEMethod> for Field {
+    fn from(method: &DEMethod) -> Field {
+        match method {
+            DEMethod::DE1976  => Field::DE_1976,
+            DEMethod::DE1994  => Field::DE_1994,
+            DEMethod::DE1994T => Field::DE_1994T,
+            DEMethod::DE2000  => Field::DE_2000,
+            DEMethod::DECMC1  => Field::DE_CMC,
+            DEMethod::DECMC2  => Field::DE_CMC2,
+        }
+    }
+}
+
+impl TryFrom<&Field> for DEMethod {
+    type Error = CgatsError;
+
+    fn try_from(field: &Field) -> Result<DEMethod, Self::Error> {
+        match field {
+            Field::DE_1976  => Ok(DEMethod::DE1976),
+            Field::DE_1994  => Ok(DEMethod::DE1994),
+            Field::DE_1994T => Ok(DEMethod::DE1994T),
+            Field::DE_2000  => Ok(DEMethod::DE2000),
+            Field::DE_CMC   => Ok(DEMethod::DECMC1),
+            Field::DE_CMC2  => Ok(DEMethod::DECMC2),
+            _ => Err(CgatsError::IncompleteData),
+        }
     }
 }
 

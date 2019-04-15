@@ -1,12 +1,7 @@
-#[macro_use]
-extern crate clap;
-
-extern crate cgats;
-use cgats::*;
-
 mod cli;
 mod config;
 use config::Config;
+use cgats::*;
 
 fn main() -> CgatsResult<()> {
     //Parse command line arguments with clap
@@ -21,7 +16,8 @@ fn main() -> CgatsResult<()> {
 
     match &config.command {
         Some(cmd) => {
-            let cgo = config.collect()?;
+            let (report, cgo) = config.collect()?;
+            
             match matches.subcommand_matches(cmd.display())
                 .expect(
                     &format!(
@@ -32,6 +28,10 @@ fn main() -> CgatsResult<()> {
             {
                 Some(f) => cgo.write_to_file(f)?,
                 None => println!("{}", cgo.format())
+            }
+
+            if let Some(rpt) = report {
+                eprintln!("{}", rpt);
             }
         },
         None => {

@@ -1,4 +1,9 @@
-use clap::{App, Arg, SubCommand};
+use clap::{
+    crate_version,
+    crate_authors,
+    crate_description,
+    App, Arg, SubCommand
+};
 
 pub fn build_cli() -> App<'static, 'static> {
     App::new("cgats")
@@ -51,6 +56,11 @@ pub fn build_cli() -> App<'static, 'static> {
                 .long("method")
                 .help("Delta E method to use in the calculations")
                 .possible_values(&["2000", "1994", "1994t", "cmc1", "cmc2", "1976"]))
+            .arg(Arg::with_name("report")
+                .takes_value(false)
+                .short("r")
+                .long("report")
+                .help("Print Delta E statistical report"))
             .arg(Arg::with_name("comparefiles")
                 .value_name("FILE")
                 .multiple(true)
