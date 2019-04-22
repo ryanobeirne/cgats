@@ -53,7 +53,7 @@ impl CgatsValue {
 
 impl FromStr for CgatsValue {
     type Err = Error;
-    fn from_str(s: &str) -> CgatsResult<CgatsValue> {
+    fn from_str(s: &str) -> Result<CgatsValue> {
         if s.is_empty() {
             return Err(Error::NoData);
         }

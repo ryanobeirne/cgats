@@ -13,7 +13,7 @@ pub enum Vendor {
 impl FromStr for Vendor {
     type Err = Error;
 
-    fn from_str(s: &str) -> CgatsResult<Vendor> {
+    fn from_str(s: &str) -> Result<Vendor> {
         use Vendor::*;
         let types: Vec<Vendor> = vec![Cgats, ColorBurst, Curve];
 

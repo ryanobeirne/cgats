@@ -51,7 +51,7 @@ impl DataVec {
         DataVec { lines }
     }
 
-    pub fn from_file<P: AsRef<Path>>(path: P) -> CgatsResult<DataVec> {
+    pub fn from_file<P: AsRef<Path>>(path: P) -> Result<DataVec> {
         let mut data_vec = DataVec::new();
 
         // Loop through lines and trim trailing whitespace
@@ -88,7 +88,7 @@ impl DataVec {
         }
     }
 
-    pub fn to_data_map(&self) -> CgatsResult<DataMap> {
+    pub fn to_data_map(&self) -> Result<DataMap> {
         let mut map = DataMap::new();
         
         let data = self.extract_data()?;
@@ -106,7 +106,7 @@ impl DataVec {
     }
 
     // Extract the DATA_FORMAT into a Vector of DataFormatTypes (DataFormat)
-    pub fn extract_data_format(&self) -> CgatsResult<DataFormat> {
+    pub fn extract_data_format(&self) -> Result<DataFormat> {
         // We need at least 2 lines to extract DATA_FORMAT
         // OK, really 3 lines, but we only need to see 2
         if self.lines.len() < 2 {
@@ -146,7 +146,7 @@ impl DataVec {
     }
 
     // Extract the data betweeen BEGIN_DATA and END_DATA into a RawVec
-    pub fn extract_data(&self) -> CgatsResult<DataVec> {
+    pub fn extract_data(&self) -> Result<DataVec> {
         // We need at least 3 lines to define DATA
         if self.lines.len() < 3 {
             return Err(Error::NoData);
@@ -259,7 +259,7 @@ impl fmt::Display for DataVec {
 }
 
 #[test]
-fn from_file() -> CgatsResult<()> {
+fn from_file() -> Result<()> {
     let raw = DataVec::from_file("test_files/curve0.txt")?;
     println!("{:?}", raw);
     Ok(())

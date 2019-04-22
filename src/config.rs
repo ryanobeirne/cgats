@@ -24,7 +24,7 @@ impl Command {
         }
     }
 
-    pub fn execute(&self, cmd_opts: &CmdOpts, cgv: CgatsVec) -> CgatsResult<(Option<DeReport>, Cgats)> {
+    pub fn execute(&self, cmd_opts: &CmdOpts, cgv: CgatsVec) -> Result<(Option<DeReport>, Cgats)> {
         match &self {
             Command::Average => Ok((None, cgv.average()?)),
             Command::Cat => Ok((None, cgv.concatenate()?)),
@@ -98,7 +98,7 @@ impl Config {
         Self { command, cmd_opts, files }
     }
 
-    pub fn collect(&self) -> CgatsResult<(Option<DeReport>, Cgats)> {
+    pub fn collect(&self) -> Result<(Option<DeReport>, Cgats)> {
         match &self.command {
             Some(cmd) => cmd.execute(&self.cmd_opts, self.cgats_vec()),
             None => Err(Error::InvalidCommand)

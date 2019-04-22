@@ -46,7 +46,7 @@ fn bad_files() {
 }
 
 #[test]
-fn reconstruct() -> CgatsResult<()> {
+fn reconstruct() -> Result<()> {
     for cgats in test_files_cgats() {
         println!("---CGATS---\n{}---CGATS---\n", cgats.format());
 
@@ -61,7 +61,7 @@ fn reconstruct() -> CgatsResult<()> {
     Ok(())
 }
 
-pub fn mktemp() -> CgatsResult<PathBuf> {
+pub fn mktemp() -> Result<PathBuf> {
     let temp = Temp::new_file()?.to_path_buf();
     File::create(&temp)?;
     Ok(temp)

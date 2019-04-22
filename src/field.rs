@@ -112,7 +112,7 @@ impl From<&DEMethod> for Field {
 impl TryFrom<&Field> for DEMethod {
     type Error = Error;
 
-    fn try_from(field: &Field) -> Result<DEMethod, Self::Error> {
+    fn try_from(field: &Field) -> std::result::Result<DEMethod, Self::Error> {
         match field {
             Field::DE_1976  => Ok(DEMethod::DE1976),
             Field::DE_1994  => Ok(DEMethod::DE1994),
@@ -140,7 +140,7 @@ impl fmt::Display for Field {
 impl FromStr for Field {
     type Err = Error;
 
-    fn from_str(s: &str) -> CgatsResult<Self> {
+    fn from_str(s: &str) -> Result<Self> {
         use Field::*;
         match s.to_uppercase().as_ref() {
             "SAMPLE_ID"   | "SAMPLEID" | "SAMPLE" => Ok(SAMPLE_ID),

@@ -14,7 +14,7 @@ pub struct DeReport {
 }
 
 impl DeReport {
-    pub fn new(de_cgats: &Cgats) -> CgatsResult<DeReport> {
+    pub fn new(de_cgats: &Cgats) -> Result<DeReport> {
         let mut de_list =  DeList::try_from(de_cgats)?;
         let overall =  DeSummary::from(&de_list);
 
@@ -145,7 +145,7 @@ impl DeList {
 
 impl std::convert::TryFrom<&Cgats> for DeList {
     type Error = Error;
-    fn try_from(cgats: &Cgats) -> Result<DeList, Self::Error> {
+    fn try_from(cgats: &Cgats) -> std::result::Result<DeList, Self::Error> {
 
         let (method_index, de_method) = cgats.de_method()?;
         let list = cgats.data_map.values()
@@ -163,7 +163,7 @@ impl std::convert::TryFrom<&Cgats> for DeList {
 }
 
 #[test]
-fn de_report() -> CgatsResult<()> {
+fn de_report() -> Result<()> {
     let cg0 = Cgats::from_file("test_files/colorburst2.lin")?;
     let cg1 = Cgats::from_file("test_files/colorburst3.lin")?;
     let cgd = cg0.deltae(cg1, DEMethod::DE2000)?;

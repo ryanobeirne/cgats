@@ -7,26 +7,26 @@ use std::path::Path;
 use std::convert::TryFrom;
 
 impl Cgats {
-    pub fn average(collection: Vec<Cgats>) -> CgatsResult<Cgats> {
+    pub fn average(collection: Vec<Cgats>) -> Result<Cgats> {
     //! Average all the values in a collection of CGATS.
     //! Returns an Error if the DATA_FORMATS or NUMBER_OF_SAMPLES don't match.
         CgatsVec { collection }.average()
     }
 
-    pub fn concatenate(collection: Vec<Cgats>) -> CgatsResult<Cgats> {
+    pub fn concatenate(collection: Vec<Cgats>) -> Result<Cgats> {
     //! Concatente multiple CGATS file from a collection.
     //! Returns an Error if the DATA_FORMATS don't match.
         CgatsVec { collection }.concatenate()
     }
 
-    pub fn deltae(self, other: Cgats, method: DEMethod) -> CgatsResult<Cgats> {
+    pub fn deltae(self, other: Cgats, method: DEMethod) -> Result<Cgats> {
     //! Calculate DELTA E of all samples between exactly 2 CGATS objects.
     //! Returns an Error if both CGATS do not contain LAB, or if the NUMBER_OF_SAMPLES differ.
         CgatsVec { collection: vec![self, other] }.deltae(method)
     }
 
     // TODO: Make this return an Option
-    pub fn de_method(&self) -> CgatsResult<(usize, DEMethod)> {
+    pub fn de_method(&self) -> Result<(usize, DEMethod)> {
     //! Returns the index and the first DEMethod found in the DATA_FORMAT
     //! Returns an error if no DE is found
         for (index, field) in self.fields.iter().enumerate() {
@@ -103,7 +103,7 @@ impl Cgats {
 }
 
 #[test]
-fn reindex() -> CgatsResult<()> {
+fn reindex() -> Result<()> {
     let mut cgo = Cgats::from_file("test_files/colorburst0.txt")?;
     let cgo_clone = cgo.clone();
     cgo.insert_sample_id();
@@ -132,7 +132,7 @@ impl CgatsVec {
         }
     }
 
-    fn can_compare(&self) -> CgatsResult<()> {
+    fn can_compare(&self) -> Result<()> {
     //!  Test that all samples have the same number of fields
         if self.collection.is_empty() {
             return Err(Error::NoData);
@@ -164,7 +164,7 @@ impl CgatsVec {
             .all(|fields| fields == &self.collection[0].fields)
     }
 
-    pub fn average(&self) -> CgatsResult<Cgats> {
+    pub fn average(&self) -> Result<Cgats> {
     //! Average all the values in a collection of CGATS.
     //! Returns an Error if the DATA_FORMATS or NUMBER_OF_SAMPLES don't match.
         self.can_compare()?;
@@ -193,7 +193,7 @@ impl CgatsVec {
         Ok(cgats)
     }
 
-    pub fn concatenate(&self) -> CgatsResult<Cgats> {
+    pub fn concatenate(&self) -> Result<Cgats> {
     //! Concatente multiple CGATS file from a collection.
     //! Returns an Error if the DATA_FORMATS don't match.
         if !self.same_fields() {
@@ -216,7 +216,7 @@ impl CgatsVec {
         }
     }
 
-    pub fn deltae(&self, method: DEMethod) -> CgatsResult<Cgats> {
+    pub fn deltae(&self, method: DEMethod) -> Result<Cgats> {
     //! Calculate DELTA E of all samples between exactly 2 CGATS objects.
     //! Returns an Error if both CGATS do not contain LAB, or if the NUMBER_OF_SAMPLES differ.
         if !self.can_delta() {
@@ -266,7 +266,7 @@ impl CgatsVec {
 }
 
 #[test]
-fn average_cgats() -> CgatsResult<()> {
+fn average_cgats() -> Result<()> {
     let cgv = CgatsVec::from_files(&vec![
         "test_files/cgats1.tsv", "test_files/cgats2.tsv"
     ]);
@@ -281,7 +281,7 @@ fn average_cgats() -> CgatsResult<()> {
 }
 
 #[test]
-fn average_cb() -> CgatsResult<()> {
+fn average_cb() -> Result<()> {
     let cgv = CgatsVec::from_files(&vec![
         "test_files/colorburst1.lin", "test_files/colorburst2.lin"
     ]);
@@ -296,7 +296,7 @@ fn average_cb() -> CgatsResult<()> {
 }
 
 #[test]
-fn cat_cgats() -> CgatsResult<()> {
+fn cat_cgats() -> Result<()> {
     let cgv = CgatsVec::from_files(&vec![
         "test_files/cgats1.tsv", "test_files/cgats2.tsv"
     ]);
@@ -310,7 +310,7 @@ fn cat_cgats() -> CgatsResult<()> {
 }
 
 #[test]
-fn deltae() -> CgatsResult<()> {
+fn deltae() -> Result<()> {
     let cgv = CgatsVec::from_files(&vec![
         "test_files/colorburst2.lin", "test_files/colorburst3.lin"
     ]);

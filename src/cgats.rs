@@ -32,7 +32,7 @@ impl Cgats {
         }
     }
 
-    pub fn from_file<P: AsRef<Path>>(path: P) -> CgatsResult<Cgats> {
+    pub fn from_file<P: AsRef<Path>>(path: P) -> Result<Cgats> {
     //! Create a CGATS object from an existing CGATS file
         let raw = DataVec::from_file(path)?;
 
@@ -49,7 +49,7 @@ impl Cgats {
         })
     }
 
-    pub fn write_to_file<P: AsRef<Path>>(&self, file: P) -> CgatsResult<()> {
+    pub fn write_to_file<P: AsRef<Path>>(&self, file: P) -> Result<()> {
     //! Write a CGATS object to a properly formatted CGATS file
         let mut buf = BufWriter::new(File::create(file)?);
         write!(buf, "{}", self.format())?;
@@ -132,7 +132,7 @@ impl fmt::Display for Cgats {
 }
 
 #[test]
-fn cgats_display() -> CgatsResult<()> {
+fn cgats_display() -> Result<()> {
     let cgats = Cgats::from_file("test_files/cgats1.tsv")?;
     let colorburst = Cgats::from_file("test_files/colorburst0.txt")?;
     let curve = Cgats::from_file("test_files/curve0.txt")?;
@@ -145,7 +145,7 @@ fn cgats_display() -> CgatsResult<()> {
 }
 
 #[test]
-fn write_meta() -> CgatsResult<()> {
+fn write_meta() -> Result<()> {
     let cgats = Cgats::from_file("test_files/cgats1.tsv")?;
     assert_eq!(
         cgats.format_meta(),
@@ -162,7 +162,7 @@ fn write_meta() -> CgatsResult<()> {
 }
 
 #[test]
-fn write_fields() -> CgatsResult<()> {
+fn write_fields() -> Result<()> {
     let cgats = Cgats::from_file("test_files/cgats1.tsv")?;
     assert_eq!(
         cgats.format_fields(),
@@ -182,7 +182,7 @@ fn write_fields() -> CgatsResult<()> {
 }
 
 #[test]
-fn write_data_map() -> CgatsResult<()> {
+fn write_data_map() -> Result<()> {
     let cgats = Cgats::from_file("test_files/cgats1.tsv")?;
     println!("{}", cgats.format_data_map());
     Ok(())

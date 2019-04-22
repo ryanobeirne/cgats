@@ -2,6 +2,7 @@ use std::fmt;
 use std::error::Error as StdError;
 use std::convert;
 use std::io;
+use std::result;
 
 #[macro_use]
 #[allow(unused_macros)]
@@ -28,7 +29,7 @@ pub enum Error {
 }
 
 // Custom Result type for CgatsError
-pub type CgatsResult<T> = Result<T, Error>;
+pub type Result<T> = result::Result<T, Error>;
 
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

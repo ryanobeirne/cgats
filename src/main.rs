@@ -3,7 +3,7 @@ mod config;
 use config::Config;
 use cgats::*;
 
-fn main() -> CgatsResult<()> {
+fn main() -> Result<()> {
     //Parse command line arguments with clap
     let matches = cli::build_cli().get_matches();
     let config = Config::build(&matches);
