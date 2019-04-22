@@ -222,7 +222,7 @@
         }
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_file</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;&gt;</span>(<span class="ident">path</span>: <span class="ident">P</span>) <span class="op">-&gt;</span> <span class="ident">CgatsResult</span><span class="op">&lt;</span><span class="ident">Cgats</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_file</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;&gt;</span>(<span class="ident">path</span>: <span class="ident">P</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Cgats</span><span class="op">&gt;</span> {
     <span class="doccomment">//! Create a CGATS object from an existing CGATS file</span>
         <span class="kw">let</span> <span class="ident">raw</span> <span class="op">=</span> <span class="ident">DataVec</span>::<span class="ident">from_file</span>(<span class="ident">path</span>)<span class="question-mark">?</span>;
 
@@ -239,7 +239,7 @@
         })
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write_to_file</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">file</span>: <span class="ident">P</span>) <span class="op">-&gt;</span> <span class="ident">CgatsResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write_to_file</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">file</span>: <span class="ident">P</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
     <span class="doccomment">//! Write a CGATS object to a properly formatted CGATS file</span>
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> <span class="ident">BufWriter</span>::<span class="ident">new</span>(<span class="ident">File</span>::<span class="ident">create</span>(<span class="ident">file</span>)<span class="question-mark">?</span>);
         <span class="macro">write</span><span class="macro">!</span>(<span class="ident">buf</span>, <span class="string">&quot;{}&quot;</span>, <span class="self">self</span>.<span class="ident">format</span>())<span class="question-mark">?</span>;
@@ -322,7 +322,7 @@
 }
 
 <span class="attribute">#[<span class="ident">test</span>]</span>
-<span class="kw">fn</span> <span class="ident">cgats_display</span>() <span class="op">-&gt;</span> <span class="ident">CgatsResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">cgats_display</span>() <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">cgats</span> <span class="op">=</span> <span class="ident">Cgats</span>::<span class="ident">from_file</span>(<span class="string">&quot;test_files/cgats1.tsv&quot;</span>)<span class="question-mark">?</span>;
     <span class="kw">let</span> <span class="ident">colorburst</span> <span class="op">=</span> <span class="ident">Cgats</span>::<span class="ident">from_file</span>(<span class="string">&quot;test_files/colorburst0.txt&quot;</span>)<span class="question-mark">?</span>;
     <span class="kw">let</span> <span class="ident">curve</span> <span class="op">=</span> <span class="ident">Cgats</span>::<span class="ident">from_file</span>(<span class="string">&quot;test_files/curve0.txt&quot;</span>)<span class="question-mark">?</span>;
@@ -335,7 +335,7 @@
 }
 
 <span class="attribute">#[<span class="ident">test</span>]</span>
-<span class="kw">fn</span> <span class="ident">write_meta</span>() <span class="op">-&gt;</span> <span class="ident">CgatsResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">write_meta</span>() <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">cgats</span> <span class="op">=</span> <span class="ident">Cgats</span>::<span class="ident">from_file</span>(<span class="string">&quot;test_files/cgats1.tsv&quot;</span>)<span class="question-mark">?</span>;
     <span class="macro">assert_eq</span><span class="macro">!</span>(
         <span class="ident">cgats</span>.<span class="ident">format_meta</span>(),
@@ -352,7 +352,7 @@
 }
 
 <span class="attribute">#[<span class="ident">test</span>]</span>
-<span class="kw">fn</span> <span class="ident">write_fields</span>() <span class="op">-&gt;</span> <span class="ident">CgatsResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">write_fields</span>() <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">cgats</span> <span class="op">=</span> <span class="ident">Cgats</span>::<span class="ident">from_file</span>(<span class="string">&quot;test_files/cgats1.tsv&quot;</span>)<span class="question-mark">?</span>;
     <span class="macro">assert_eq</span><span class="macro">!</span>(
         <span class="ident">cgats</span>.<span class="ident">format_fields</span>(),
@@ -372,7 +372,7 @@
 }
 
 <span class="attribute">#[<span class="ident">test</span>]</span>
-<span class="kw">fn</span> <span class="ident">write_data_map</span>() <span class="op">-&gt;</span> <span class="ident">CgatsResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">write_data_map</span>() <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">cgats</span> <span class="op">=</span> <span class="ident">Cgats</span>::<span class="ident">from_file</span>(<span class="string">&quot;test_files/cgats1.tsv&quot;</span>)<span class="question-mark">?</span>;
     <span class="macro">println</span><span class="macro">!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">cgats</span>.<span class="ident">format_data_map</span>());
     <span class="prelude-val">Ok</span>(())

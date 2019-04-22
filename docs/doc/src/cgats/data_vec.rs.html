@@ -318,7 +318,7 @@
         <span class="ident">DataVec</span> { <span class="ident">lines</span> }
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_file</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;&gt;</span>(<span class="ident">path</span>: <span class="ident">P</span>) <span class="op">-&gt;</span> <span class="ident">CgatsResult</span><span class="op">&lt;</span><span class="ident">DataVec</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_file</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;&gt;</span>(<span class="ident">path</span>: <span class="ident">P</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataVec</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">data_vec</span> <span class="op">=</span> <span class="ident">DataVec</span>::<span class="ident">new</span>();
 
         <span class="comment">// Loop through lines and trim trailing whitespace</span>
@@ -349,13 +349,13 @@
 
         <span class="comment">// Make sure the file is not empty</span>
         <span class="kw">if</span> <span class="ident">data_vec</span>.<span class="ident">lines</span>.<span class="ident">is_empty</span>() {
-            <span class="prelude-val">Err</span>(<span class="ident">CgatsError</span>::<span class="ident">EmptyFile</span>)
+            <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">EmptyFile</span>)
         } <span class="kw">else</span> {
             <span class="prelude-val">Ok</span>(<span class="ident">data_vec</span>)
         }
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">to_data_map</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">CgatsResult</span><span class="op">&lt;</span><span class="ident">DataMap</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">to_data_map</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataMap</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">map</span> <span class="op">=</span> <span class="ident">DataMap</span>::<span class="ident">new</span>();
         
         <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">extract_data</span>()<span class="question-mark">?</span>;
@@ -373,11 +373,11 @@
     }
 
     <span class="comment">// Extract the DATA_FORMAT into a Vector of DataFormatTypes (DataFormat)</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">extract_data_format</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">CgatsResult</span><span class="op">&lt;</span><span class="ident">DataFormat</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">extract_data_format</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataFormat</span><span class="op">&gt;</span> {
         <span class="comment">// We need at least 2 lines to extract DATA_FORMAT</span>
         <span class="comment">// OK, really 3 lines, but we only need to see 2</span>
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">lines</span>.<span class="ident">len</span>() <span class="op">&lt;</span> <span class="number">2</span> {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">CgatsError</span>::<span class="ident">NoDataFormat</span>);
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">NoDataFormat</span>);
         }
 
         <span class="comment">// Use implicit format type for ColorBurst LinFiles</span>
@@ -405,7 +405,7 @@
 
         <span class="comment">// Check that the DATA_FORMAT is not empty</span>
         <span class="kw">if</span> <span class="ident">data_format</span>.<span class="ident">len</span>() <span class="op">&lt;</span> <span class="number">1</span> {
-            <span class="prelude-val">Err</span>(<span class="ident">CgatsError</span>::<span class="ident">NoDataFormat</span>)
+            <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">NoDataFormat</span>)
         } <span class="kw">else</span> {
             <span class="prelude-val">Ok</span>(<span class="ident">data_format</span>)
         }
@@ -413,10 +413,10 @@
     }
 
     <span class="comment">// Extract the data betweeen BEGIN_DATA and END_DATA into a RawVec</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">extract_data</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">CgatsResult</span><span class="op">&lt;</span><span class="ident">DataVec</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">extract_data</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataVec</span><span class="op">&gt;</span> {
         <span class="comment">// We need at least 3 lines to define DATA</span>
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">lines</span>.<span class="ident">len</span>() <span class="op">&lt;</span> <span class="number">3</span> {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">CgatsError</span>::<span class="ident">NoData</span>);
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">NoData</span>);
         }
 
         <span class="comment">// Push DATA here</span>
@@ -442,7 +442,7 @@
 
         <span class="comment">// Check that we actually found some data</span>
         <span class="kw">if</span> <span class="ident">data_vec</span>.<span class="ident">lines</span>.<span class="ident">is_empty</span>() {
-            <span class="prelude-val">Err</span>(<span class="ident">CgatsError</span>::<span class="ident">NoData</span>)
+            <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">NoData</span>)
         } <span class="kw">else</span> {
             <span class="prelude-val">Ok</span>(<span class="ident">data_vec</span>)
         }
@@ -526,7 +526,7 @@
 }
 
 <span class="attribute">#[<span class="ident">test</span>]</span>
-<span class="kw">fn</span> <span class="ident">from_file</span>() <span class="op">-&gt;</span> <span class="ident">CgatsResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">from_file</span>() <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">raw</span> <span class="op">=</span> <span class="ident">DataVec</span>::<span class="ident">from_file</span>(<span class="string">&quot;test_files/curve0.txt&quot;</span>)<span class="question-mark">?</span>;
     <span class="macro">println</span><span class="macro">!</span>(<span class="string">&quot;{:?}&quot;</span>, <span class="ident">raw</span>);
     <span class="prelude-val">Ok</span>(())

@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["CgatsError",""]],"macro":[["err",""]],"struct":[["Cgats",""],["CgatsVec",""],["DeReport",""]],"type":[["CgatsResult",""]]});
+initSidebarItems({"enum":[["Error",""]],"struct":[["Cgats",""],["CgatsVec",""],["DeReport",""]],"type":[["Result",""]]});
