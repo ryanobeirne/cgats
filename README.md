@@ -88,6 +88,12 @@ Calculate Delta E between each value pair in two CGATS files:
 cgats delta -m de2000 test_files/colorburst{1,2}.lin
 ```
 
+Calculate Delta E with a report printed to stderr:
+
+```sh
+cgats delta --report test_files/colorburst{1,2}.lin
+```
+
 * Note that the two CGATS files must have the same number of samples and must each contain `LAB_L`, `LAB_A`, and `LAB_B` fields. Also, this feature depends on my [deltae](https://github.com/robeirne/deltae) crate.
 
 ### Binary Installation
