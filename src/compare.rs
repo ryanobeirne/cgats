@@ -8,18 +8,27 @@ use std::convert::TryFrom;
 
 impl Cgats {
     pub fn average(collection: Vec<Cgats>) -> CgatsResult<Cgats> {
+    //! Average all the values in a collection of CGATS.
+    //! Returns an Error if the DATA_FORMATS or NUMBER_OF_SAMPLES don't match.
         CgatsVec { collection }.average()
     }
 
     pub fn concatenate(collection: Vec<Cgats>) -> CgatsResult<Cgats> {
+    //! Concatente multiple CGATS file from a collection.
+    //! Returns an Error if the DATA_FORMATS don't match.
         CgatsVec { collection }.concatenate()
     }
 
     pub fn deltae(self, other: Cgats, method: DEMethod) -> CgatsResult<Cgats> {
+    //! Calculate DELTA E of all samples between exactly 2 CGATS objects.
+    //! Returns an Error if both CGATS do not contain LAB, or if the NUMBER_OF_SAMPLES differ.
         CgatsVec { collection: vec![self, other] }.deltae(method)
     }
 
+    // TODO: Make this return an Option
     pub fn de_method(&self) -> CgatsResult<(usize, DEMethod)> {
+    //! Returns the index and the first DEMethod found in the DATA_FORMAT
+    //! Returns an error if no DE is found
         for (index, field) in self.fields.iter().enumerate() {
             if let Ok(method) = DEMethod::try_from(field) {
                 return Ok((index, method));
@@ -30,13 +39,8 @@ impl Cgats {
     }
 
     pub fn field_index(&self, field: &Field) -> Option<usize> {
-        for (i, f) in self.fields.iter().enumerate() {
-            if f == field {
-                return Some(i);
-            }
-        }
-
-        None
+    //! Returns the index of a given `Field`, returns `None` if not present.
+        self.fields.iter().position(|f| f == field)
     }
 
     fn new_with_fields(fields: DataFormat) -> Cgats {
@@ -49,6 +53,7 @@ impl Cgats {
     }
 
     fn derive(&self) -> Cgats {
+    //! Returns a new, empty CGATS object based on an existing CGATS object
         Cgats {
             vendor: self.vendor,
             meta: self.meta.clone(),
@@ -57,30 +62,23 @@ impl Cgats {
         }
     }
 
-    fn reindex_sample_id(&mut self) {
-        let sid_index = self.fields.iter()
-            .position(|f| *f == Field::SAMPLE_ID);
-
-        match sid_index {
-            Some(index) => {
-                for (key, value) in self.data_map.iter_mut(){
-                    value.values[index] = CgatsValue::from_str(&key.to_string())
-                        .expect("Cannot parse value from key <usize>!");
-                }
-            },
-            None => ()
+    pub fn reindex_sample_id(&mut self) {
+    //! Replace SAMPLE_ID values with the index of the sample (starting from 0)
+        if let Some(index) = self.field_index(&Field::SAMPLE_ID) {
+            for (key, value) in self.data_map.iter_mut(){
+                value.values[index] = CgatsValue::from_str(&key.to_string())
+                    .expect("Cannot parse value from key <usize>!");
+            }
         }
 
     }
 
-    fn insert_sample_id(&mut self) {
+    pub fn insert_sample_id(&mut self) {
+    //! Insert SAMPLE_ID field into CGATS object
         self.vendor = Some(Vendor::Cgats);
         self.meta.insert(0, "CGATS.17");
 
-        let sid_index = self.fields.iter()
-            .position(|f| *f == Field::SAMPLE_ID);
-
-        match sid_index {
+        match self.field_index(&Field::SAMPLE_ID) {
             Some(_) => {
                 self.reindex_sample_id();
             },
@@ -97,6 +95,7 @@ impl Cgats {
     }
 
     fn has_lab(&self) -> bool {
+    //! Test if the CGATS object contains LAB
         self.fields.contains(&Field::LAB_L) &&
         self.fields.contains(&Field::LAB_A) &&
         self.fields.contains(&Field::LAB_B)
@@ -106,8 +105,14 @@ impl Cgats {
 #[test]
 fn reindex() -> CgatsResult<()> {
     let mut cgo = Cgats::from_file("test_files/colorburst0.txt")?;
+    let cgo_clone = cgo.clone();
     cgo.insert_sample_id();
     println!("{}", cgo.format());
+    let cgo_reindex = Cgats::from_file("test_files/colorburst0_reindex.txt")?;
+
+    assert_eq!(cgo.format(), cgo_reindex.format());
+    assert_eq!(cgo.fields, cgo_reindex.fields);
+    assert_ne!(cgo.fields, cgo_clone.fields);
 
     Ok(())
 }
@@ -119,6 +124,7 @@ pub struct CgatsVec {
 
 impl CgatsVec {
     pub fn from_files<P: AsRef<Path>>(files: &Vec<P>) -> CgatsVec {
+    //! Convert a collection of files into a CgatsVec
         CgatsVec {
             collection: files.iter()
                 .filter_map(|f| Cgats::from_file(f).ok())
@@ -127,6 +133,7 @@ impl CgatsVec {
     }
 
     fn can_compare(&self) -> CgatsResult<()> {
+    //!  Test that all samples have the same number of fields
         if self.collection.is_empty() {
             return Err(CgatsError::NoData);
         }
@@ -144,18 +151,22 @@ impl CgatsVec {
     }
 
     fn can_delta(&self) -> bool {
+    //! Test that a collection of CGATS can calculate Delta E
         self.collection.len() == 2 &&
         self.collection[0].sample_count() == self.collection[1].sample_count() &&
         self.collection.iter().all(|cgo| cgo.has_lab())
     }
 
     fn same_fields(&self) -> bool {
+    //! Test that a collection of CGATS all have the same DATA_FORMAT
         self.collection.iter()
             .map(|cgo| &cgo.fields)
             .all(|fields| fields == &self.collection[0].fields)
     }
 
     pub fn average(&self) -> CgatsResult<Cgats> {
+    //! Average all the values in a collection of CGATS.
+    //! Returns an Error if the DATA_FORMATS or NUMBER_OF_SAMPLES don't match.
         self.can_compare()?;
 
         let len = self.collection.len();
@@ -183,6 +194,8 @@ impl CgatsVec {
     }
 
     pub fn concatenate(&self) -> CgatsResult<Cgats> {
+    //! Concatente multiple CGATS file from a collection.
+    //! Returns an Error if the DATA_FORMATS don't match.
         if !self.same_fields() {
             return Err(CgatsError::CannotCompare);
         }
@@ -204,6 +217,8 @@ impl CgatsVec {
     }
 
     pub fn deltae(&self, method: DEMethod) -> CgatsResult<Cgats> {
+    //! Calculate DELTA E of all samples between exactly 2 CGATS objects.
+    //! Returns an Error if both CGATS do not contain LAB, or if the NUMBER_OF_SAMPLES differ.
         if !self.can_delta() {
             return Err(CgatsError::CannotCompare);
         }

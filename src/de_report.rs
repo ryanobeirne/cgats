@@ -42,10 +42,10 @@ impl fmt::Display for DeReport {
         writeln!(f, "DE Formula: {}\n", self.de_method)?;
 
         writeln!(f, "OVERALL - ({} colors)", self.overall.sample_count)?;
-        writeln!(f, "{}\n", self.overall)?;
+        writeln!(f, "{}", self.overall)?;
 
         writeln!(f, "BEST 90% - ({} colors)", self.best_90.sample_count)?;
-        writeln!(f, "{}\n", self.best_90)?;
+        writeln!(f, "{}", self.best_90)?;
 
         writeln!(f, "WORST 10% - ({} colors)", self.worst_10.sample_count)?;
         writeln!(f, "{}", self.worst_10)?;
