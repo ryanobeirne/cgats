@@ -1,16 +1,17 @@
-use std::error::Error;
 use std::fmt;
+use std::error::Error as StdError;
 use std::convert;
 use std::io;
 
-#[macro_export]
+#[macro_use]
+#[allow(unused_macros)]
 macro_rules! err {
     ($($tt:tt)*) => { Err(CgatsError::Other(format!($($tt)*))) }
 }
 
 // Custom error types for CGATS
 #[derive(Debug, PartialEq, Eq)]
-pub enum CgatsError {
+pub enum Error {
     CannotCompare,
     EmptyFile,
     FileError,
@@ -27,18 +28,18 @@ pub enum CgatsError {
 }
 
 // Custom Result type for CgatsError
-pub type CgatsResult<T> = Result<T, CgatsError>;
+pub type CgatsResult<T> = Result<T, Error>;
 
-impl fmt::Display for CgatsError {
+impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "CgatsError::{:?}: {}", &self, &self.description())
     }
 }
 
 // Description of the Error type
-impl Error for CgatsError {
+impl std::error::Error for Error {
     fn description(&self) -> &str {
-        use CgatsError::*;
+        use Error::*;
         match &self {
             CannotCompare      => "Cannot compare data sets!",
             EmptyFile          => "File is empty!",
@@ -57,15 +58,15 @@ impl Error for CgatsError {
     }
 }
 
-impl convert::From<io::Error> for CgatsError {
+impl convert::From<io::Error> for Error {
    fn from(e: io::Error) -> Self {
        eprintln!("{}: {:?}",e, e.kind());
-       CgatsError::FileError
+       Error::FileError
    } 
 } 
 
-impl convert::From<CgatsError> for fmt::Error {
-    fn from(cge: CgatsError) -> Self {
+impl convert::From<Error> for fmt::Error {
+    fn from(cge: Error) -> Self {
         eprintln!("{}", cge);
         fmt::Error
     }

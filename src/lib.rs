@@ -12,7 +12,7 @@ mod test;
 
 pub use self::cgats::Cgats;
 pub use compare::CgatsVec;
-pub use error::{CgatsResult, CgatsError};
+pub use error::{CgatsResult, Error};
 pub use de_report::DeReport;
 use vendor::Vendor;
 use field::*;

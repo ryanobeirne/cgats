@@ -101,7 +101,7 @@ impl Config {
     pub fn collect(&self) -> CgatsResult<(Option<DeReport>, Cgats)> {
         match &self.command {
             Some(cmd) => cmd.execute(&self.cmd_opts, self.cgats_vec()),
-            None => Err(CgatsError::InvalidCommand)
+            None => Err(Error::InvalidCommand)
         }
     }
 

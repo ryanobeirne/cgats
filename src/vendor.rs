@@ -11,7 +11,7 @@ pub enum Vendor {
 }
 
 impl FromStr for Vendor {
-    type Err = CgatsError;
+    type Err = Error;
 
     fn from_str(s: &str) -> CgatsResult<Vendor> {
         use Vendor::*;
@@ -24,7 +24,7 @@ impl FromStr for Vendor {
             }
         }
 
-       Err(CgatsError::UnknownVendor)
+       Err(Error::UnknownVendor)
     }
 }
 
@@ -39,6 +39,6 @@ fn from_str() {
     assert_eq!(Vendor::from_str("ColorBurst"), Ok(Vendor::ColorBurst));
     assert_eq!(Vendor::from_str("CGATS.17"), Ok(Vendor::Cgats));
     assert_eq!(Vendor::from_str("File Created by Curve3"), Ok(Vendor::Curve));
-    assert_eq!(Vendor::from_str("derp"), Err(CgatsError::UnknownVendor));
-    assert_eq!(Vendor::from_str(""), Err(CgatsError::UnknownVendor));
+    assert_eq!(Vendor::from_str("derp"), Err(Error::UnknownVendor));
+    assert_eq!(Vendor::from_str(""), Err(Error::UnknownVendor));
 }

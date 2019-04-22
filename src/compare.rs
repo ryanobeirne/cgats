@@ -35,7 +35,7 @@ impl Cgats {
             }
         }
 
-        Err(CgatsError::IncompleteData)
+        Err(Error::IncompleteData)
     }
 
     pub fn field_index(&self, field: &Field) -> Option<usize> {
@@ -135,7 +135,7 @@ impl CgatsVec {
     fn can_compare(&self) -> CgatsResult<()> {
     //!  Test that all samples have the same number of fields
         if self.collection.is_empty() {
-            return Err(CgatsError::NoData);
+            return Err(Error::NoData);
         }
         
         let prime = &self.collection[0];
@@ -144,7 +144,7 @@ impl CgatsVec {
             c.sample_count() == prime.sample_count() ||
             c.fields == prime.fields
         ) {
-            return Err(CgatsError::CannotCompare);
+            return Err(Error::CannotCompare);
         }
 
         Ok(())
@@ -197,7 +197,7 @@ impl CgatsVec {
     //! Concatente multiple CGATS file from a collection.
     //! Returns an Error if the DATA_FORMATS don't match.
         if !self.same_fields() {
-            return Err(CgatsError::CannotCompare);
+            return Err(Error::CannotCompare);
         }
 
         match self.collection.first() {
@@ -212,7 +212,7 @@ impl CgatsVec {
                 new.meta.meta_renumber_sets(new.data_map.len());
                 Ok(new)
             },
-            None => Err(CgatsError::NoData),
+            None => Err(Error::NoData),
         }
     }
 
@@ -220,7 +220,7 @@ impl CgatsVec {
     //! Calculate DELTA E of all samples between exactly 2 CGATS objects.
     //! Returns an Error if both CGATS do not contain LAB, or if the NUMBER_OF_SAMPLES differ.
         if !self.can_delta() {
-            return Err(CgatsError::CannotCompare);
+            return Err(Error::CannotCompare);
         }
 
         let mut cgats = Cgats::new_with_fields(vec![

@@ -144,7 +144,7 @@ impl DeList {
 }
 
 impl std::convert::TryFrom<&Cgats> for DeList {
-    type Error = CgatsError;
+    type Error = Error;
     fn try_from(cgats: &Cgats) -> Result<DeList, Self::Error> {
 
         let (method_index, de_method) = cgats.de_method()?;

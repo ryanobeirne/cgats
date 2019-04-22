@@ -82,7 +82,7 @@ impl DataVec {
 
         // Make sure the file is not empty
         if data_vec.lines.is_empty() {
-            Err(CgatsError::EmptyFile)
+            Err(Error::EmptyFile)
         } else {
             Ok(data_vec)
         }
@@ -110,7 +110,7 @@ impl DataVec {
         // We need at least 2 lines to extract DATA_FORMAT
         // OK, really 3 lines, but we only need to see 2
         if self.lines.len() < 2 {
-            return Err(CgatsError::NoDataFormat);
+            return Err(Error::NoDataFormat);
         }
 
         // Use implicit format type for ColorBurst LinFiles
@@ -138,7 +138,7 @@ impl DataVec {
 
         // Check that the DATA_FORMAT is not empty
         if data_format.len() < 1 {
-            Err(CgatsError::NoDataFormat)
+            Err(Error::NoDataFormat)
         } else {
             Ok(data_format)
         }
@@ -149,7 +149,7 @@ impl DataVec {
     pub fn extract_data(&self) -> CgatsResult<DataVec> {
         // We need at least 3 lines to define DATA
         if self.lines.len() < 3 {
-            return Err(CgatsError::NoData);
+            return Err(Error::NoData);
         }
 
         // Push DATA here
@@ -175,7 +175,7 @@ impl DataVec {
 
         // Check that we actually found some data
         if data_vec.lines.is_empty() {
-            Err(CgatsError::NoData)
+            Err(Error::NoData)
         } else {
             Ok(data_vec)
         }

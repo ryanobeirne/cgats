@@ -52,10 +52,10 @@ impl CgatsValue {
 }
 
 impl FromStr for CgatsValue {
-    type Err = CgatsError;
+    type Err = Error;
     fn from_str(s: &str) -> CgatsResult<CgatsValue> {
         if s.is_empty() {
-            return Err(CgatsError::NoData);
+            return Err(Error::NoData);
         }
 
         let string = s.to_string();

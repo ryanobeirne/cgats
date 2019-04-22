@@ -110,7 +110,7 @@ impl From<&DEMethod> for Field {
 }
 
 impl TryFrom<&Field> for DEMethod {
-    type Error = CgatsError;
+    type Error = Error;
 
     fn try_from(field: &Field) -> Result<DEMethod, Self::Error> {
         match field {
@@ -120,7 +120,7 @@ impl TryFrom<&Field> for DEMethod {
             Field::DE_2000  => Ok(DEMethod::DE2000),
             Field::DE_CMC   => Ok(DEMethod::DECMC1),
             Field::DE_CMC2  => Ok(DEMethod::DECMC2),
-            _ => Err(CgatsError::IncompleteData),
+            _ => Err(Error::IncompleteData),
         }
     }
 }
@@ -138,7 +138,7 @@ impl fmt::Display for Field {
 }
 
 impl FromStr for Field {
-    type Err = CgatsError;
+    type Err = Error;
 
     fn from_str(s: &str) -> CgatsResult<Self> {
         use Field::*;
@@ -275,7 +275,7 @@ impl FromStr for Field {
             "SPECTRAL_810" => Ok(SPECTRAL_810),
             "SPECTRAL_820" => Ok(SPECTRAL_820),
             "SPECTRAL_830" => Ok(SPECTRAL_830),
-            _ => Err(CgatsError::UnknownFormatType)
+            _ => Err(Error::UnknownFormatType)
         }
     }
 
