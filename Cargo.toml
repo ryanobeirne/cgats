@@ -1,6 +1,6 @@
 [package]
 name = "cgats"
-version = "0.1.3"
+version = "0.1.4"
 authors = ["Ryan O'Beirne <ryanobeirne@gmail.com>"]
 description = "Parse, transform, and write CGATS color files"
 edition = "2018"
@@ -11,7 +11,7 @@ documentation = "https://ryanobeirne.github.io/cgats"
 readme = "README.md"
 
 [dependencies]
-deltae = "0.1.3"
+deltae = "0.1.*"
 statistical = "1.0.0"
 
 [dev-dependencies]
@@ -20,4 +20,4 @@ clap = "2.32.0"
 
 [[example]]
 name = "cgats"
-path = "src/examples/cgats/main.rs"
+path = "examples/cgats/main.rs"
