@@ -4,14 +4,14 @@
 
 This crate is a library intended to read, write, and transform CGATS color files and is currently in development. The included binary is a simple implementation of the library's API.
 
-I haven't finished documenting the library or decided which features to make available in the public API, so they're all public now:
+I haven't finished documenting the library or decided which features to make available in the public API, so they're mostly all public now:
 
-[Rust API Documentation](https://robeirne.github.io/cgats)
+[Rust API Documentation](https://ryanobeirne.github.io/cgats)
 
 Or build the documentation yourself:
 
 ```sh
-cargo doc --open
+cargo doc --no-deps --open
 ```
 
 ### The CGATS format
@@ -94,16 +94,16 @@ Calculate Delta E with a report printed to stderr:
 cgats delta --report test_files/colorburst{1,2}.lin
 ```
 
-* Note that the two CGATS files must have the same number of samples and must each contain `LAB_L`, `LAB_A`, and `LAB_B` fields. Also, this feature depends on my [deltae](https://github.com/robeirne/deltae) crate.
+* Note that the two CGATS files must have the same number of samples and must each contain `LAB_L`, `LAB_A`, and `LAB_B` fields.
 
 ### Binary Installation
 
 First, you'll need to [download and install rust](https://rustup.rs). Then:
 
 ```sh
-git clone https://github.com/robeirne/cgats
+git clone https://github.com/ryanobeirne/cgats
 cd cgats
-cargo install --path ./ --force
+cargo install --example=cgats --path=. --force
 ```
 
 ### TODO
