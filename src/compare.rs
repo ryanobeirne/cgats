@@ -154,7 +154,7 @@ impl CgatsVec {
     //! Test that a collection of CGATS can calculate Delta E
         self.collection.len() == 2 &&
         self.collection[0].sample_count() == self.collection[1].sample_count() &&
-        self.collection.iter().all(|cgo| cgo.has_lab())
+        self.collection.iter().all(Cgats::has_lab)
     }
 
     fn same_fields(&self) -> bool {
@@ -182,7 +182,7 @@ impl CgatsVec {
                 let div_sample = sample.divide_values(len);
                 let prime_sample = prime.data_map.get(key).expect("Map does not contain key!");
                 let entry = cgats.data_map.entry(*key)
-                    .or_insert(prime_sample.zero());
+                    .or_insert_with(|| prime_sample.zero());
 
                 *entry = entry.add_values(&div_sample);
             }

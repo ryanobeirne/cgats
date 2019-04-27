@@ -26,26 +26,20 @@ impl CgatsValue {
     }
 
     fn add_mut(&mut self, other: &CgatsValue) {
-        match self.float {
-            Some(f) => {
+        if let Some(f) = self.float {
                 let float = Some(f + other.float.unwrap_or(0.0));
                 let string = float.unwrap().to_string();
                 self.float = float;
                 self.string = string;
-            },
-            None => ()
         }
     }
 
     fn divide_mut(&mut self, divisor: usize) {
-        match self.float {
-            Some(f) => {
+        if let Some(f) = self.float {
                 let float = Some(f / divisor as Float);
                 let string = float.unwrap().to_string();
                 self.float = float;
                 self.string = string;
-            },
-            None => ()
         }
     }
 
@@ -126,9 +120,9 @@ impl Sample {
     }
 
     pub fn to_lab(&self, indexes: &[usize; 3]) -> Option<LabValue> {
-        let l = self.values[indexes[0]].float? as f64;
-        let a = self.values[indexes[1]].float? as f64;
-        let b = self.values[indexes[2]].float? as f64;
+        let l = self.values[indexes[0]].float?;
+        let a = self.values[indexes[1]].float?;
+        let b = self.values[indexes[2]].float?;
 
         Some(LabValue {l, a, b})
     }

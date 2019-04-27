@@ -62,13 +62,13 @@ impl DataVec {
             };
 
             // If the file uses carriage returns, split those up as well
-            let v_cr = text.split("\r")
+            let v_cr = text.split('\r')
                 .filter(|l| !l.is_empty())
-                .map(|l| l.trim());
+                .map(str::trim);
 
             // Push each item in a line into a Vector
             for split_line in v_cr {
-                let split = split_line.split("\t");
+                let split = split_line.split('\t');
                 let mut v = DataLine::new();
 
                 for item in split {
@@ -96,7 +96,7 @@ impl DataVec {
         for (index, line) in data.lines.iter().enumerate() {
             let values = line.raw_samples.iter()
                 .map(|val|
-                    CgatsValue::from_str(&val).unwrap_or(CgatsValue::default())
+                    CgatsValue::from_str(&val).unwrap_or_default()
                 ).collect();
             let sample = Sample  { values };
             map.insert(index, sample);
@@ -137,7 +137,7 @@ impl DataVec {
         }
 
         // Check that the DATA_FORMAT is not empty
-        if data_format.len() < 1 {
+        if data_format.is_empty() {
             Err(Error::NoDataFormat)
         } else {
             Ok(data_format)

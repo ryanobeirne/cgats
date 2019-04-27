@@ -89,7 +89,7 @@ impl Cgats {
         s.pop();
         s.push_str("\nEND_DATA_FORMAT\n");
 
-        format!("{}", s)
+        s
     }
 
     fn format_data_map(&self) -> String {

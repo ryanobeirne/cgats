@@ -133,11 +133,11 @@ impl DeList {
         [
             DeList {
                 de_method,
-                list: best_90.into_iter().map(|f| *f).collect(),
+                list: best_90.to_vec(),
             },
             DeList {
                 de_method,
-                list: worst_10.into_iter().map(|f| *f).collect(),
+                list: worst_10.to_vec(),
             }
         ]
     }
@@ -149,7 +149,7 @@ impl std::convert::TryFrom<&Cgats> for DeList {
 
         let (method_index, de_method) = cgats.de_method()?;
         let list = cgats.data_map.values()
-            .filter_map(|sample| sample.values.iter().nth(method_index))
+            .filter_map(|sample| sample.values.get(method_index))
             .filter_map(|cgv| cgv.float)
             .collect();
         

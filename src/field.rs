@@ -55,7 +55,7 @@ pub fn ColorBurstFormat() -> DataFormat {
 }
 
 impl Field {
-    pub fn is_float(&self) -> bool {
+    pub fn is_float(self) -> bool {
         use Field::*;
         match &self {
             SAMPLE_NAME => false,
@@ -76,7 +76,7 @@ impl Field {
         }
     }
 
-    pub fn to_de_method(&self) -> Option<DEMethod> {
+    pub fn to_de_method(self) -> Option<DEMethod> {
         match self {
             Field::DE_1976  => Some(DEMethod::DE1976),
             Field::DE_1994  => Some(DEMethod::DE1994),
