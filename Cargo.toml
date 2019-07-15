@@ -1,6 +1,6 @@
 [package]
 name = "cgats"
-version = "0.1.4"
+version = "0.1.5"
 authors = ["Ryan O'Beirne <ryanobeirne@gmail.com>"]
 description = "Parse, transform, and write CGATS color files"
 edition = "2018"
@@ -17,7 +17,14 @@ statistical = "1.0.0"
 [dev-dependencies]
 mktemp = "0.3.1"
 clap = "2.32.0"
+gnuplot = "0.0.31"
+la = "0.2.0"
+num = "0.2.0"
 
 [[example]]
 name = "cgats"
 path = "examples/cgats/main.rs"
+
+[[example]]
+name = "linviz"
+path = "examples/linviz/main.rs"
