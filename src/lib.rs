@@ -11,7 +11,6 @@ mod de_report;
 mod test;
 
 pub use self::cgats::Cgats;
-pub use compare::CgatsVec;
 pub use error::{Result, Error};
 pub use de_report::DeReport;
 use vendor::Vendor;

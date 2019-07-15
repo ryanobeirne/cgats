@@ -119,7 +119,13 @@ fn reindex() -> Result<()> {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct CgatsVec {
-    collection: Vec<Cgats>,
+    pub collection: Vec<Cgats>,
+}
+
+impl From<Vec<Cgats>> for CgatsVec {
+    fn from(collection: Vec<Cgats>) -> CgatsVec {
+        CgatsVec { collection }
+    }
 }
 
 impl CgatsVec {
@@ -139,10 +145,12 @@ impl CgatsVec {
         }
         
         let prime = &self.collection[0];
+        let prime_count = prime.sample_count();
 
-        if ! self.collection.iter().all(|c|
-            c.sample_count() == prime.sample_count() ||
-            c.fields == prime.fields
+
+        if self.collection.iter().any(|c|
+            c.sample_count() != prime_count ||
+            c.fields != prime.fields
         ) {
             return Err(Error::CannotCompare);
         }
@@ -292,6 +300,16 @@ fn average_cb() -> Result<()> {
     println!("{}", avg.format());
 
     assert_eq!(avg.data_map, expected.data_map);
+
+    let cgv2 = CgatsVec::from_files(&vec![
+        "test_files/colorburst0.txt",
+        "test_files/colorburst1.lin",
+        "test_files/colorburst2.lin",
+        "test_files/colorburst3.lin",
+    ]);
+
+    assert!(cgv2.average().is_err());
+
     Ok(())
 }
 

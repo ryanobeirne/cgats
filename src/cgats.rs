@@ -5,7 +5,7 @@ use std::fs::File;
 use std::io::{Write, BufWriter};
 use std::fmt;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Clone, PartialEq)]
 pub struct Cgats {
     pub vendor: Option<Vendor>,
     pub meta: DataVec,
@@ -120,6 +120,12 @@ impl Default for Cgats {
 
 impl fmt::Display for Cgats {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.format())
+    }
+}
+
+impl fmt::Debug for Cgats {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let vendor = match &self.vendor {
             Some(v) => v.to_string(),
             None => "None".to_string(),
@@ -137,9 +143,9 @@ fn cgats_display() -> Result<()> {
     let colorburst = Cgats::from_file("test_files/colorburst0.txt")?;
     let curve = Cgats::from_file("test_files/curve0.txt")?;
 
-    assert_eq!(cgats.to_string(),       "Cgats(11):[SAMPLE_ID, SAMPLE_NAME, CMYK_C, CMYK_M, CMYK_Y, CMYK_K]");
-    assert_eq!(colorburst.to_string(),  "ColorBurst(84):[D_RED, D_GREEN, D_BLUE, D_VIS, LAB_L, LAB_A, LAB_B]");
-    assert_eq!(curve.to_string(),       "Curve(21):[SAMPLE_ID, SAMPLE_NAME, CMYK_C, CMYK_M, CMYK_Y, CMYK_K]");
+    assert_eq!(format!("{:?}", cgats),      "Cgats(11):[SAMPLE_ID, SAMPLE_NAME, CMYK_C, CMYK_M, CMYK_Y, CMYK_K]");
+    assert_eq!(format!("{:?}", colorburst), "ColorBurst(84):[D_RED, D_GREEN, D_BLUE, D_VIS, LAB_L, LAB_A, LAB_B]");
+    assert_eq!(format!("{:?}", curve),      "Curve(21):[SAMPLE_ID, SAMPLE_NAME, CMYK_C, CMYK_M, CMYK_Y, CMYK_K]");
 
     Ok(())
 }
