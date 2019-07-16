@@ -65,6 +65,10 @@ impl Cgats {
         )
     }
 
+    pub fn is_colorburst(&self) -> bool {
+        self.vendor == Some(Vendor::ColorBurst)
+    }
+
     fn format_meta(&self) -> String {
     //! Format the CGATS metadata section to a string
         format!("{}", self.meta)
