@@ -29,12 +29,17 @@ version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
+name = "byteorder"
+version = "1.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
 name = "cgats"
 version = "0.1.6-alpha.0"
 dependencies = [
  "clap 2.33.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "deltae 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "gnuplot 0.0.31 (registry+https://github.com/rust-lang/crates.io-index)",
+ "deltae 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "gnuplot 0.0.31 (git+https://github.com/SiegeLord/RustGnuplot?rev=9e1446a)",
  "la 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "lab 0.7.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "mktemp 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -66,7 +71,7 @@ dependencies = [
 
 [[package]]
 name = "deltae"
-version = "0.1.3"
+version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
@@ -77,7 +82,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 [[package]]
 name = "gnuplot"
 version = "0.0.31"
-source = "registry+https://github.com/rust-lang/crates.io-index"
+source = "git+https://github.com/SiegeLord/RustGnuplot?rev=9e1446a#9e1446af595d5572bb27a6b7933f8472dc4ab68c"
+dependencies = [
+ "byteorder 1.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
+]
 
 [[package]]
 name = "la"
@@ -436,11 +444,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum atty 0.2.11 (registry+https://github.com/rust-lang/crates.io-index)" = "9a7d5b8723950951411ee34d271d99dddcc2035a16ab25310ea2c8cfd4369652"
 "checksum autocfg 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)" = "a6d640bee2da49f60a4068a7fae53acde8982514ab7bae8b8cea9e88cbcfd799"
 "checksum bitflags 1.0.4 (registry+https://github.com/rust-lang/crates.io-index)" = "228047a76f468627ca71776ecdebd732a3423081fcf5125585bcd7c49886ce12"
+"checksum byteorder 1.3.2 (registry+https://github.com/rust-lang/crates.io-index)" = "a7c3dd8985a7111efc5c80b44e23ecdd8c007de8ade3b96595387e812b957cf5"
 "checksum clap 2.33.0 (registry+https://github.com/rust-lang/crates.io-index)" = "5067f5bb2d80ef5d68b4c87db81601f0b75bca627bc2ef76b141d7b846a3c6d9"
 "checksum cloudabi 0.0.3 (registry+https://github.com/rust-lang/crates.io-index)" = "ddfc5b9aa5d4507acaf872de71051dfd0e309860e88966e1051e462a077aac4f"
-"checksum deltae 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)" = "e1d79a5842fb55ee44eb775e520a59dc30e1111923f853599f0e936628477b59"
+"checksum deltae 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)" = "2e384fe2eddce339995c76b3a8e61c162eec8d35110817cd084b78a78bd0f63a"
 "checksum fuchsia-cprng 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "81f7f8eb465745ea9b02e2704612a9946a59fa40572086c6fd49d6ddcf30bf31"
-"checksum gnuplot 0.0.31 (registry+https://github.com/rust-lang/crates.io-index)" = "18a907dc810202b800898a3059eba489404c7f232f8e141500122a86b173bd7f"
+"checksum gnuplot 0.0.31 (git+https://github.com/SiegeLord/RustGnuplot?rev=9e1446a)" = "<none>"
 "checksum la 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)" = "c0500e95bb7a4bb773d952d160beeae040fd77479b16f05672d9b63727e65957"
 "checksum lab 0.7.1 (registry+https://github.com/rust-lang/crates.io-index)" = "152264805421cdcc3c6486f03f937c558ea02445c468811196f1483c94aafb7d"
 "checksum libc 0.2.46 (registry+https://github.com/rust-lang/crates.io-index)" = "023a4cd09b2ff695f9734c1934145a315594b7986398496841c7031a5a1bbdbd"

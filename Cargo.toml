@@ -11,14 +11,14 @@ documentation = "https://ryanobeirne.github.io/cgats"
 readme = "README.md"
 
 [dependencies]
-deltae = "0.1.*"
+deltae = "0.1.5"
 statistical = "1.0.0"
 lab = "0.7.1"
 
 [dev-dependencies]
 mktemp = "0.3.1"
 clap = "2.32.0"
-gnuplot = "0.0.31"
+gnuplot = { git = "https://github.com/SiegeLord/RustGnuplot", rev = "9e1446a" }
 la = "0.2.0"
 num = "0.2.0"
 
@@ -28,4 +28,4 @@ path = "examples/cgats/main.rs"
 
 [[example]]
 name = "linviz"
-path = "examples/linviz/main.rs"
+path = "examples/linviz/linviz.rs"

@@ -126,11 +126,11 @@ impl Sample {
     }
 
     pub fn to_lab(&self, indexes: &[usize; 3]) -> Option<LabValue> {
-        let l = self.values[indexes[0]].float? as f64;
-        let a = self.values[indexes[1]].float? as f64;
-        let b = self.values[indexes[2]].float? as f64;
-
-        Some(LabValue {l, a, b})
+        Some(LabValue {
+            l: self.values.get(indexes[0])?.float?,
+            a: self.values.get(indexes[1])?.float?,
+            b: self.values.get(indexes[2])?.float?,
+        })
     }
 }
 
