@@ -6,13 +6,15 @@ pub const BLACK:   &str = "#401C1B1A";
 // pub const GREEN:   &str = "#00FF00";
 // pub const BLUE:    &str = "#0000FF";
 
-pub const TRANS: &str ="#C0";
+// The level of transparency we want to use
+pub const TRANS: &str ="#E6";
 
+// Make a color transparent for gnuplot
 pub fn trans(color: &str) -> String {
     color.replace("#40", TRANS)
 }
 
-#[derive(Debug)]
+// An RGB color object
 pub struct Rgb {
     pub red: u8,
     pub green: u8,
@@ -20,12 +22,14 @@ pub struct Rgb {
 }
 
 impl Rgb {
+    // Convert RGB to hexadecimal
     pub fn to_hex(&self) -> String {
         format!("#40{:02X}{:02X}{:02X}", self.red, self.green, self.blue)
     }
 }
 
 impl From<&[u8; 3]> for Rgb {
+    // Convert an array of u8 to Rgb
     fn from(a: &[u8; 3]) -> Rgb {
         Rgb {
             red: a[0], green: a[1], blue: a[2] 

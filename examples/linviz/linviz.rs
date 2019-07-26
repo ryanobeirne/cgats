@@ -1,3 +1,4 @@
+
 use la::Matrix;
 use cgats::*;
 use gnuplot::{AxesCommon, AutoOption, Figure, PlotOption, PlotOption::*};
@@ -10,6 +11,10 @@ use std::path::Path;
 mod colors;
 use colors::*;
 
+mod cbdensity;
+use cbdensity::*;
+
+#[macro_export]
 macro_rules! err {
     ($($tt:tt)*) => { Err(Error::from(format!($($tt)*))) }
 }
@@ -17,68 +22,58 @@ macro_rules! err {
 type Error = Box<std::error::Error>;
 type Result<T> = std::result::Result<T, Error>;
 
-const USAGE: &str = "Usage:
+// This binary usage
+const USAGE: &str = "linviz: Visualize ColorBurst linearization files
+Usage:
     linviz cblinfile1.lin [cblinfile2.lin ...]";
 
-const X_AXES: [u8; 21] = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100];
+// The number of density samples in a ColorBurst linearization channel
+const CB_LEN: usize = 21;
 
+// ColorBurst linearization sample increments
+const X_AXES: [u8; CB_LEN] = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100];
+
+// String to name Averaged ColorBurst CGATS linearizations
 const AVERAGE: &str = "::AVERAGE::";
 
 fn main() -> Result<()> {
+    // Collect file arguments as CGATS
     let mut cgv = files_to_cgats(args().skip(1));
 
+    // Exit if we have no CGATS to work with
     if cgv.is_empty() {
         eprintln!("No valid ColorBurst linearization files found!\n{}", USAGE);
         std::process::exit(1);
     }
 
+    // If we can average them all, add the average to the plot
     if let Ok(avg) = Cgats::average(cgv.values().cloned().collect::<Vec<_>>()) {
         cgv.insert(AVERAGE.into(), avg);
         eprintln!("Average Inserted");
     }
 
+    // Convert the ColorBurst CGATS density to a format that gnuplot can plot
     let cbd_bt = cgats_to_cbdensity(cgv);
 
-    // let sleep_time = sleep_time(cbd_bt.len());
-
+    // Make the gnuplot Figure
     let mut fig = Figure::new();
     fig.set_terminal("qt size 1024,720", "").set_enhanced_text(false);
-    // fig.set_terminal("png background rgb '#c0c0c0' size 1024,720", "derp.png").set_enhanced_text(false);
     fig.show();
 
+    // Plot the density to the Figure
     plot_cbd(&mut fig, cbd_bt);
 
+    // Generate the info that's going into gnuplot
     #[cfg(debug_assertions)] fig.echo_to_file("gnuplot.plg");
+
+    // Show the figure with plotted axes and quit plotting;
     fig.show();
     fig.close();
 
     Ok(())
 }
 
-fn files_to_cgats<I>(files: I) -> BTreeMap<String, Cgats> 
-where I: Iterator, I::Item: Into<String> + AsRef<Path> {
-    files.map(|file| { let cg = Cgats::from_file(&file); (file.into(), cg)})
-    .filter(|(_file, cg)| cg.is_ok())
-    .map(|(file, cg)| (file, cg.unwrap()))
-    .filter(|(_, cg)| cg.is_colorburst())
-    .collect::<BTreeMap<String, Cgats>>()
-}
-
-fn cgats_to_cbdensity(cgv: BTreeMap<String, Cgats>) -> BTreeMap<String, CbDensity> {
-    cgv.into_iter()
-        .map(|(file, cgv)| (file, CbDensity::from_cgats(&cgv)))
-        .filter(|(_, cbd)| cbd.is_ok())
-        .map(|(file, cbd)| (file, cbd.unwrap()))
-        .collect::<BTreeMap<String, CbDensity>>()
-}
-
-// Determine largest density value
-fn dmax(cbd_bt: &BTreeMap<String, CbDensity>) -> f32 {
-    *cbd_bt.values()
-        .map(|cbd| cbd.max_density())
-        .max_by(|a, b| a.partial_cmp(b).unwrap()).unwrap()
-}
-
+// Plot the density to the figure
 fn plot_cbd(fig: &mut Figure, cbd_bt: BTreeMap<String, CbDensity>) {
     let dmax = dmax(&cbd_bt);
 
@@ -147,6 +142,7 @@ fn plot_cbd(fig: &mut Figure, cbd_bt: BTreeMap<String, CbDensity>) {
 
 }
 
+// Determine how long to sleep between axes plots
 fn sleep_time(len: usize) -> u64 {
     match len {
         0 | 1 => 0,
@@ -155,99 +151,7 @@ fn sleep_time(len: usize) -> u64 {
     }
 }
 
+// Sleep for milliseconds
 fn sleep(ms: u64) {
     std::thread::sleep(std::time::Duration::from_millis(ms));
-}
-
-fn parse_cgats_to_matrix(cgats: &Cgats, cols: usize) -> Result<Matrix<f32>> {
-    let data = cgats.data_map.values()
-        .flat_map(|sample| sample.values.iter())
-        .filter_map(|val| val.float)
-        .collect::<Vec<f32>>();
-
-    let rows = data.len() / cols;
-
-    if rows * cols == data.len() {
-        Ok(Matrix::new(rows, cols, data))
-    } else {
-        Err(Box::new(std::io::Error::from(std::io::ErrorKind::InvalidInput)))
-    }
-}
-
-type Density = Vec<f32>;
-
-#[derive(Debug)]
-struct CbDensity {
-    cyan: Density,
-    magenta: Density,
-    yellow: Density,
-    black: Density,
-    spot: Vec<(Density, Rgb)>,
-}
-
-impl CbDensity {
-    fn from_cgats(cgats: &Cgats) -> Result<CbDensity> {
-        if ! cgats.is_colorburst() {
-            return err!("CGATS is not ColorBurst format!")
-        }
-
-        let cols = cgats.fields.len();
-        let rows = cgats.data_map.len();
-        let channels = rows / 21;
-
-        let matrix = parse_cgats_to_matrix(&cgats, cols).expect("PARSE CGATS TO MATRIX");
-
-        let cyan    = pick(&matrix, 0, 0);
-        let magenta = pick(&matrix, 1, 21);
-        let yellow  = pick(&matrix, 2, 42);
-        let black   = pick(&matrix, 3, 63);
-        let mut spot = Vec::new();
-
-        if channels > 4 {
-            for channel in 4..channels {
-                spot.push(density_rgb(&matrix, channel));
-            }
-        }
-
-        Ok(CbDensity {
-            cyan, magenta, yellow, black, spot
-        })
-    }
-
-    fn max_density(&self) -> &f32 {
-        self.cyan.iter()
-            .chain(self.magenta.iter())
-            .chain(self.yellow.iter())
-            .chain(self.black.iter())
-            .chain(self.spot.iter().flat_map(|s| s.0.iter()))
-            .max_by(|a, b| a.partial_cmp(b).unwrap()).unwrap()
-    }
-}
-
-fn density_rgb(matrix: &Matrix<f32>, channel: usize) -> (Density, Rgb) {
-    let skip = channel * 21;
-    let max = skip + 20;
-    let maxrow = matrix.get_rows(max).get_data().to_owned();
-
-    let (col, _dmax) = maxrow.iter().enumerate().take(4)
-        .max_by(|(_a,a), (_b,b)| (a).partial_cmp(b).unwrap()).unwrap();
-
-    let pick = pick(matrix, col, skip);
-
-    let maxlab = maxrow.into_iter().skip(4).collect::<Vec<_>>();
-    debug_assert_eq!(maxlab.len(), 3);
-    let lab = Lab { l: maxlab[0], a: maxlab[1], b: maxlab[2] };
-
-    let rgb = Rgb::from(&lab.to_rgb());
-
-    (pick, rgb)
-}
-
-fn pick<T>(matrix: &Matrix<T>, col: usize, skip: usize) -> Vec<T> 
-where T: Copy {
-    matrix.get_columns(col).get_data().iter()
-        .skip(skip)
-        .take(21)
-        .cloned()
-        .collect()
 }
