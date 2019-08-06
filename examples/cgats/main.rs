@@ -2,27 +2,18 @@ mod cli;
 mod config;
 use config::Config;
 use cgats::*;
-use std::io::{BufWriter, stdout};
-use std::fs::File;
 
 fn main() -> Result<()> {
     //Parse command line arguments with clap
     let matches = cli::build_cli().get_matches();
-    let config = Config::build(&matches);
-
-    #[cfg(debug_assertions)]
-    dbg!(&config);
+    let mut config = Config::build(&matches)?;
 
     if config.files.is_empty() {
         eprintln!("{}", matches.usage()); 
         std::process::exit(1);
     }
 
-    if let Some(file) = matches.value_of("OUTPUTFILE") {
-        config.execute(&mut BufWriter::new(File::create(file)?))?
-    } else {
-        config.execute(&mut BufWriter::new(stdout()))?
-    };
+    config.execute()?;
 
     Ok(())
 }
@@ -54,7 +45,7 @@ mod tests {
 
         let expected = read_to_string(exp_file)?;
 
-        assert_eq!(calculated, expected);
+        assert_eq!(calculated.trim(), expected.trim());
 
         Ok(())
     }
@@ -62,5 +53,5 @@ mod tests {
     cmd_eq_file!(avg,   "avg test_files/cgats{1,2}.tsv",        "test_files/cgats5.tsv");
     cmd_eq_file!(cat,   "cat test_files/cgats{1,2}.tsv",        "test_files/cgats7.tsv");
     cmd_eq_file!(delta, "delta test_files/colorburst{2,3}.lin", "test_files/deltae0.txt");
-    cmd_eq_file!(dereport, "delta --report --output-file=/dev/null test_files/colorburst{2,3}.lin 2>&1", "test_files/dereport0.txt");
+    cmd_eq_file!(dereport, "delta -rf/dev/null test_files/colorburst{2,3}.lin 2>&1", "test_files/dereport0.txt");
 }

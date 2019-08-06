@@ -33,7 +33,7 @@ pub fn build_cli() -> App<'static, 'static> {
                 .long("method")
                 .help("Delta E method to use in the calculations")
                 .possible_values(&["2000", "1994", "1994t", "cmc1", "cmc2", "1976"]))
-            .arg(Arg::with_name("report")
+            .arg(Arg::with_name("DEREPORT")
                 .takes_value(false)
                 .short("r")
                 .long("report")

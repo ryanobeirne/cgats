@@ -1,9 +1,11 @@
 use cgats::*;
 use clap::ArgMatches;
 use std::str::FromStr;
-use std::io::{self, Write, stderr, BufWriter};
+use std::io::{self, Write, stderr, stdout, Stdout, BufWriter};
 use deltae::DEMethod;
 use crate::DeReport;
+use std::fs::File;
+use std::path::Path;
 
 use std::fmt;
 
@@ -51,15 +53,50 @@ impl fmt::Display for Command {
 }
 
 #[derive(Debug)]
-pub struct Config{
+enum CgatsWriter {
+    File(BufWriter<File>),
+    Stdout(BufWriter<Stdout>),
+}
+
+impl CgatsWriter {
+    fn file<P: AsRef<Path>>(file: P) -> Result<Self> {
+        Ok(CgatsWriter::File(BufWriter::new(File::create(file)?)))
+    }
+
+    fn stdout() -> Self {
+        CgatsWriter::Stdout(BufWriter::new(stdout()))
+    }
+}
+
+type WriteResult<T> = std::result::Result<T, std::io::Error>;
+
+impl std::io::Write for CgatsWriter {
+    fn write(&mut self, buf: &[u8]) -> WriteResult<usize> {
+        match self {
+            CgatsWriter::File(bwf) => bwf.write(buf),
+            CgatsWriter::Stdout(stdout) => stdout.write(buf),
+        }
+    }
+
+    fn flush(&mut self) -> WriteResult<()> {
+        match self {
+            CgatsWriter::File(bwf) => bwf.flush(),
+            CgatsWriter::Stdout(stdout) => stdout.flush(),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct Config {
     pub command: Command,
     pub de_method: DEMethod,
     pub de_report: bool,
     pub files: Vec<String>,
+    output: CgatsWriter,
 }
 
 impl Config {
-    pub fn build(matches: &ArgMatches) -> Self {
+    pub fn build(matches: &ArgMatches) -> Result<Self> {
         let cmd_name = matches.subcommand_name();
         let subcommand = cmd_name.unwrap_or_default();
         let submatches = matches.subcommand_matches(subcommand);
@@ -71,7 +108,21 @@ impl Config {
             DEMethod::default()
         };
 
-        let de_report = matches.is_present("DEREPORT");
+        let (de_report, output) = if let (_, Some(subcmd)) = matches.subcommand() {
+            let report = subcmd.is_present("DEREPORT");
+            let file = subcmd.value_of("OUTPUTFILE");
+
+            let out = if let Some(file) = file {
+                CgatsWriter::file(file)?
+            } else {
+                CgatsWriter::stdout()
+            };
+
+            (report, out)
+        } else {
+            (false, CgatsWriter::stdout())
+        };
+
 
         let files = match cmd_name {
             Some(_cmd) => submatches.expect("SUBCOMMAND")
@@ -83,34 +134,35 @@ impl Config {
                 .collect::<Vec<_>>(),
         };
 
-        Self { command, de_method, de_report, files}
+        Ok(Self { command, de_method, de_report, files, output})
     }
 
-    pub fn execute<W: Write>(&self, output: &mut BufWriter<W>) -> Result<()> {
+    pub fn execute(&mut self) -> Result<()> {
         let cgv = CgatsVec::from_files(&self.files);
 
         match self.command {
             Command::Display => {
                 for cgo in cgv.collection.iter() {
-                    writeln!(output, "{:?}", cgo)?;
+                    writeln!(self.output, "{:?}", cgo)?;
                 }
             },
 
             Command::Average => {
-                write!(output, "{}", cgv.average()?)?;
+                write!(self.output, "{}", cgv.average()?)?;
                 
             },
 
             Command::Delta => {
                 let cgd = cgv.deltae(self.de_method)?;
-                write!(output, "{}", &cgd)?;
+                writeln!(self.output, "{}", &cgd)?;
+                self.output.flush()?;
                 if self.de_report {
                     write!(stderr(), "{}", DeReport::new(&cgd)?)?;
                 }
             },
 
             Command::Cat => {
-                write!(output, "{}", cgv.concatenate()?)?;
+                write!(self.output, "{}", cgv.concatenate()?)?;
             }
         }
 
@@ -125,6 +177,7 @@ impl Default for Config {
             de_method: DEMethod::default(),
             de_report: false,
             files: Vec::new(),
+            output: CgatsWriter::Stdout(BufWriter::new(stdout())),
         }
     }
 }
