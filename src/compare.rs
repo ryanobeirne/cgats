@@ -324,6 +324,7 @@ fn cat_cgats() -> Result<()> {
 
     assert_eq!(cat.data_map.keys().last(), Some(&21));
     assert_eq!(cat.data_map.len(), 22);
+    assert_eq!(cat.to_string(), std::fs::read_to_string("test_files/cgats7.tsv")?);
     Ok(())
 }
 

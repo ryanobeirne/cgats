@@ -1,47 +1,46 @@
 use cgats::*;
 use clap::ArgMatches;
 use std::str::FromStr;
+use std::io::{self, Write, stderr, BufWriter};
 use deltae::DEMethod;
 use crate::DeReport;
 
 use std::fmt;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Command {
+    Display, // Default
     Average,
     Cat,
     Delta,
+    // Merge
     // Convert,
 }
 
+impl Default for Command {
+    fn default() -> Self {
+        Command::Display
+    }
+}
+
 impl Command {
-    pub fn from_string(s: &str) -> Option<Self> {
+    pub fn from_string(s: &str) -> Self {
+        match Command::from_str(s) {
+            Ok(cmd) => cmd,
+            Err(_) => Command::default()
+        }
+    }
+}
+
+impl FromStr for Command {
+    type Err = io::Error;
+    fn from_str(s: &str) -> std::result::Result<Command, Self::Err> {
         match s.to_lowercase().as_str() {
-            "average" | "avg" => Some(Command::Average),
-            "concatenate" | "cat" | "append" => Some(Command::Cat),
-            "delta" | "deltae" | "de" => Some(Command::Delta),
-            _ => None
+            "average" | "avg" => Ok(Command::Average),
+            "concatenate" | "cat" | "append" => Ok(Command::Cat),
+            "delta" | "deltae" | "de" => Ok(Command::Delta),
+            _ => Err(io::Error::from(io::ErrorKind::InvalidInput))
         }
-    }
-
-    pub fn execute(&self, cmd_opts: &CmdOpts, cgv: CgatsVec) -> Result<(Option<DeReport>, Cgats)> {
-        match &self {
-            Command::Average => Ok((None, cgv.average()?)),
-            Command::Cat => Ok((None, cgv.concatenate()?)),
-            Command::Delta => {
-                let cgo = cgv.deltae(DEMethod::from_str(&cmd_opts[0])?)?;
-                if cmd_opts.contains(&"report".to_string()) {
-                    Ok((DeReport::new(&cgo).ok(), cgo))
-                } else {
-                    Ok((None, cgo))
-                }
-            },
-        }
-    }
-
-    pub fn display(&self) -> String {
-        let s = format!("{}", &self).to_lowercase();
-        format!("{}", s)
     }
 }
 
@@ -51,62 +50,82 @@ impl fmt::Display for Command {
     }
 }
 
-pub type CmdOpts = Vec<String>;
-
 #[derive(Debug)]
-pub struct Config {
-    pub command: Option<Command>,
-    pub cmd_opts: CmdOpts,
+pub struct Config{
+    pub command: Command,
+    pub de_method: DEMethod,
+    pub de_report: bool,
     pub files: Vec<String>,
 }
 
 impl Config {
     pub fn build(matches: &ArgMatches) -> Self {
         let cmd_name = matches.subcommand_name();
-        let command = match cmd_name {
-            Some(cmd) => Command::from_string(cmd),
-            None => None
-        };
+        let subcommand = cmd_name.unwrap_or_default();
+        let submatches = matches.subcommand_matches(subcommand);
+        let command = Command::from_string(subcommand);
 
-        let mut cmd_opts = Vec::<String>::new();
-
-        let files = if let Some(cmd) = cmd_name {
-            match matches.subcommand_matches(cmd) {
-                Some(scm) => {
-                    if cmd == "delta" {
-                        cmd_opts.push(scm.value_of("method").unwrap_or("de2000").to_string());
-                        if scm.is_present("report") {
-                            cmd_opts.push("report".to_string());
-                        }
-                    }
-                    scm.values_of("comparefiles")
-                    .expect("Did not find 'comparefiles'")
-                    .map(|s| s.to_string())
-                    .collect()
-                },
-                None => Vec::new()
-            }
+        let de_method = if let Some(de) = matches.value_of("DEMETHOD") {
+            DEMethod::from_str(de).unwrap_or_default()
         } else {
-            let clap_files = matches.values_of("files");
-            match clap_files {
-                Some(f) => f.map(|s| s.to_string()).collect(),
-                None => Vec::new()
-            }
+            DEMethod::default()
         };
 
+        let de_report = matches.is_present("DEREPORT");
 
-        Self { command, cmd_opts, files }
+        let files = match cmd_name {
+            Some(_cmd) => submatches.expect("SUBCOMMAND")
+                .values_of("FILES").unwrap_or_default()
+                .map(String::from)
+                .collect::<Vec<_>>(),
+            None => matches.values_of("FILES").unwrap_or_default()
+                .map(String::from)
+                .collect::<Vec<_>>(),
+        };
+
+        Self { command, de_method, de_report, files}
     }
 
-    pub fn collect(&self) -> Result<(Option<DeReport>, Cgats)> {
-        match &self.command {
-            Some(cmd) => cmd.execute(&self.cmd_opts, self.cgats_vec()),
-            None => Err(Error::InvalidCommand)
+    pub fn execute<W: Write>(&self, output: &mut BufWriter<W>) -> Result<()> {
+        let cgv = CgatsVec::from_files(&self.files);
+
+        match self.command {
+            Command::Display => {
+                for cgo in cgv.collection.iter() {
+                    writeln!(output, "{:?}", cgo)?;
+                }
+            },
+
+            Command::Average => {
+                write!(output, "{}", cgv.average()?)?;
+                
+            },
+
+            Command::Delta => {
+                let cgd = cgv.deltae(self.de_method)?;
+                write!(output, "{}", &cgd)?;
+                if self.de_report {
+                    write!(stderr(), "{}", DeReport::new(&cgd)?)?;
+                }
+            },
+
+            Command::Cat => {
+                write!(output, "{}", cgv.concatenate()?)?;
+            }
         }
-    }
 
-    pub fn cgats_vec(&self) -> CgatsVec {
-        CgatsVec::from_files(&self.files)
+        Ok(())
+    }
+}
+
+impl Default for Config {
+    fn default() -> Self {
+        Config {
+            command: Command::default(),
+            de_method: DEMethod::default(),
+            de_report: false,
+            files: Vec::new(),
+        }
     }
 }
 
