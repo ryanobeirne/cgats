@@ -1,3 +1,4 @@
+// Be careful here... the alpha prefix must match `SOLID`
 pub const CYAN:    &str = "#40009FE3";
 pub const MAGENTA: &str = "#40E5007E";
 pub const YELLOW:  &str = "#40FFED00";
@@ -7,11 +8,12 @@ pub const BLACK:   &str = "#401C1B1A";
 // pub const BLUE:    &str = "#0000FF";
 
 // The level of transparency we want to use
-pub const TRANS: &str ="#E6";
+const SOLID: &str = "#40";
+const TRANS: &str = "#E6";
 
 // Make a color transparent for gnuplot
 pub fn trans(color: &str) -> String {
-    color.replace("#40", TRANS)
+    color.replace(SOLID, TRANS)
 }
 
 // An RGB color object
@@ -24,7 +26,7 @@ pub struct Rgb {
 impl Rgb {
     // Convert RGB to hexadecimal
     pub fn to_hex(&self) -> String {
-        format!("#40{:02X}{:02X}{:02X}", self.red, self.green, self.blue)
+        format!("{}{:02X}{:02X}{:02X}", SOLID, self.red, self.green, self.blue)
     }
 }
 
@@ -40,5 +42,5 @@ impl From<&[u8; 3]> for Rgb {
 #[test]
 fn rgbhex() {
     let rgb = Rgb { red: 0, green: 128, blue: 255 };
-    assert_eq!(rgb.to_hex(), "#0080FF");
+    assert_eq!(rgb.to_hex(), format!("{}0080FF", SOLID));
 }

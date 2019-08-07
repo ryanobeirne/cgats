@@ -49,7 +49,7 @@ fn main() -> Result<()> {
     // If we can average them all, add the average to the plot
     if let Ok(avg) = Cgats::average(cgv.values().cloned().collect::<Vec<_>>()) {
         cgv.insert(AVERAGE.into(), avg);
-        eprintln!("Average Inserted");
+        eprintln!("Average of {} Inserted", cgv.len() - 1);
     }
 
     // Convert the ColorBurst CGATS density to a format that gnuplot can plot
