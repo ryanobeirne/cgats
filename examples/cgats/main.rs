@@ -53,5 +53,6 @@ mod tests {
     cmd_eq_file!(avg,   "avg test_files/cgats{1,2}.tsv",        "test_files/cgats5.tsv");
     cmd_eq_file!(cat,   "cat test_files/cgats{1,2}.tsv",        "test_files/cgats7.tsv");
     cmd_eq_file!(delta, "delta test_files/colorburst{2,3}.lin", "test_files/deltae0.txt");
-    cmd_eq_file!(dereport, "delta -rf/dev/null test_files/colorburst{2,3}.lin 2>&1", "test_files/dereport0.txt");
+    cmd_eq_file!(dereport_2000, "delta -rf/dev/null test_files/colorburst{2,3}.lin 2>&1", "test_files/dereport0.txt");
+    cmd_eq_file!(dereport_1976, "delta --method=1976 -rf/dev/null test_files/colorburst{2,3}.lin 2>&1", "test_files/dereport1.txt");
 }

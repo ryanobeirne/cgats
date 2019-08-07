@@ -105,13 +105,8 @@ impl Config {
         let submatches = matches.subcommand_matches(subcommand);
         let command = Command::from_string(subcommand);
 
-        let de_method = if let Some(subcmd) = submatches {
-            DEMethod::from_str(subcmd.value_of("DEMETHOD").unwrap_or("DE2000")).unwrap_or_default()
-        } else {
-            DEMethod::default()
-        };
-
-        let (de_report, output) = if let Some(subcmd) = submatches {
+        let (de_method, de_report, output) = if let Some(subcmd) = submatches {
+            let method = DEMethod::from_str(subcmd.value_of("DEMETHOD").unwrap_or("DE2000")).unwrap_or_default();
             let report = subcmd.is_present("DEREPORT");
             let file = subcmd.value_of("OUTPUTFILE");
 
@@ -121,9 +116,9 @@ impl Config {
                 CgatsWriter::stdout()
             };
 
-            (report, out)
+            (method, report, out)
         } else {
-            (false, CgatsWriter::stdout())
+            (DEMethod::default(), false, CgatsWriter::stdout())
         };
 
 
