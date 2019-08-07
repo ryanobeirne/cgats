@@ -12,6 +12,7 @@ use std::fmt;
 #[derive(Debug, PartialEq)]
 pub enum Command {
     Display, // Default
+    Print,
     Average,
     Cat,
     Delta,
@@ -38,6 +39,8 @@ impl FromStr for Command {
     type Err = io::Error;
     fn from_str(s: &str) -> std::result::Result<Command, Self::Err> {
         match s.to_lowercase().as_str() {
+            "display" => Ok(Command::Display),
+            "print" => Ok(Command::Print),
             "average" | "avg" => Ok(Command::Average),
             "concatenate" | "cat" | "append" => Ok(Command::Cat),
             "delta" | "deltae" | "de" => Ok(Command::Delta),
@@ -102,13 +105,13 @@ impl Config {
         let submatches = matches.subcommand_matches(subcommand);
         let command = Command::from_string(subcommand);
 
-        let de_method = if let Some(de) = matches.value_of("DEMETHOD") {
-            DEMethod::from_str(de).unwrap_or_default()
+        let de_method = if let Some(subcmd) = submatches {
+            DEMethod::from_str(subcmd.value_of("DEMETHOD").unwrap_or("DE2000")).unwrap_or_default()
         } else {
             DEMethod::default()
         };
 
-        let (de_report, output) = if let (_, Some(subcmd)) = matches.subcommand() {
+        let (de_report, output) = if let Some(subcmd) = submatches {
             let report = subcmd.is_present("DEREPORT");
             let file = subcmd.value_of("OUTPUTFILE");
 
@@ -147,6 +150,12 @@ impl Config {
                 }
             },
 
+            Command::Print => {
+                for cgo in cgv.collection.iter() {
+                    writeln!(self.output, "{}", cgo)?;
+                }
+            }
+
             Command::Average => {
                 write!(self.output, "{}", cgv.average()?)?;
                 
@@ -154,8 +163,10 @@ impl Config {
 
             Command::Delta => {
                 let cgd = cgv.deltae(self.de_method)?;
+
                 writeln!(self.output, "{}", &cgd)?;
                 self.output.flush()?;
+
                 if self.de_report {
                     write!(stderr(), "{}", DeReport::new(&cgd)?)?;
                 }
