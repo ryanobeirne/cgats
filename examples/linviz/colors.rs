@@ -9,7 +9,7 @@ pub const BLACK:   &str = "#401C1B1A";
 
 // The level of transparency we want to use
 const SOLID: &str = "#40";
-const TRANS: &str = "#E6";
+const TRANS: &str = "#CC";
 
 // Make a color transparent for gnuplot
 pub fn trans(color: &str) -> String {
