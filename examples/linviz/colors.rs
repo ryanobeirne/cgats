@@ -17,6 +17,7 @@ pub fn trans(color: &str) -> String {
 }
 
 // An RGB color object
+#[derive(Clone)]
 pub struct Rgb {
     pub red: u8,
     pub green: u8,

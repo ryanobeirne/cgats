@@ -22,13 +22,8 @@ macro_rules! err {
     ($($tt:tt)*) => { Err(Error::from(format!($($tt)*))) }
 }
 
-type Error = Box<std::error::Error>;
+type Error = Box<dyn std::error::Error>;
 type Result<T> = std::result::Result<T, Error>;
-
-// This binary usage
-const USAGE: &str = "linviz: Visualize ColorBurst linearization files
-Usage:
-    linviz cblinfile1.lin [cblinfile2.lin ...]";
 
 // The number of density samples in a ColorBurst linearization channel
 const CB_LEN: usize = 21;
@@ -40,20 +35,15 @@ const X_AXES: [u8; CB_LEN] = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 
 const AVERAGE: &str = "::AVERAGE::";
 
 fn main() -> Result<()> {
-    let app = cli::app();
-    let matches = app.clone().get_matches();
+    let matches = cli::app().get_matches();
+
 
     // Collect file arguments as CGATS
-    let mut cgv = if let Some(files) = matches.values_of("files") {
-        files_to_cgats(files)
-    } else {
-        eprintln!("{}", app.usage("usage: S"));
-        std::process::exit(1);
-    };
+    let mut cgv = files_to_cgats(matches.values_of("files").unwrap());
 
     // Exit if we have no CGATS to work with
     if cgv.is_empty() {
-        eprintln!("No valid ColorBurst linearization files found!\n{}", USAGE);
+        eprintln!("No valid ColorBurst linearization files found!");
         std::process::exit(1);
     }
 
@@ -66,7 +56,10 @@ fn main() -> Result<()> {
     }
 
     // Convert the ColorBurst CGATS density to a format that gnuplot can plot
-    let cbd_bt = cgats_to_cbdensity(cgv, matches.is_present("normalize"));
+    let mut cbdm = CbDensityMap::from(cgv);
+    if matches.is_present("normalize") {
+        cbdm.normalize();
+    }
 
     // Make the gnuplot Figure
     let mut fig = Figure::new();
@@ -74,37 +67,45 @@ fn main() -> Result<()> {
     fig.show();
 
     // Plot the density to the Figure
-    plot_cbd(&mut fig, cbd_bt);
+    plot_cbd(&mut fig, cbdm, matches.is_present("clear"));
 
     // // Generate the info that's going into gnuplot
     // #[cfg(debug_assertions)] fig.echo_to_file("gnuplot.plg");
 
     // Show the figure with plotted axes and quit plotting;
     fig.show();
+
     fig.close();
 
     Ok(())
 }
 
 // Plot the density to the figure
-fn plot_cbd(fig: &mut Figure, cbd_bt: BTreeMap<String, CbDensity>) {
-    let dmax = dmax(&cbd_bt);
-    // let sleep_time = sleep_time(cbd_bt.len());
+fn plot_cbd(fig: &mut Figure, cbdm: CbDensityMap, clear: bool) {
+    let sleep_time = sleep_time(cbdm.len());
+    let dmax = cbdm.dmax();
+    let len = cbdm.len();
+    let single = len == 1;
 
-    for (file, cbd) in cbd_bt.iter() {
-        // fig.clear_axes();
+    for (file, cbd) in cbdm.iter() {
+        if clear { fig.clear_axes(); }
         
-        let title = Path::new(&file).file_name().unwrap().to_string_lossy();
+        let is_avg = file == AVERAGE;
+        let single_or_avg = is_avg || single;
 
-        let is_avg = file == AVERAGE || cbd_bt.len() == 1;
+        let title = if is_avg && ! clear {
+            std::borrow::Cow::Borrowed(" ")
+        } else {
+            Path::new(&file).file_name().unwrap().to_string_lossy()
+        };
 
-        let (lw, ps): (PlotOption<&str>, PlotOption<&str>) = if is_avg {
+        let (lw, ps): (PlotOption<&str>, PlotOption<&str>) = if single_or_avg {
             (LineWidth(4.0), PointSize(1.0))
         } else {
             (LineWidth(1.0), PointSize(0.5))
         };
 
-        let (c, m, y, k) = if is_avg {
+        let (c, m, y, k) = if single_or_avg {
             (CYAN.into(), MAGENTA.into(), YELLOW.into(), BLACK.into())
         } else {
             (trans(CYAN), trans(MAGENTA), trans(YELLOW), trans(BLACK))
@@ -139,7 +140,7 @@ fn plot_cbd(fig: &mut Figure, cbd_bt: BTreeMap<String, CbDensity>) {
             );
 
         for (density, color) in cbd.spot.iter() {
-            let x = if is_avg {
+            let x = if single_or_avg {
                 color.to_hex()
             } else {
                 trans(&color.to_hex())
@@ -151,23 +152,25 @@ fn plot_cbd(fig: &mut Figure, cbd_bt: BTreeMap<String, CbDensity>) {
                 );
         }
 
-        // fig.show();
         // fig.save_to_png(&format!("output/{}.png", title), 1024, 720);
-        // sleep(sleep_time);
+        if clear {
+            fig.show();
+            sleep(sleep_time);
+        }
     }
 
 }
 
-// // Determine how long to sleep between axes plots
-// fn sleep_time(len: usize) -> u64 {
-//     match len {
-//         0 | 1 => 0,
-//         2..=5 => 1000,
-//         _ => 5000 / len as u64
-//     }
-// }
+// Determine how long to sleep between axes plots
+fn sleep_time(len: usize) -> u64 {
+    match len {
+        0 | 1 => 0,
+        2..=5 => 1000,
+        _ => 5000 / len as u64
+    }
+}
 
-// // Sleep for milliseconds
-// fn sleep(ms: u64) {
-//     std::thread::sleep(std::time::Duration::from_millis(ms));
-// }
+// Sleep for milliseconds
+fn sleep(ms: u64) {
+    std::thread::sleep(std::time::Duration::from_millis(ms));
+}
