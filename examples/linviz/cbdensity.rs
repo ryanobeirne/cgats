@@ -58,6 +58,39 @@ impl CbDensity {
             .chain(self.spot.iter().flat_map(|s| s.0.iter()))
             .max_by(|a, b| a.partial_cmp(b).unwrap()).unwrap()
     }
+
+    // Normalize the density on a scale from 0 to 1
+    pub fn normalize(mut self) -> Self {
+        norm(&mut self.cyan);
+        norm(&mut self.magenta);
+        norm(&mut self.yellow);
+        norm(&mut self.black);
+
+        for (density, _rgb) in self.spot.iter_mut() {
+            norm(density);
+        }
+
+        self
+    }
+}
+
+// Normalize a slice of f32 on a scale from 0 to 1
+fn norm(v: &mut [f32]) {
+    let max = v.iter().max_by(|a,b| a.partial_cmp(b).unwrap()).unwrap().clone();
+    let min = v.iter().min_by(|a,b| a.partial_cmp(b).unwrap()).unwrap().clone();
+
+    for i in v.iter_mut() {
+        *i = (*i - min) / (max - min);
+    }
+}
+
+#[test]
+fn normal() {
+    let normal = &mut [1.5, 2.8, 6.3, 7.2, 10.8];
+    norm(normal);
+    let expected = &[0.0, 0.13978493, 0.516129, 0.6129032, 1.0];
+
+    assert_eq!(normal, expected);
 }
 
 // Parse a CGATS object into a density Matrix
@@ -86,11 +119,16 @@ where I: Iterator, I::Item: Into<String> + AsRef<Path> {
 }
 
 // Map CGATS objects to Density Matrices
-pub fn cgats_to_cbdensity(cgv: BTreeMap<String, Cgats>) -> BTreeMap<String, CbDensity> {
+pub fn cgats_to_cbdensity(cgv: BTreeMap<String, Cgats>, norm: bool) -> BTreeMap<String, CbDensity> {
     cgv.into_iter()
         .map(|(file, cgv)| (file, CbDensity::from_cgats(&cgv)))
         .filter(|(_, cbd)| cbd.is_ok())
-        .map(|(file, cbd)| (file, cbd.unwrap()))
+        .map(|(file, cbd)| (file, {
+            if norm {
+                cbd.unwrap().normalize()
+            } else {
+                cbd.unwrap()
+            }}))
         .collect::<BTreeMap<String, CbDensity>>()
 }
 

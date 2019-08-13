@@ -4,9 +4,12 @@ use cgats::*;
 use gnuplot::{AxesCommon, AutoOption, Figure, PlotOption, PlotOption::*};
 use lab::Lab;
 
-use std::env::args;
 use std::collections::BTreeMap;
 use std::path::Path;
+
+#[macro_use]
+extern crate clap;
+mod cli;
 
 mod colors;
 use colors::*;
@@ -37,8 +40,16 @@ const X_AXES: [u8; CB_LEN] = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 
 const AVERAGE: &str = "::AVERAGE::";
 
 fn main() -> Result<()> {
+    let app = cli::app();
+    let matches = app.clone().get_matches();
+
     // Collect file arguments as CGATS
-    let mut cgv = files_to_cgats(args().skip(1));
+    let mut cgv = if let Some(files) = matches.values_of("files") {
+        files_to_cgats(files)
+    } else {
+        eprintln!("{}", app.usage("usage: S"));
+        std::process::exit(1);
+    };
 
     // Exit if we have no CGATS to work with
     if cgv.is_empty() {
@@ -55,7 +66,7 @@ fn main() -> Result<()> {
     }
 
     // Convert the ColorBurst CGATS density to a format that gnuplot can plot
-    let cbd_bt = cgats_to_cbdensity(cgv);
+    let cbd_bt = cgats_to_cbdensity(cgv, matches.is_present("normalize"));
 
     // Make the gnuplot Figure
     let mut fig = Figure::new();
@@ -65,8 +76,8 @@ fn main() -> Result<()> {
     // Plot the density to the Figure
     plot_cbd(&mut fig, cbd_bt);
 
-    // Generate the info that's going into gnuplot
-    #[cfg(debug_assertions)] fig.echo_to_file("gnuplot.plg");
+    // // Generate the info that's going into gnuplot
+    // #[cfg(debug_assertions)] fig.echo_to_file("gnuplot.plg");
 
     // Show the figure with plotted axes and quit plotting;
     fig.show();
