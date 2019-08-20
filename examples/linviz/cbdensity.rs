@@ -2,7 +2,76 @@ use super::*;
 use std::fs::File;
 
 // The density ramp for a given logical ink channel
-pub type Density = Vec<f32>;
+#[derive(Debug, Clone, Copy)]
+pub struct Density {
+    pub inner: CbDens,
+    pub rgb: Rgb,
+}
+
+impl Default for Density {
+    fn default() -> Self {
+        Density {
+            inner: X_AXES,
+            rgb: Rgb::default(),
+        }
+    }
+}
+
+impl Density {
+    // Normalize a Density on a scale from 0 to 1
+    fn normalize(&mut self) {
+        let max = self.inner.iter().max_by(|a,b| a.partial_cmp(b).unwrap()).unwrap().clone();
+        let min = self.inner.iter().min_by(|a,b| a.partial_cmp(b).unwrap()).unwrap().clone();
+
+        for i in self.inner.iter_mut() {
+            *i = (*i - min) / (max - min);
+        }
+    }
+
+    /// Normalize and return a density
+    ///! let normal = Density::default().normal();
+    #[allow(unused)]
+    fn normal(mut self) -> Self {
+        self.normalize();
+        self
+    }
+
+    // Cherry pick a density ramp from a Matrix at column x row
+    pub fn pick_from_matrix(matrix: &Matrix<f32>, col: usize, row: usize) -> CbDens {
+        let mut arr = [0_f32; CB_LEN];
+        for (i, data) in matrix.get_columns(col).get_data().iter()
+            .skip(row)
+            .take(CB_LEN)
+            .enumerate() {
+                arr[i] = *data;
+            }
+
+        arr
+    }
+
+    // Get the Density Ramp and RGB color from a given density ramp in a matrix
+    pub fn from_matrix(matrix: &Matrix<f32>, channel: usize) -> Self {
+        // Skip to the relevant row
+        let row = channel * CB_LEN;
+        let max = row + CB_LEN - 1;
+        let maxrow = matrix.get_rows(max).get_data().to_owned();
+
+        // Loop through the density values in the row and find the maximum (for spot colors)
+        let (col, _dmax) = maxrow.iter().enumerate().take(4)
+            .max_by(|(_a,a), (_b,b)| (a).partial_cmp(b).unwrap()).unwrap();
+
+        // Get the Lab values of the max density patch
+        let maxlab = maxrow.into_iter().skip(4).collect::<Vec<_>>();
+        debug_assert_eq!(maxlab.len(), 3);
+        let lab = Lab { l: maxlab[0], a: maxlab[1], b: maxlab[2] };
+
+        // Pick out the column with the highest max density
+        Density {
+            inner: Density::pick_from_matrix(matrix, col, row),
+            rgb: Rgb::from(&lab.to_rgb()),
+        }
+    }
+}
 
 // The density linearization object
 pub struct CbDensity {
@@ -10,7 +79,7 @@ pub struct CbDensity {
     pub magenta: Density,
     pub yellow: Density,
     pub black: Density,
-    pub spot: Vec<(Density, Rgb)>,
+    pub spot: Vec<Density>,
 }
 
 impl<'a> CbDensity {
@@ -32,16 +101,16 @@ impl<'a> CbDensity {
         let matrix = parse_cgats_to_matrix(&cgats, cols)?;
 
         // Pick out the density ramp for the given channel
-        let cyan    = pick(&matrix, 0, 0);
-        let magenta = pick(&matrix, 1, 21);
-        let yellow  = pick(&matrix, 2, 42);
-        let black   = pick(&matrix, 3, 63);
+        let cyan    = Density::from_matrix(&matrix, 0);
+        let magenta = Density::from_matrix(&matrix, 1);
+        let yellow  = Density::from_matrix(&matrix, 2);
+        let black   = Density::from_matrix(&matrix, 3);
         let mut spot = Vec::new();
 
         // Pick out density ramps for spot colors and determine the ink color
         if channels > 4 {
             for channel in 4..channels {
-                spot.push(density_rgb(&matrix, channel));
+                spot.push(Density::from_matrix(&matrix, channel));
             }
         }
 
@@ -53,23 +122,22 @@ impl<'a> CbDensity {
     // Determine the maxmimum density value in a CBDensity object for fitting axes into plots
     pub fn max_density(&self) -> &f32 {
         self.channels()
-            .flat_map(|channel| channel.iter())
+            .flat_map(|channel| channel.inner.iter())
             .max_by(|a, b| a.partial_cmp(b).unwrap()).unwrap()
     }
 
     // Normalize the density on a scale from 0 to 1
-    pub fn normalize(&mut self) {
-        norm(&mut self.cyan);
-        norm(&mut self.magenta);
-        norm(&mut self.yellow);
-        norm(&mut self.black);
-
-        for (density, _rgb) in self.spot.iter_mut() {
-            norm(density);
+    pub fn normalize(&'a mut self) {
+        for channel in self.channels_mut() {
+            channel.normalize();
         }
     }
 
     pub fn channels(&'a self) -> Channels<'a> {
+        self.into_iter()
+    }
+
+    pub fn channels_mut(&'a mut self) -> ChannelsMut<'a> {
         self.into_iter()
     }
 }
@@ -83,24 +151,12 @@ fn channel_test() {
     }
 }
 
-// Normalize a slice of f32 on a scale from 0 to 1
-fn norm<T>(v: &mut [T])
-where T: num::Float {
-    let max = v.iter().max_by(|a,b| a.partial_cmp(b).unwrap()).unwrap().clone();
-    let min = v.iter().min_by(|a,b| a.partial_cmp(b).unwrap()).unwrap().clone();
-
-    for i in v.iter_mut() {
-        *i = (*i - min) / (max - min);
-    }
-}
-
 #[test]
 fn normal() {
-    let normal = &mut [1.5_f32, 2.8, 6.3, 7.2, 10.8];
-    norm(normal);
-    let expected = &[0.0, 0.13978493, 0.516129, 0.6129032, 1.0];
+    let default = Density::default();
+    let normal = Density::default().normal();
 
-    assert_eq!(normal, expected);
+    assert_eq!(default.inner, normal.inner);
 }
 
 impl<'a> IntoIterator for &'a CbDensity {
@@ -111,6 +167,24 @@ impl<'a> IntoIterator for &'a CbDensity {
             inner: self,
             index: 0,
         }
+    }
+}
+
+
+use std::iter::{Chain, Once, once};
+use std::slice::IterMut;
+
+pub type ChannelsMut<'a> = Chain<Chain<Chain<Chain<Once<&'a mut Density>, Once<&'a mut Density>>, Once<&'a mut Density>>, Once<&'a mut Density>>, IterMut<'a, Density>>;
+
+impl<'a> IntoIterator for &'a mut CbDensity {
+    type Item = &'a mut Density;
+    type IntoIter = ChannelsMut<'a>;
+    fn into_iter(self) -> Self::IntoIter {
+        once(&mut self.cyan)
+            .chain(once(&mut self.magenta))
+            .chain(once(&mut self.yellow))
+            .chain(once(&mut self.black))
+            .chain(&mut self.spot)
     }
 }
 
@@ -130,7 +204,7 @@ impl<'a> Iterator for Channels<'a> {
             3 => &self.inner.black,
             i => {
                 if let Some(density) = self.inner.spot.get(i - 4) {
-                    &density.0
+                    density
                 } else {
                     return None;
                 }
@@ -228,46 +302,27 @@ fn parse_cgats_to_matrix(cgats: &Cgats, cols: usize) -> Result<Matrix<f32>> {
 // Map file strings to CGATS objects
 pub fn files_to_cgats<I>(files: I) -> BTreeMap<String, Cgats>
 where I: Iterator, I::Item: ToString + AsRef<Path> + AsRef<std::ffi::OsStr> {
-    files.filter(|file| Path::new(file).is_file())
-    .filter(|f| File::open(f).is_ok())
-    .map(|file| { let cg = Cgats::from_file(&file); (file.to_string(), cg)})
-    .filter(|(_file, cg)| cg.is_ok())
+    files.filter(|file| {
+        let is_file = Path::new(file).is_file();
+        if !is_file { eprintln!("'{}': File not found!", file.to_string()) }
+        is_file
+    })
+    .filter(|f| {
+        let ok_file = File::open(f).is_ok();
+        if !ok_file { eprintln!("'{}': Unable to open file!", f.to_string()) }
+        ok_file
+    })
+    .map(|file| { let cg = Cgats::from_file(&file); (file.to_string(), cg) })
+    .filter(|(file, cg)| {
+        let ok_cg = cg.is_ok();
+        if !ok_cg { eprintln!("'{}': Invalid CGATS format!", file) }
+        ok_cg
+    })
     .map(|(file, cg)| (file, cg.unwrap()))
-    .filter(|(_, cg)| cg.is_colorburst())
+    .filter(|(file, cg)| {
+        let is_cb = cg.is_colorburst();
+        if !is_cb { eprintln!("'{}': Invalid ColorBurst Linearization format!", file) }
+        is_cb
+    })
     .collect::<BTreeMap<String, Cgats>>()
-}
-
-// Get the Density Ramp and RGB color from a given density ramp in a matrix
-pub fn density_rgb(matrix: &Matrix<f32>, channel: usize) -> (Density, Rgb) {
-    // Skip to the relevant row
-    let row = channel * CB_LEN;
-    let max = row + CB_LEN - 1;
-    let maxrow = matrix.get_rows(max).get_data().to_owned();
-
-    // Loop through the density values in the row and find the maximum (for spot colors)
-    let (col, _dmax) = maxrow.iter().enumerate().take(4)
-        .max_by(|(_a,a), (_b,b)| (a).partial_cmp(b).unwrap()).unwrap();
-
-    // Pick out the column with the highest max density
-    let pick = pick(matrix, col, row);
-
-    // Get the Lab values of the max density patch
-    let maxlab = maxrow.into_iter().skip(4).collect::<Vec<_>>();
-    debug_assert_eq!(maxlab.len(), 3);
-    let lab = Lab { l: maxlab[0], a: maxlab[1], b: maxlab[2] };
-
-    // Convert Lab to RGB
-    let rgb = Rgb::from(&lab.to_rgb());
-
-    (pick, rgb)
-}
-
-// Cherry pick a density ramp from a Matrix at column x row
-pub fn pick<T>(matrix: &Matrix<T>, col: usize, row: usize) -> Vec<T>
-where T: Copy {
-    matrix.get_columns(col).get_data().iter()
-        .skip(row)
-        .take(CB_LEN)
-        .cloned()
-        .collect()
 }

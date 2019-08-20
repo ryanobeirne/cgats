@@ -27,9 +27,11 @@ type Result<T> = std::result::Result<T, Error>;
 
 // The number of density samples in a ColorBurst linearization channel
 const CB_LEN: usize = 21;
+pub type CbDens = [f32; CB_LEN];
+
 
 // ColorBurst linearization sample increments
-const X_AXES: [u8; CB_LEN] = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100];
+const X_AXES: CbDens = [0.0, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90, 0.95, 1.0];
 
 // String to name Averaged ColorBurst CGATS linearizations
 const AVERAGE: &str = "::AVERAGE::";
@@ -58,6 +60,7 @@ fn main() -> Result<()> {
     // Convert the ColorBurst CGATS density to a format that gnuplot can plot
     let mut cbdm = CbDensityMap::from(cgv);
     if matches.is_present("normalize") {
+        eprintln!("Normalizing...");
         cbdm.normalize();
     }
 
@@ -105,51 +108,26 @@ fn plot_cbd(fig: &mut Figure, cbdm: CbDensityMap, clear: bool) {
             (LineWidth(1.0), PointSize(0.5))
         };
 
-        let (c, m, y, k) = if single_or_avg {
-            (CYAN.into(), MAGENTA.into(), YELLOW.into(), BLACK.into())
-        } else {
-            (trans(CYAN), trans(MAGENTA), trans(YELLOW), trans(BLACK))
-        };
-
+        // Setup the axes
         let axes = fig.axes2d()
             .set_title(&title, &[])
             .set_x_label("Input %", &[])
-            .set_x_ticks(Some((AutoOption::Fix(5.0), 0)), &[], &[])
-            .set_y_ticks(Some((AutoOption::Fix(0.1), 0)), &[], &[])
+            .set_x_ticks(Some((AutoOption::Fix(0.05), 0)), &[], &[])
+            .set_y_ticks(Some((AutoOption::Fix(0.05), 0)), &[], &[])
             .set_y_label("Output Density", &[])
-            .set_x_range(AutoOption::Fix(0.0), AutoOption::Fix(X_AXES[20] as f64))
+            .set_x_range(AutoOption::Fix(0.0), AutoOption::Fix(X_AXES[CB_LEN - 1] as f64))
             .set_y_range(AutoOption::Fix(0.0), AutoOption::Fix(dmax.into()))
             .set_x_grid(true)
             .set_y_grid(true);
 
-        axes.lines_points(
-                &X_AXES, &cbd.cyan,
-                &[PointSymbol('O'), Color(&c), ps, lw]
-            )
-            .lines_points(
-                &X_AXES, &cbd.magenta,
-                &[PointSymbol('O'), Color(&m), ps, lw]
-            )
-            .lines_points(
-                &X_AXES, &cbd.yellow,
-                &[PointSymbol('O'), Color(&y), ps, lw]
-            )
-            .lines_points(
-                &X_AXES, &cbd.black,
-                &[PointSymbol('O'), Color(&k), ps, lw]
-            );
-
-        for (density, color) in cbd.spot.iter() {
-            let x = if single_or_avg {
-                color.to_hex()
-            } else {
-                trans(&color.to_hex())
-            };
+        for channel in cbd.channels() {
+            let mut color = channel.rgb.to_hex();
+            if !single_or_avg { color = trans(&color); }
 
             axes.lines_points(
-                    &X_AXES, density,
-                    &[PointSymbol('O'), Color(&x), ps, lw]
-                );
+                &X_AXES, &channel.inner,
+                &[PointSymbol('O'), Color(&color), ps, lw]
+            );
         }
 
         // fig.save_to_png(&format!("output/{}.png", title), 1024, 720);

@@ -1,8 +1,8 @@
-// Be careful here... the alpha prefix must match `SOLID`
-pub const CYAN:    &str = "#40009FE3";
-pub const MAGENTA: &str = "#40E5007E";
-pub const YELLOW:  &str = "#40FFED00";
-pub const BLACK:   &str = "#401C1B1A";
+// // Be careful here... the alpha prefix must match `SOLID`
+// pub const CYAN:    &str = "#40009FE3";
+// pub const MAGENTA: &str = "#40E5007E";
+// pub const YELLOW:  &str = "#40FFED00";
+// pub const BLACK:   &str = "#401C1B1A";
 // pub const RED:     &str = "#FF0000";
 // pub const GREEN:   &str = "#00FF00";
 // pub const BLUE:    &str = "#0000FF";
@@ -17,7 +17,7 @@ pub fn trans(color: &str) -> String {
 }
 
 // An RGB color object
-#[derive(Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct Rgb {
     pub red: u8,
     pub green: u8,
@@ -28,6 +28,16 @@ impl Rgb {
     // Convert RGB to hexadecimal
     pub fn to_hex(&self) -> String {
         format!("{}{:02X}{:02X}{:02X}", SOLID, self.red, self.green, self.blue)
+    }
+}
+
+impl Default for Rgb {
+    fn default() -> Self {
+        Rgb {
+            red: 255,
+            green: 255,
+            blue: 255,
+        }
     }
 }
 
