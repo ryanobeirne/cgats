@@ -29,12 +29,11 @@ type Result<T> = std::result::Result<T, Error>;
 const CB_LEN: usize = 21;
 pub type CbDens = [f32; CB_LEN];
 
-
 // ColorBurst linearization sample increments
 const X_AXES: CbDens = [0.0, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90, 0.95, 1.0];
 
 // String to name Averaged ColorBurst CGATS linearizations
-const AVERAGE: &str = "::AVERAGE::";
+const AVERAGE: &str = "{::AVERAGE::}";
 
 fn main() -> Result<()> {
     let matches = cli::app().get_matches();
@@ -58,10 +57,12 @@ fn main() -> Result<()> {
     }
 
     // Convert the ColorBurst CGATS density to a format that gnuplot can plot
-    let mut cbdm = CbDensityMap::from(cgv);
+    let mut cbdm: CbDensityMap = cgv.iter().collect();
     if matches.is_present("normalize") {
         eprintln!("Normalizing...");
         cbdm.normalize();
+        // Insert the default linear density curve
+        cbdm.insert_first_spot(Density::default());
     }
 
     // Make the gnuplot Figure
@@ -77,7 +78,6 @@ fn main() -> Result<()> {
 
     // Show the figure with plotted axes and quit plotting;
     fig.show();
-
     fig.close();
 
     Ok(())
@@ -85,23 +85,26 @@ fn main() -> Result<()> {
 
 // Plot the density to the figure
 fn plot_cbd(fig: &mut Figure, cbdm: CbDensityMap, clear: bool) {
-    let sleep_time = sleep_time(cbdm.len());
     let dmax = cbdm.dmax();
     let len = cbdm.len();
+    let sleep_time = sleep_time(len);
     let single = len == 1;
 
+    // Loop through the CbDensities
     for (file, cbd) in cbdm.iter() {
         if clear { fig.clear_axes(); }
         
         let is_avg = file == AVERAGE;
         let single_or_avg = is_avg || single;
 
+        // Set an empty title for non-files
         let title = if is_avg && ! clear {
             std::borrow::Cow::Borrowed(" ")
         } else {
             Path::new(&file).file_name().unwrap().to_string_lossy()
         };
 
+        // Determine the Line Width and Point Size
         let (lw, ps): (PlotOption<&str>, PlotOption<&str>) = if single_or_avg {
             (LineWidth(4.0), PointSize(1.0))
         } else {
@@ -120,10 +123,16 @@ fn plot_cbd(fig: &mut Figure, cbdm: CbDensityMap, clear: bool) {
             .set_x_grid(true)
             .set_y_grid(true);
 
+        // Loop through the channels
         for channel in cbd.channels() {
-            let mut color = channel.rgb.to_hex();
-            if !single_or_avg { color = trans(&color); }
+            // Determine channel plot line color
+            let color = if single_or_avg {
+                channel.rgb.to_hex_solid()
+            } else {
+                channel.rgb.to_hex_trans()
+            };
 
+            // Plot the channel
             axes.lines_points(
                 &X_AXES, &channel.inner,
                 &[PointSymbol('O'), Color(&color), ps, lw]

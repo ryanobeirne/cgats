@@ -6,6 +6,7 @@ use deltae::DEMethod;
 use crate::DeReport;
 use std::fs::File;
 use std::path::Path;
+use super::cli;
 
 use std::fmt;
 
@@ -90,16 +91,18 @@ impl std::io::Write for CgatsWriter {
 }
 
 #[derive(Debug)]
-pub struct Config {
-    pub command: Command,
-    pub de_method: DEMethod,
-    pub de_report: bool,
-    pub files: Vec<String>,
+pub struct Config<'a> {
+    command: Command,
+    de_method: DEMethod,
+    de_report: bool,
+    files: Vec<String>,
+    matches: ArgMatches<'a>,
     output: CgatsWriter,
 }
 
-impl Config {
-    pub fn build(matches: &ArgMatches) -> Result<Self> {
+impl<'a> Config<'a> {
+    pub fn new() -> Result<Self> {
+        let matches = cli::build_cli().get_matches();
         let cmd_name = matches.subcommand_name();
         let subcommand = cmd_name.unwrap_or_default();
         let submatches = matches.subcommand_matches(subcommand);
@@ -132,7 +135,15 @@ impl Config {
                 .collect::<Vec<_>>(),
         };
 
-        Ok(Self { command, de_method, de_report, files, output})
+        Ok(Self { command, de_method, de_report, files, matches, output})
+    }
+
+    pub fn usage(&self) -> String {
+        self.matches.usage().to_owned()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.files.is_empty()
     }
 
     pub fn execute(&mut self) -> Result<()> {
@@ -176,19 +187,20 @@ impl Config {
     }
 }
 
-impl Default for Config {
+impl<'a> Default for Config<'a> {
     fn default() -> Self {
         Config {
             command: Command::default(),
             de_method: DEMethod::default(),
             de_report: false,
             files: Vec::new(),
+            matches: ArgMatches::default(),
             output: CgatsWriter::Stdout(BufWriter::new(stdout())),
         }
     }
 }
 
-impl fmt::Display for Config {
+impl<'a> fmt::Display for Config<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut s = String::from("Config {\n\tcommand: ");
 

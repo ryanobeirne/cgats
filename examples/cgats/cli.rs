@@ -1,13 +1,14 @@
 use clap::{
-    crate_version,
     crate_authors,
     crate_description,
     App, Arg, SubCommand
 };
 
+const CRATE_VERSION: &str = env!("CRATE_VERSION");
+
 pub fn build_cli() -> App<'static, 'static> {
     App::new("cgats")
-        .version(crate_version!())
+        .version(CRATE_VERSION)
         .author(crate_authors!())
         .about(crate_description!())
         .arg(cgats_files(false))

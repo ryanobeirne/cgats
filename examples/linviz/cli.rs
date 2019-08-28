@@ -1,9 +1,11 @@
 use clap::{App, Arg};
 
+const CRATE_VERSION: &str = env!("CRATE_VERSION");
+
 pub fn app() -> App<'static, 'static> {
     App::new("linviz")
         .author(crate_authors!())
-        .version(crate_version!())
+        .version(CRATE_VERSION)
         .about("Visualize ColorBurst linearization CGATS files with GNUPlot")
         .arg(Arg::with_name("normalize")
             .long("normalize")

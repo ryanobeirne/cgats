@@ -4,12 +4,10 @@ use config::Config;
 use cgats::*;
 
 fn main() -> Result<()> {
-    //Parse command line arguments with clap
-    let matches = cli::build_cli().get_matches();
-    let mut config = Config::build(&matches)?;
+    let mut config = Config::new()?;
 
-    if config.files.is_empty() {
-        eprintln!("{}", matches.usage()); 
+    if config.is_empty() {
+        eprintln!("{}", config.usage()); 
         std::process::exit(1);
     }
 
@@ -24,7 +22,7 @@ mod tests {
     use std::process::Command;
     use std::fs::read_to_string;
 
-    type Result<T> = std::result::Result<T, Box<std::error::Error>>;
+    type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
     macro_rules! cmd_eq_file {
         ($a:ident, $b:expr, $c:expr) => {

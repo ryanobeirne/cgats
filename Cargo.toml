@@ -1,6 +1,6 @@
 [package]
 name = "cgats"
-version = "0.1.7-alpha.0"
+version = "0.1.8-alpha.0"
 authors = ["Ryan O'Beirne <ryanobeirne@gmail.com>"]
 description = "Parse, transform, and write CGATS color files"
 edition = "2018"
@@ -21,6 +21,10 @@ clap = "2.32.0"
 gnuplot = { git = "https://github.com/SiegeLord/RustGnuplot", rev = "9e1446a" }
 la = "0.2.0"
 num = "0.2.0"
+
+[build-dependencies]
+rustc_tools_util = "0.2.0"
+clap = "2.32.0"
 
 [[example]]
 name = "cgats"

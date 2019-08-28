@@ -133,12 +133,19 @@ impl<'a> CbDensity {
         }
     }
 
+    // Iterate over the color channels
     pub fn channels(&'a self) -> Channels<'a> {
         self.into_iter()
     }
 
+    // Mutable Iterator over the color channels
     pub fn channels_mut(&'a mut self) -> ChannelsMut<'a> {
         self.into_iter()
+    }
+
+    // Push a density into the spot colors
+    pub fn push_spot(&'a mut self, density: Density) {
+        self.spot.push(density)
     }
 }
 
@@ -157,6 +164,18 @@ fn normal() {
     let normal = Density::default().normal();
 
     assert_eq!(default.inner, normal.inner);
+}
+
+impl Default for CbDensity {
+    fn default() -> Self {
+        CbDensity {
+            cyan: Density::default(),
+            magenta: Density::default(),
+            yellow: Density::default(),
+            black: Density::default(),
+            spot: Vec::new(),
+        }
+    }
 }
 
 impl<'a> IntoIterator for &'a CbDensity {
@@ -229,6 +248,10 @@ pub struct CbDensityMap {
 }
 
 impl CbDensityMap {
+    #[allow(unused)]
+    pub fn insert(&mut self, key: String, val: CbDensity) -> Option<CbDensity> {
+        self.inner.insert(key, val)
+    }
     pub fn iter<'a>(&'a self) -> Iter {
         self.inner.iter()
     }
@@ -241,10 +264,12 @@ impl CbDensityMap {
     //     self.inner.keys()
     // }
 
+    // Iterator over the CbDensities
     pub fn values<'a>(&'a self) -> Values {
         self.inner.values()
     }
 
+    // Mutable iterator over the CbDensities
     pub fn values_mut<'a>(&'a mut self) -> ValuesMut<'a> {
         self.inner.values_mut()
     }
@@ -260,8 +285,17 @@ impl CbDensityMap {
             .max_by(|a, b| a.partial_cmp(b).unwrap()).unwrap()
     }
 
+    // Normalize all the densities
     pub fn normalize<'a>(&'a mut self) {
         self.values_mut().for_each(|density| density.normalize());
+    }
+
+    // Insert a spot color density into the first CbDensity
+    pub fn insert_first_spot<'a>(&'a mut self, density: Density) -> Option<()> {
+        self.values_mut()
+            .nth(0)?
+            .push_spot(density);
+        Some(())
     }
 }
 
@@ -279,6 +313,18 @@ impl std::iter::FromIterator<(String, CbDensity)> for CbDensityMap {
     fn from_iter<T: IntoIterator<Item = (String, CbDensity)>>(iter: T) -> Self {
         CbDensityMap {
             inner: iter.into_iter().collect()
+        }
+    }
+}
+
+impl<'a> std::iter::FromIterator<(&'a String, &'a Cgats)> for CbDensityMap {
+    fn from_iter<T: IntoIterator<Item = (&'a String, &'a Cgats)>>(iter: T) -> Self {
+        CbDensityMap {
+            inner: iter.into_iter()
+                .map(|(file, cgats)| (file, CbDensity::from_cgats(&cgats)))
+                .filter(|(_file, cgats)| cgats.is_ok())
+                .map(|(file, cgats)| (file.clone(), cgats.unwrap()))
+                .collect()
         }
     }
 }
@@ -303,14 +349,14 @@ fn parse_cgats_to_matrix(cgats: &Cgats, cols: usize) -> Result<Matrix<f32>> {
 pub fn files_to_cgats<I>(files: I) -> BTreeMap<String, Cgats>
 where I: Iterator, I::Item: ToString + AsRef<Path> + AsRef<std::ffi::OsStr> {
     files.filter(|file| {
-        let is_file = Path::new(file).is_file();
-        if !is_file { eprintln!("'{}': File not found!", file.to_string()) }
-        is_file
-    })
-    .filter(|f| {
-        let ok_file = File::open(f).is_ok();
-        if !ok_file { eprintln!("'{}': Unable to open file!", f.to_string()) }
+        let ok_file = File::open(file).is_ok();
+        if !ok_file { eprintln!("'{}': Unable to open file!", file.to_string()) }
         ok_file
+    })
+    .filter(|file| {
+        let is_dir = Path::new(file).is_dir();
+        if is_dir { eprintln!("'{}': File is a directory!!", file.to_string()) }
+        !is_dir
     })
     .map(|file| { let cg = Cgats::from_file(&file); (file.to_string(), cg) })
     .filter(|(file, cg)| {
@@ -324,5 +370,5 @@ where I: Iterator, I::Item: ToString + AsRef<Path> + AsRef<std::ffi::OsStr> {
         if !is_cb { eprintln!("'{}': Invalid ColorBurst Linearization format!", file) }
         is_cb
     })
-    .collect::<BTreeMap<String, Cgats>>()
+    .collect()
 }
