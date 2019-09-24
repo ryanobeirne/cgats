@@ -7,7 +7,7 @@ use std::fmt;
 
 #[derive(Clone, PartialEq)]
 pub struct Cgats {
-    pub vendor: Option<Vendor>,
+    pub vendor: Vendor,
     pub meta: DataVec,
     pub fields: DataFormat,
     pub data_map: DataMap,
@@ -27,7 +27,7 @@ impl Cgats {
     pub fn new_with_vendor(vendor: Vendor) -> Cgats {
     //! Create a new empty CGATS object with a Vendor
         Cgats {
-            vendor: Some(vendor),
+            vendor,
             ..Cgats::default()
         }
     }
@@ -36,7 +36,7 @@ impl Cgats {
     //! Create a CGATS object from an existing CGATS file
         let raw = DataVec::from_file(path)?;
 
-        let vendor = raw.get_vendor();
+        let vendor = raw.get_vendor()?;
         let meta = raw.extract_meta_data();
         let fields = raw.extract_data_format()?;
         let data_map = raw.to_data_map()?;
@@ -66,7 +66,7 @@ impl Cgats {
     }
 
     pub fn is_colorburst(&self) -> bool {
-        self.vendor == Some(Vendor::ColorBurst)
+        self.vendor == Vendor::ColorBurst
     }
 
     fn format_meta(&self) -> String {
@@ -79,7 +79,7 @@ impl Cgats {
         let mut s = String::new();
 
         // ColorBurst does not include DATA_FORMAT information in LineFiles
-        if self.vendor == Some(Vendor::ColorBurst) {
+        if self.is_colorburst() {
             return s;
         }
 
@@ -114,7 +114,7 @@ impl Cgats {
 impl Default for Cgats {
     fn default() -> Cgats {
         Cgats {
-            vendor: None,
+            vendor: Vendor::Cgats,
             fields: DataFormat::new(),
             data_map: DataMap::new(),
             meta: DataVec::new(),
@@ -130,12 +130,7 @@ impl fmt::Display for Cgats {
 
 impl fmt::Debug for Cgats {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let vendor = match &self.vendor {
-            Some(v) => v.to_string(),
-            None => "None".to_string(),
-        };
-
-        let format = format!("{}({}):{:?}", vendor, &self.sample_count(), self.fields);
+        let format = format!("{}({}):{:?}", self.vendor, &self.sample_count(), self.fields);
 
         write!(f, "{}", format)
     }

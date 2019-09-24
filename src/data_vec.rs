@@ -6,7 +6,8 @@ use std::fmt;
 use std::path::Path;
 use std::str::FromStr;
 
-#[derive(Debug, Default, Clone, Eq, PartialEq)]
+/// Intermediate data format
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct DataLine {
     pub raw_samples: Vec<String>
 }
@@ -114,8 +115,8 @@ impl DataVec {
         }
 
         // Use implicit format type for ColorBurst LinFiles
-        let vendor = &self.get_vendor();
-        if let Some(Vendor::ColorBurst) = vendor {
+        let vendor = &self.get_vendor()?;
+        if let Vendor::ColorBurst = vendor {
             return Ok(field::ColorBurstFormat());
         }
 
@@ -214,17 +215,19 @@ impl DataVec {
         meta_vec
     }
 
-    // Get the CgatsType from the first line in the RawVec (first line in file)
-    pub fn get_vendor(&self) -> Option<Vendor> {
-        let s = self.lines.first()?.raw_samples.iter()
+    // Get the Vendor from the first line in the DataVec (first line in file)
+    pub fn get_vendor(&self) -> Result<Vendor> {
+        let first_line = match self.lines.first() {
+            Some(line) => line,
+            None => return Err(Error::UnknownVendor),
+        };
+        
+        let s: String = first_line.raw_samples.iter()
             .map(|s| s.to_lowercase())
             .collect::<String>();
 
-        // Search the string for a CgatsType
-        match Vendor::from_str(&s) {
-            Ok(cgt) => Some(cgt),
-            Err(_) => None,
-        }
+        // Search the string for a Vendor
+        Vendor::from_str(&s)
     }
 
     pub fn meta_renumber_sets(&mut self, num: usize) {
@@ -245,6 +248,14 @@ impl fmt::Display for DataLine {
         values.pop();
 
         write!(f, "{}", values)
+    }
+}
+
+impl Default for DataLine {
+    fn default() -> Self {
+        DataLine {
+            raw_samples: Vec::new(),
+        }
     }
 }
 

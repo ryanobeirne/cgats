@@ -3,28 +3,42 @@ use super::*;
 use std::str::FromStr;
 use std::fmt;
 
-#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+const KEYWORDS: &[&str] = &["argyll", "cti1", "cgats", "colorburst", "curve"];
+
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Vendor {
+    Argyll,
     Cgats,
     ColorBurst,
     Curve,
+    Other(String),
 }
 
-impl FromStr for Vendor {
+impl<'a> FromStr for Vendor {
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Vendor> {
-        use Vendor::*;
-        let types: Vec<Vendor> = vec![Cgats, ColorBurst, Curve];
+        if s.is_empty() {
+            return Err(Error::UnknownVendor);
+        }
 
-        for t in types.into_iter() {
-            let tstring = &t.to_string().to_lowercase();
-            if s.to_lowercase().contains(tstring) {
-                return Ok(t);
+        let s_lower = s.to_lowercase();
+
+        for keyword in KEYWORDS.iter() {
+            if s_lower.contains(keyword) {
+                let vendor = match *keyword {
+                    "argyll" | "cti1" => Vendor::Argyll,
+                    "cgats"           => Vendor::Cgats,
+                    "colorburst"      => Vendor::ColorBurst,
+                    "curve"           => Vendor::Curve,
+                    _ => unreachable!("Vendor keyword not in list! [vendor::KEYWORDS]"),
+                };
+
+                return Ok(vendor);
             }
         }
 
-       Err(Error::UnknownVendor)
+        Ok(Vendor::Other(s.to_owned()))
     }
 }
 
@@ -39,6 +53,7 @@ fn from_str() {
     assert_eq!(Vendor::from_str("ColorBurst"), Ok(Vendor::ColorBurst));
     assert_eq!(Vendor::from_str("CGATS.17"), Ok(Vendor::Cgats));
     assert_eq!(Vendor::from_str("File Created by Curve3"), Ok(Vendor::Curve));
-    assert_eq!(Vendor::from_str("derp"), Err(Error::UnknownVendor));
+    assert_eq!(Vendor::from_str("CTI1"), Ok(Vendor::Argyll));
+    assert_eq!(Vendor::from_str("derp"), Ok(Vendor::Other("derp".to_owned())));
     assert_eq!(Vendor::from_str(""), Err(Error::UnknownVendor));
 }

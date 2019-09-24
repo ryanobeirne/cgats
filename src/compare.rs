@@ -45,7 +45,7 @@ impl Cgats {
 
     fn new_with_fields(fields: DataFormat) -> Cgats {
         Cgats {
-            vendor: Some(Vendor::Cgats),
+            vendor: Vendor::Cgats,
             meta: DataVec::new(),
             fields,
             data_map: DataMap::new(),
@@ -55,7 +55,7 @@ impl Cgats {
     fn derive(&self) -> Cgats {
     //! Returns a new, empty CGATS object based on an existing CGATS object
         Cgats {
-            vendor: self.vendor,
+            vendor: self.vendor.clone(),
             meta: self.meta.clone(),
             fields: self.fields.clone(),
             data_map: DataMap::new(),
@@ -75,7 +75,7 @@ impl Cgats {
 
     pub fn insert_sample_id(&mut self) {
     //! Insert SAMPLE_ID field into CGATS object
-        self.vendor = Some(Vendor::Cgats);
+        self.vendor = Vendor::Cgats;
         self.meta.insert(0, "CGATS.17");
 
         match self.field_index(&Field::SAMPLE_ID) {
@@ -235,7 +235,7 @@ impl CgatsVec {
             Field::SAMPLE_ID, Field::from_de_method(method)
         ]);
 
-        cgats.vendor = Some(Vendor::Cgats);
+        cgats.vendor = Vendor::Cgats;
         cgats.meta = DataVec::from(vec![
             DataLine::from(vec!["CGATS.17".to_string()]),
         ]);
