@@ -1,6 +1,6 @@
 [package]
 name = "cgats"
-version = "0.1.8-alpha.1"
+version = "0.2.0-alpha.1"
 authors = ["Ryan O'Beirne <ryanobeirne@gmail.com>"]
 description = "Parse, transform, and write CGATS color files"
 edition = "2018"
@@ -22,6 +22,6 @@ clap = "2.32.0"
 rustc_tools_util = "0.2.0"
 clap = "2.32.0"
 
-[[example]]
-name = "cgats"
-path = "examples/cgats/main.rs"
+#[[example]]
+#name = "cgats"
+#path = "examples/cgats/main.rs"

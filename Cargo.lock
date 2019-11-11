@@ -30,7 +30,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "cgats"
-version = "0.1.8-alpha.1"
+version = "0.2.0-alpha.1"
 dependencies = [
  "clap 2.33.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "deltae 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",

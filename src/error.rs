@@ -1,29 +1,22 @@
+/// # CGATS error-handling module
 use std::fmt;
 use std::error::Error as StdError;
-use std::convert;
-use std::io;
 use std::result;
 
-#[macro_use]
-#[allow(unused_macros)]
-macro_rules! err {
-    ($($tt:tt)*) => { Err(CgatsError::Other(format!($($tt)*))) }
-}
-
-// Custom error types for CGATS
+/// The CGATS error type
 #[derive(Debug, PartialEq, Eq)]
 pub enum Error {
     CannotCompare,
     EmptyFile,
-    FileError,
+    ReadError,
     FormatDataMismatch,
     IncompleteData,
-    InvalidCommand,
+    //InvalidCommand,
     InvalidID,
     NoData,
     NoDataFormat,
     UnknownVendor,
-    UnknownFormatType,
+    UnknownField,
     WriteError,
     Other(String)
 }
@@ -44,31 +37,18 @@ impl std::error::Error for Error {
         match &self {
             CannotCompare      => "Cannot compare data sets!",
             EmptyFile          => "File is empty!",
-            FileError          => "Problem reading file!",
+            ReadError          => "Problem reading file!",
             FormatDataMismatch => "DATA length does not match DATA_FORMAT length!",
             IncompleteData     => "Not enough data for the calculation!",
-            InvalidCommand     => "Invalid Compare command!",
+            //InvalidCommand     => "Invalid Compare command!",
             InvalidID          => "SAMPLE_ID is not an integer!",
-            NoData             => "Color Data not found!",
-            NoDataFormat       => "Cannot find BEGIN_DATA_FORMAT tag!",
+            NoData             => "DATA not found!",
+            NoDataFormat       => "BEGIN_DATA_FORMAT tag not found!",
             UnknownVendor      => "Cannot determine Vendor!",
-            UnknownFormatType  => "Unknown Data Format Type!",
+            UnknownField       => "Unknown Data Field Type!",
             WriteError         => "Problem writing to file!",
-            Other(message)     => &message,
+            Other(message)     => message.as_str(),
         }
     }
 }
 
-impl convert::From<io::Error> for Error {
-   fn from(e: io::Error) -> Self {
-       eprintln!("{}: {:?}",e, e.kind());
-       Error::FileError
-   } 
-} 
-
-impl convert::From<Error> for fmt::Error {
-    fn from(cge: Error) -> Self {
-        eprintln!("{}", cge);
-        fmt::Error
-    }
-}
