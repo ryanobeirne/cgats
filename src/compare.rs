@@ -232,7 +232,7 @@ impl CgatsVec {
         }
 
         let mut cgats = Cgats::new_with_fields(vec![
-            Field::SAMPLE_ID, Field::from_de_method(method)
+            Field::SAMPLE_ID, Field::from(method)
         ]);
 
         cgats.vendor = Vendor::Cgats;

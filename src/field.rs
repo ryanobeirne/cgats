@@ -1,10 +1,10 @@
 use super::*;
 
-use deltae::DEMethod;
+use deltae::*;
 
 use std::str::FromStr;
 use std::fmt;
-use std::convert::TryFrom;
+use std::convert::{TryInto, TryFrom};
 
 // Container for what is between BEGIN_DATA_FORMAT and END_DATA_FORMAT
 pub type DataFormat = Vec<Field>;
@@ -65,25 +65,14 @@ impl Field {
         }
     }
 
-    pub fn from_de_method(method: DEMethod) -> Field {
-        match method {
-            DEMethod::DE1976  => Field::DE_1976,
-            DEMethod::DE1994  => Field::DE_1994,
-            DEMethod::DE1994T => Field::DE_1994T,
-            DEMethod::DE2000  => Field::DE_2000,
-            DEMethod::DECMC1  => Field::DE_CMC,
-            DEMethod::DECMC2  => Field::DE_CMC2,
-        }
-    }
-
-    pub fn to_de_method(self) -> Option<DEMethod> {
+    pub fn to_de_method(self) -> Option<deltae::DEMethod> {
         match self {
-            Field::DE_1976  => Some(DEMethod::DE1976),
-            Field::DE_1994  => Some(DEMethod::DE1994),
-            Field::DE_1994T => Some(DEMethod::DE1994T),
-            Field::DE_2000  => Some(DEMethod::DE2000),
-            Field::DE_CMC   => Some(DEMethod::DECMC1),
-            Field::DE_CMC2  => Some(DEMethod::DECMC2),
+            Field::DE_1976  => Some(DE1976),
+            Field::DE_1994  => Some(DE1994G),
+            Field::DE_1994T => Some(DE1994T),
+            Field::DE_2000  => Some(DE2000),
+            Field::DE_CMC   => Some(DECMC1),
+            Field::DE_CMC2  => Some(DECMC2),
             _ => None,
         }
     }
@@ -96,15 +85,36 @@ impl Field {
     }
 }
 
-impl From<&DEMethod> for Field {
-    fn from(method: &DEMethod) -> Field {
+
+impl TryInto<DEMethod> for Field {
+    type Error = Error;
+    fn try_into(self) -> Result<DEMethod> {
+        match self {
+            Field::DE_1976  => Ok(DE1976),
+            Field::DE_1994  => Ok(DE1994G),
+            Field::DE_1994T => Ok(DE1994T),
+            Field::DE_2000  => Ok(DE2000),
+            Field::DE_CMC   => Ok(DECMC1),
+            Field::DE_CMC2  => Ok(DECMC2),
+            _ => Err(Error::UnknownFormatType),
+        }
+    }
+}
+
+impl From<DEMethod> for Field {
+    fn from(method: DEMethod) -> Field {
         match method {
-            DEMethod::DE1976  => Field::DE_1976,
-            DEMethod::DE1994  => Field::DE_1994,
-            DEMethod::DE1994T => Field::DE_1994T,
-            DEMethod::DE2000  => Field::DE_2000,
-            DEMethod::DECMC1  => Field::DE_CMC,
-            DEMethod::DECMC2  => Field::DE_CMC2,
+            DE1976  => Field::DE_1976,
+            DE1994G => Field::DE_1994,
+            DE1994T => Field::DE_1994T,
+            DE2000  => Field::DE_2000,
+            DECMC(tl, tc)  => {
+                if tl == 2.0 && tc == 1.0 {
+                    Field::DE_CMC2
+                } else {
+                    Field::DE_CMC
+                }
+            }
         }
     }
 }
@@ -114,12 +124,12 @@ impl TryFrom<&Field> for DEMethod {
 
     fn try_from(field: &Field) -> std::result::Result<DEMethod, Self::Error> {
         match field {
-            Field::DE_1976  => Ok(DEMethod::DE1976),
-            Field::DE_1994  => Ok(DEMethod::DE1994),
-            Field::DE_1994T => Ok(DEMethod::DE1994T),
-            Field::DE_2000  => Ok(DEMethod::DE2000),
-            Field::DE_CMC   => Ok(DEMethod::DECMC1),
-            Field::DE_CMC2  => Ok(DEMethod::DECMC2),
+            Field::DE_1976  => Ok(DE1976),
+            Field::DE_1994  => Ok(DE1994G),
+            Field::DE_1994T => Ok(DE1994T),
+            Field::DE_2000  => Ok(DE2000),
+            Field::DE_CMC   => Ok(DECMC1),
+            Field::DE_CMC2  => Ok(DECMC2),
             _ => Err(Error::IncompleteData),
         }
     }
