@@ -34,11 +34,12 @@ impl From<&str> for Vendor {
 }
 
 impl FromStr for Vendor {
-    type Err = Error;
+    type Err = BoxError;
     fn from_str(s: &str) -> Result<Vendor> {
+        let s = s.trim();
         eprintln!("Vendor::from_str: '{}", s);
         if s.is_empty() {
-            return Err(Error::UnknownVendor);
+            return boxerr!(Error::UnknownVendor);
         }
 
         for keyword in KEYWORDS.iter() {
@@ -68,10 +69,10 @@ impl fmt::Display for Vendor {
 
 #[test]
 fn from_str() {
-    assert_eq!(Vendor::from_str("ColorBurst"), Ok(Vendor::ColorBurst));
-    assert_eq!(Vendor::from_str("CGATS.17"), Ok(Vendor::Cgats));
-    assert_eq!(Vendor::from_str("File Created by Curve3"), Ok(Vendor::Curve));
-    assert_eq!(Vendor::from_str("CTI1"), Ok(Vendor::Argyll));
-    assert_eq!(Vendor::from_str("derp"), Ok(Vendor::Other("derp".to_owned())));
-    assert_eq!(Vendor::from_str(""), Err(Error::UnknownVendor));
+    assert_eq!(Vendor::from_str("ColorBurst").unwrap(), Vendor::ColorBurst);
+    assert_eq!(Vendor::from_str("CGATS.17").unwrap(), Vendor::Cgats);
+    assert_eq!(Vendor::from_str("File Created by Curve3").unwrap(), Vendor::Curve);
+    assert_eq!(Vendor::from_str("CTI1").unwrap(), Vendor::Argyll);
+    assert_eq!(Vendor::from_str("derp").unwrap(), Vendor::Other("derp".to_owned()));
+    assert!(Vendor::from_str("").is_err());
 }

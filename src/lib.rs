@@ -1,8 +1,12 @@
 use std::fmt;
+use std::path::Path;
+use std::fs::File;
+use std::convert::TryFrom;
 
 pub mod field;
 pub mod read;
 mod vendor;
+#[macro_use]
 mod error;
 
 use field::*;
@@ -18,6 +22,13 @@ pub struct Cgats {
     fields:   Vec<Field>,
     values:   Vec<CgatsValue>,
 }
+
+impl Cgats {
+    pub fn from_file<P: AsRef<Path>>(path: P) -> Result<Self> {
+        Cgats::try_from(File::open(path)?)
+    }
+}
+
 
 impl Default for Cgats {
     fn default() -> Self {

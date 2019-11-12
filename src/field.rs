@@ -87,7 +87,7 @@ impl Field {
 
 
 impl TryInto<DEMethod> for Field {
-    type Error = Error;
+    type Error = BoxError;
     fn try_into(self) -> Result<DEMethod> {
         match self {
             Field::DE_1976  => Ok(DE1976),
@@ -96,7 +96,7 @@ impl TryInto<DEMethod> for Field {
             Field::DE_2000  => Ok(DE2000),
             Field::DE_CMC   => Ok(DECMC1),
             Field::DE_CMC2  => Ok(DECMC2),
-            _ => Err(Error::UnknownField),
+            _ => boxerr!(Error::UnknownField),
         }
     }
 }
@@ -120,7 +120,7 @@ impl From<DEMethod> for Field {
 }
 
 impl TryFrom<&Field> for DEMethod {
-    type Error = Error;
+    type Error = BoxError;
     fn try_from(field: &Field) -> Result<DEMethod> {
         match field {
             Field::DE_1976  => Ok(DE1976),
@@ -129,7 +129,7 @@ impl TryFrom<&Field> for DEMethod {
             Field::DE_2000  => Ok(DE2000),
             Field::DE_CMC   => Ok(DECMC1),
             Field::DE_CMC2  => Ok(DECMC2),
-            _ => Err(Error::IncompleteData),
+            _ => boxerr!(Error::IncompleteData),
         }
     }
 }
@@ -147,7 +147,7 @@ impl fmt::Display for Field {
 }
 
 impl FromStr for Field {
-    type Err = Error;
+    type Err = BoxError;
     fn from_str(s: &str) -> Result<Self> {
         use Field::*;
         match s.to_uppercase().as_ref() {
@@ -283,7 +283,7 @@ impl FromStr for Field {
             "SPECTRAL_810" => Ok(SPECTRAL_810),
             "SPECTRAL_820" => Ok(SPECTRAL_820),
             "SPECTRAL_830" => Ok(SPECTRAL_830),
-            _ => Err(Error::UnknownField)
+            _ => boxerr!(Error::UnknownField)
         }
     }
 

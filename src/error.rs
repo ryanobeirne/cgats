@@ -22,7 +22,16 @@ pub enum Error {
 }
 
 // Custom Result type for CgatsError
-pub type Result<T> = result::Result<T, Error>;
+//pub type CgatsResult<T> = result::Result<T, Error>;
+pub type Result<T> = result::Result<T, BoxError>;
+pub type BoxError = Box<dyn std::error::Error>;
+
+#[macro_export]
+macro_rules! boxerr {
+    ($x: expr) => {
+        Err(Box::new($x))
+    }
+}
 
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
