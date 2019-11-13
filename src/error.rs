@@ -52,7 +52,7 @@ impl std::error::Error for Error {
             //InvalidCommand     => "Invalid Compare command!",
             InvalidID          => "SAMPLE_ID is not an integer!",
             NoData             => "DATA not found!",
-            NoDataFormat       => "BEGIN_DATA_FORMAT tag not found!",
+            NoDataFormat       => "DATA_FORMAT tag not found!",
             UnknownVendor      => "Cannot determine Vendor!",
             UnknownField       => "Unknown Data Field Type!",
             WriteError         => "Problem writing to file!",

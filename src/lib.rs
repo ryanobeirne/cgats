@@ -15,6 +15,10 @@ use error::*;
 
 pub use error::*;
 
+/// vendor: Vendor,
+/// metadata: Vec<String>,
+/// fields:   Vec<Field>,
+/// values:   Vec<CgatsValue>,
 #[derive(Debug, Clone)]
 pub struct Cgats {
     vendor: Vendor,
@@ -43,9 +47,21 @@ impl Default for Cgats {
 
 #[derive(Debug, Clone, PartialOrd, PartialEq)]
 enum CgatsValue {
-    Float(f32),
     Int(usize),
+    Float(f32),
     Text(String),
+}
+
+impl From<&str> for CgatsValue {
+    fn from(s: &str) -> Self {
+        if let Ok(i) = s.parse::<usize>() {
+            CgatsValue::Int(i)
+        } else if let Ok(f) = s.parse::<f32>() {
+            CgatsValue::Float(f)
+        } else {
+            CgatsValue::Text(s.into())
+        }
+    }
 }
 
 impl fmt::Display for CgatsValue {
