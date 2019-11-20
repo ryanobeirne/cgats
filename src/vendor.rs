@@ -3,7 +3,7 @@ use super::*;
 use std::str::FromStr;
 use std::fmt;
 
-const KEYWORDS: &[&str] = &["argyll", "cti1", "cgats", "colorburst", "curve", "xrite"];
+const KEYWORDS: &[&str] = &["argyll", "cti1", "cgats", "colorburst", "curve", "xrite", "x-rite", "i1", "profiler"];
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Vendor {
@@ -37,7 +37,6 @@ impl FromStr for Vendor {
     type Err = BoxError;
     fn from_str(s: &str) -> Result<Vendor> {
         let s = s.trim();
-        eprintln!("Vendor::from_str: '{}", s);
         if s.is_empty() {
             return boxerr!(Error::UnknownVendor);
         }

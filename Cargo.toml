@@ -1,7 +1,7 @@
 [package]
 name = "cgats"
 version = "0.2.0-alpha.1"
-authors = ["Ryan O'Beirne <ryanobeirne@gmail.com>"]
+authors = ["Ryan O'Beirne <ryanobeirne@ryanobeirne.com>"]
 description = "Parse, transform, and write CGATS color files"
 edition = "2018"
 license = "GPL-3.0"

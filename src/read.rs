@@ -44,24 +44,16 @@ impl<R: Read> TryFrom<BufReader<R>> for Cgats {
 
                     // Split line on tabs.
                     // Error if the data length doesn't match the number of fields.
-                    let split = line.split('\t').collect::<Vec<_>>();
-                    if split.len() != cgats.fields.len() {
+                    let sample = line.split('\t').collect::<Sample>();
+                    if sample.n_values() != cgats.fields.len() {
                         return boxerr!(Error::FormatDataMismatch);
                     }
 
-                    // Push the values into the Cgats
-                    for value in split.into_iter() {
-                        cgats.values.push(CgatsValue::from(value));
-                    }
+                    cgats.samples.push(sample);
                 }
             } else {
                 cgats.metadata.push(trim.into());
             }
-        }
-
-        // Check that the number of values are evenly divisible by number of fields
-        if cgats.values.len() % cgats.fields.len() != 0 {
-            return boxerr!(Error::FormatDataMismatch);
         }
 
         Ok(cgats)
@@ -78,7 +70,7 @@ impl TryFrom<File> for Cgats {
 
 #[test]
 fn read_file() -> Result<()> {
-    let cgats0 = Cgats::from_file("test_files/cgats1.tsv");
+    let cgats0 = Cgats::from_file("test_files/cgats0.txt");
     let cgats1 = Cgats::from_file("test_files/empty");
     dbg!(&cgats0, &cgats1);
 
