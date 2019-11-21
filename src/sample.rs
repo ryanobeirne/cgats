@@ -1,10 +1,17 @@
 use crate::*;
 
-/// A sample value
+/// A sample value.
+/// Can be an integer, floating point decimal, or text string
 #[derive(Debug, Clone, PartialOrd, PartialEq)]
 pub enum CgatsValue {
+    /// An integer value.
+    /// Typically only used for `SAMPLE_ID` field, although other fields are acceptable.
     Int(usize),
+    /// A floating point decimal value.
+    /// Most values will use this type.
     Float(f32),
+    /// A text string value.
+    /// Typically only used for `SAMPLE_NAME` field.
     Text(String),
 }
 
@@ -51,9 +58,9 @@ impl fmt::Display for CgatsValue {
 // Sample ////////////////////////////////////////////////////////////////////
 /// Iterator over Cgats samples
 pub struct Samples<'a> {
-    len: usize,
-    index: usize,
-    samples: Vec<&'a Sample>,
+    pub(crate) len: usize,
+    pub(crate) index: usize,
+    pub(crate) samples: Vec<&'a Sample>,
 }
 
 impl<'a> Iterator for Samples<'a> {
@@ -80,15 +87,63 @@ impl<'a> FromIterator<&'a Sample> for Samples<'a> {
     }
 }
 
-/// A measurement sample
+/// A measurement sample complsed of `CgatsValue`s
 #[derive(Debug, Clone)]
 pub struct Sample {
-    pub values: Vec<CgatsValue>,
+    pub(crate) values: Vec<CgatsValue>,
 }
 
 impl Sample {
+    /// Returns the number of values in the sample
     pub fn n_values(&self) -> usize {
         self.values.len()
+    }
+
+    /// Returns an interator over the sample values
+    pub fn values<'a>(&'a self) -> Values<'a> {
+        self.into_iter()
+    }
+
+    /// Get a sample value by index.
+    /// Panics if the index is out of range.
+    pub fn value(&self, index: usize) -> &CgatsValue {
+        &self.values[index]
+    }
+
+    /// Get a sample value by index.
+    pub fn get_value(&self, index: usize) -> Option<&CgatsValue> {
+        self.values.get(index)
+    }
+}
+
+impl<'a> IntoIterator for &'a Sample {
+    type Item = &'a CgatsValue;
+    type IntoIter = Values<'a>;
+    fn into_iter(self) -> Self::IntoIter {
+        Values {
+            len: self.n_values(),
+            index: 0,
+            values: self.values.iter().collect(),
+        }
+    }
+}
+
+/// Iterator over CgatsValues
+pub struct Values<'a> {
+    len: usize,
+    index: usize,
+    values: Vec<&'a CgatsValue>
+}
+
+impl<'a> Iterator for Values<'a> {
+    type Item = &'a CgatsValue;
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.index < self.len {
+            self.index += 1;
+            Some(self.values[self.index - 1])
+        } else {
+            None
+        }
     }
 }
 
