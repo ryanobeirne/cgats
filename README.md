@@ -1,5 +1,10 @@
 # cgats
 
+## ⚠️ This repository has been archived! ⚠️
+
+You can view the most recent version of this repository here:
+[Gitlab: ryanobeirne/cgats](https://gitlab.com/ryanobeirne/cgats)
+
 ## Read, write, and manipulate [CGATS color files](http://www.colorwiki.com/wiki/CGATS.17_Text_File_Format)
 
 This crate is a library intended to read, write, and transform CGATS color files and is currently in development. The included binary is a simple implementation of the library's API.
